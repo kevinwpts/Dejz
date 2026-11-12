@@ -85,7 +85,7 @@ export function useLiveSync({
       document.removeEventListener('visibilitychange', onVisible);
       window.removeEventListener('focus', onVisible);
     };
-  }, [userId, loadSupabaseUserData]);
+  }, [userId, loadSupabaseUserData, setExcludeInternalTransfersState, userIdRef]);
 
   // Supabase Realtime: Lyssna på databasändringar med debounce för att undvika synk-stormar
   useEffect(() => {
@@ -146,7 +146,7 @@ export function useLiveSync({
       }
       supabase.removeChannel(channel);
     };
-  }, [userId, refreshBankStatus]);
+  }, [userId, refreshBankStatus, syncInFlightRef]);
 
   return { hasActiveBankConnection };
 }

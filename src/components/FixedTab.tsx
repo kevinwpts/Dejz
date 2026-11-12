@@ -76,6 +76,9 @@ export const FixedTab: React.FC<FixedTabProps> = ({
   }, [fixedExpenses]);
 
   const savingsGoalsMap = useMemo(() => {
+    // Sparmålen ligger i localStorage – läs om dem när fasta utgifter eller köp ändras
+    void fixedExpenses;
+    void transactions;
     const map = new Map<string, string>();
     for (const g of getSavingsGoals()) {
       map.set(g.id, g.name);

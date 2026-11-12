@@ -65,7 +65,7 @@ serve(async (req: Request) => {
     // --- Skicka verifieringsmejl (kräver inloggning) ---
     if (body?.action === 'send') {
       const jwt = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
-      const { data: userData } = await admin.auth.getUser(jwt).catch(() => ({ data: null as any }));
+      const { data: userData } = await admin.auth.getUser(jwt).catch(() => ({ data: null }));
       const user = userData?.user;
       if (!user?.email) return json({ status: 'not_logged_in' }, 401);
 

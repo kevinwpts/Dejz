@@ -1,6 +1,6 @@
 import type { RecurringMatchResult } from '../../../utils/recurring';
 import { ModalSubView } from './shared';
-import type { MutableRefObject, SetStateAction } from 'react';
+import type { RefObject, SetStateAction } from 'react';
 import React from 'react';
 import {
   X,
@@ -29,7 +29,7 @@ export interface TxViewEditProps {
   setCategory: (value: SetStateAction<string>) => void;
   txType: "expense" | "income";
   title: string;
-  activeTx: TransactionItem;
+  activeTx: TransactionItem | null;
   isIncome: boolean;
   category: string;
   recurringStatus: RecurringMatchResult;
@@ -47,13 +47,13 @@ export interface TxViewEditProps {
   note: string;
   setNote: (value: SetStateAction<string>) => void;
   draftReceipts: ReceiptAttachment[];
-  setPreviewReceipt: (value: SetStateAction<ReceiptAttachment>) => void;
+  setPreviewReceipt: (value: SetStateAction<ReceiptAttachment | null>) => void;
   handleRemoveReceiptAt: (index: number) => void;
-  fileInputRef: MutableRefObject<HTMLInputElement>;
+  fileInputRef: RefObject<HTMLInputElement>;
   handleCreateSave: () => void;
   handleSaveEditClick: () => void;
   handleCancelEdit: () => void;
-  onDelete: (id: string) => void;
+  onDelete?: (id: string) => void;
   setShowDeleteConfirm: (value: SetStateAction<boolean>) => void;
   showDeleteConfirm: boolean;
   handleDelete: () => void;

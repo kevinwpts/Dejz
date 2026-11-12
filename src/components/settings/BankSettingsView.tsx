@@ -13,33 +13,33 @@ import { appOrigin } from '../../utils/platform';
 export interface BankSettingsViewProps {
   bankAccounts: BankAccount[];
   connections: BankConnection[];
-  connectedBank: string;
+  connectedBank: string | null;
   accounts: AccountItem[];
-  setEditingAccount: (value: SetStateAction<AccountItem>) => void;
+  setEditingAccount: (value: SetStateAction<AccountItem | null>) => void;
   setAccountNameInput: (value: SetStateAction<string>) => void;
   setAccountIncludedInput: (value: SetStateAction<boolean>) => void;
-  onRefreshBankStatus: () => void;
-  syncingAccountId: string;
-  setSyncingAccountId: (value: SetStateAction<string>) => void;
+  onRefreshBankStatus?: () => void;
+  syncingAccountId: string | null;
+  setSyncingAccountId: (value: SetStateAction<string | null>) => void;
   onOpenBank: () => void;
-  setSelectingAccountsConn: (value: SetStateAction<BankConnection>) => void;
+  setSelectingAccountsConn: (value: SetStateAction<BankConnection | null>) => void;
   setSelectedConnAccountIds: (value: SetStateAction<string[]>) => void;
-  selectingAccountsConn: BankConnection;
+  selectingAccountsConn: BankConnection | null;
   setSavingConnAccounts: (value: SetStateAction<boolean>) => void;
   selectedConnAccountIds: string[];
-  reconnectingBankId: string;
-  setReconnectingBankId: (value: SetStateAction<string>) => void;
-  editingAccount: AccountItem;
+  reconnectingBankId: string | null;
+  setReconnectingBankId: (value: SetStateAction<string | null>) => void;
+  editingAccount: AccountItem | null;
   setSavingAccountEdit: (value: SetStateAction<boolean>) => void;
   accountNameInput: string;
   accountIncludedInput: boolean;
   hasActiveBank: boolean;
-  setDisconnectConfirmConnId: (value: SetStateAction<string>) => void;
+  setDisconnectConfirmConnId: (value: SetStateAction<string | null>) => void;
   onSyncBank: () => void;
   syncingBank: boolean;
   savingAccountEdit: boolean;
   savingConnAccounts: boolean;
-  disconnectConfirmConnId: string;
+  disconnectConfirmConnId: string | null;
   onDisconnectBank: (connectionId?: string) => void;
 }
 
@@ -82,7 +82,7 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
 
   const displayAccountItems: AccountItem[] =
     bankAccounts.length > 0
-      ? bankAccounts.map((ba, idx) => {
+      ? bankAccounts.map((ba, idx): AccountItem => {
           const conn = connections.find((c) => c.id === ba.connection_id);
           const bName = conn?.aspsp_name || connectedBank || 'Bank';
           const meta = accountMetaMap[ba.id];
@@ -94,7 +94,7 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
           return {
             id: ba.id,
             name: cleanName,
-            accountNumber: ba.bban || ba.iban || undefined,
+            accountNumber: ba.bban || ba.iban || '',
             bankName: bName,
             balance: Number(ba.balance_amount) || 0,
             type: 'checking',

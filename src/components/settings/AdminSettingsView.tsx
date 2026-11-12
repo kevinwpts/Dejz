@@ -4,14 +4,14 @@ import { AdminPanelView } from '../AdminSimulator';
 import { TransactionItem, FixedExpenseItem } from '../HomeTab';
 
 export interface AdminSettingsViewProps {
-  onStartOnboarding: () => void;
-  onStartCreateGoalWizard: () => void;
+  onStartOnboarding?: () => void;
+  onStartCreateGoalWizard?: () => void;
   setSubView: (next: SettingsSubView) => void;
-  onOpenAddFixedModal: () => void;
-  onOpenPreviewFixedModal: (exp?: FixedExpenseItem) => void;
-  onOpenAddIncomeModal: () => void;
-  onOpenAddTransactionModal: () => void;
-  onOpenPreviewTransactionModal: (tx?: TransactionItem) => void;
+  onOpenAddFixedModal?: () => void;
+  onOpenPreviewFixedModal?: (exp?: FixedExpenseItem) => void;
+  onOpenAddIncomeModal?: () => void;
+  onOpenAddTransactionModal?: () => void;
+  onOpenPreviewTransactionModal?: (tx?: TransactionItem) => void;
 }
 
 export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({

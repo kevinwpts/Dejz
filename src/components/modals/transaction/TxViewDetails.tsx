@@ -1,6 +1,6 @@
 import type { RecurringMatchResult, SimilarTransactionsSummary } from '../../../utils/recurring';
 import { ModalSubView, getDefaultPaymentMethodForTx } from './shared';
-import type { MutableRefObject, SetStateAction } from 'react';
+import type { RefObject, SetStateAction } from 'react';
 import React from 'react';
 import {
   X,
@@ -34,18 +34,18 @@ import {
 export interface TxViewDetailsProps {
   subView: "details" | "edit" | "category-picker" | "payment-picker" | "date-picker" | "link-fixed-picker" | "similar" | "swish" | "receipt-preview";
   isCreateMode: boolean;
-  activeTx: TransactionItem;
+  activeTx: TransactionItem | null;
   navDirection: "forward" | "back";
-  onToggleHeart: (id: string, isHearted: boolean) => void;
+  onToggleHeart?: (id: string, isHearted: boolean) => void;
   isIncome: boolean;
-  onTogglePackage: (id: string, isWaitingForPackage: boolean) => void;
+  onTogglePackage?: (id: string, isWaitingForPackage: boolean) => void;
   onClose: () => void;
   logoPrefTick: number;
   category: string;
   title: string;
   setLogoPrefTick: (value: SetStateAction<number>) => void;
   recurringStatus: RecurringMatchResult;
-  onUpdate: (tx: TransactionItem, applyToSimilarIds?: string[], options?: { renameScope?: "single" | "same-merchant" | "chain"; renameTargetIds?: string[]; categoryTargetIds?: string[]; }) => void;
+  onUpdate?: (tx: TransactionItem, applyToSimilarIds?: string[], options?: { renameScope?: "single" | "same-merchant" | "chain"; renameTargetIds?: string[]; categoryTargetIds?: string[]; }) => void;
   isBankSynced: boolean;
   formatKr: (val: number) => string;
   amount: string | number;
@@ -53,24 +53,24 @@ export interface TxViewDetailsProps {
   navigateSubView: (next: ModalSubView, dir?: "forward" | "back") => void;
   date: string;
   draftReceipts: ReceiptAttachment[];
-  setPreviewReceipt: (value: SetStateAction<ReceiptAttachment>) => void;
-  fileInputRef: MutableRefObject<HTMLInputElement>;
-  onLinkToFixed: (tx: TransactionItem, item: FixedExpenseItem | IncomeItem, kind: "expense" | "income") => void;
-  onMarkAsFixed: (tx: TransactionItem, kind: "expense" | "income") => void;
+  setPreviewReceipt: (value: SetStateAction<ReceiptAttachment | null>) => void;
+  fileInputRef: RefObject<HTMLInputElement>;
+  onLinkToFixed?: (tx: TransactionItem, item: FixedExpenseItem | IncomeItem | null, kind: "expense" | "income") => void;
+  onMarkAsFixed?: (tx: TransactionItem, kind: "expense" | "income") => void;
   incomes: IncomeItem[];
   fixedExpenses: FixedExpenseItem[];
   similarInfo: SimilarTransactionsSummary;
   paymentMethod: string;
-  resolvedAccountInfo: { label: string; fullNumber: string; maskedNumber: string; };
+  resolvedAccountInfo: { label: string; fullNumber: string; maskedNumber: string; } | null;
   showFullAccount: boolean;
   setShowFullAccount: (value: SetStateAction<boolean>) => void;
   handleRemoveReceiptAt: (index: number) => void;
   note: string;
   setNote: (value: SetStateAction<string>) => void;
-  onExclude: (id: string, exclude: boolean) => void;
+  onExclude?: (id: string, exclude: boolean) => void;
   isExcluded: boolean;
   rawBankText: string;
-  onDelete: (id: string) => void;
+  onDelete?: (id: string) => void;
   setShowDeleteConfirm: (value: SetStateAction<boolean>) => void;
   showDeleteConfirm: boolean;
   displayName: string;

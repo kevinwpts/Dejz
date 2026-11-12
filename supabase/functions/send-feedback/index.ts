@@ -51,7 +51,7 @@ serve(async (req: Request) => {
     let userCreatedAt: string | null = null;
     const token = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
     if (token) {
-      const { data } = await admin.auth.getUser(token).catch(() => ({ data: null as any }));
+      const { data } = await admin.auth.getUser(token).catch(() => ({ data: null }));
       if (data?.user) {
         userId = data.user.id;
         userEmail = data.user.email ?? null;

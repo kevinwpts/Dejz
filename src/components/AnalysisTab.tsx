@@ -270,7 +270,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
         amount: effectiveAmt,
       };
     });
-  }, [fixedExpenses, incomes, periodOffset, periodTransactions, periodRecurringMatches]);
+  }, [fixedExpenses, incomes, periodOffset, periodTransactions, periodRecurringMatches, computedPeriod]);
 
   // Rörliga utgifter under perioden (exkl. 1-till-1-matchade fasta utgifter, 100 % konsekvent med Hemfliken)
   const variableTransactions = useMemo(() => {
@@ -731,7 +731,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                             const subIncome = 'payday' in entry ? entry : null;
                             const subFixed = 'dueDay' in entry ? entry : null;
                             const isIncome = subItem.type === 'income';
-                            const itemName = subItem.title || subItem.name;
+                            const itemName = subItem.title || subItem.name || '';
                             const isSubRecurring = Boolean(
                               subItem.dueDay ||
                                 subItem.payday ||
@@ -816,8 +816,8 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                                       }
                                     >
                                       {isIncome
-                                        ? `+${formatKr(subItem.amount)}`
-                                        : `−${formatKr(subItem.amount)}`}
+                                        ? `+${formatKr(entry.amount)}`
+                                        : `−${formatKr(entry.amount)}`}
                                     </span>
                                     {subTx?.date && (
                                       <span className="ui-row-meta">

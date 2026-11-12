@@ -1,4 +1,4 @@
-import type { MutableRefObject, SetStateAction } from 'react';
+import type { RefObject, SetStateAction } from 'react';
 import { formatInputThousands, cleanActivityLabel } from './goalHelpers';
 import React from 'react';
 import {
@@ -27,14 +27,14 @@ import { TransactionItem, AccountItem } from '../HomeTab';
 export interface GoalDetailViewProps {
   selectedGoal: SavingsGoalItem;
   resolveGoalAmount: (goal: SavingsGoalItem) => number;
-  resolveGoalLinkedLabel: (goal: SavingsGoalItem) => string;
+  resolveGoalLinkedLabel: (goal: SavingsGoalItem) => string | null;
   savingsGoals: SavingsGoalItem[];
   updateGoals: (next: SavingsGoalItem[]) => void;
   transferAmountInput: string;
-  transferMode: "deposit" | "withdraw";
+  transferMode: "deposit" | "withdraw" | null;
   userInitials: string;
-  userName: string;
-  setTransferMode: (value: SetStateAction<"deposit" | "withdraw">) => void;
+  userName?: string | null;
+  setTransferMode: (value: SetStateAction<"deposit" | "withdraw" | null>) => void;
   setTransferAmountInput: (value: SetStateAction<string>) => void;
   sharedHiddenFileInput: React.ReactNode;
   setIsArtworkPickerOpen: (value: SetStateAction<boolean>) => void;
@@ -42,12 +42,12 @@ export interface GoalDetailViewProps {
   setIsAccountPickerOpen: (value: SetStateAction<boolean>) => void;
   setShowDeleteConfirm: (value: SetStateAction<boolean>) => void;
   showDeleteConfirm: boolean;
-  setSelectedGoalId: (nextId: string) => void;
+  setSelectedGoalId: (nextId: string | null) => void;
   isAccountPickerOpen: boolean;
   accounts: AccountItem[];
   effectiveTotalBalance: number;
   isArtworkPickerOpen: boolean;
-  galleryInputRef: MutableRefObject<HTMLInputElement>;
+  galleryInputRef: RefObject<HTMLInputElement>;
   transactions: TransactionItem[];
 }
 

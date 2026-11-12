@@ -114,11 +114,11 @@ export const AppTabContent: React.FC = () => {
                   isInitialLoading={isInitialLoading}
                   onOpenBank={() => setIsBankModalOpen(true)}
                   onSelectTransaction={(tx) => {
-                    setSelectedTransaction(tx);
+                    setSelectedTransaction(tx ?? null);
                     setIsTxModalOpen(true);
                   }}
                   onSelectFixed={(exp) => {
-                    setSelectedFixedExpense(exp);
+                    setSelectedFixedExpense(exp ?? null);
                     setIsFixedModalOpen(true);
                   }}
                   onSelectIncome={(inc) => {
@@ -163,7 +163,7 @@ export const AppTabContent: React.FC = () => {
                     setIsIncomeModalOpen(true);
                   }}
                   onSelectFixed={(exp) => {
-                    setSelectedFixedExpense(exp);
+                    setSelectedFixedExpense(exp ?? null);
                     setIsFixedModalOpen(true);
                   }}
                   onAddIncome={() => {
@@ -201,11 +201,11 @@ export const AppTabContent: React.FC = () => {
                   userEmail={userEmail}
                   userName={userName}
                   onSelectTransaction={(tx) => {
-                    setSelectedTransaction(tx);
+                    setSelectedTransaction(tx ?? null);
                     setIsTxModalOpen(true);
                   }}
                   onSelectFixed={(exp) => {
-                    setSelectedFixedExpense(exp);
+                    setSelectedFixedExpense(exp ?? null);
                     setIsFixedModalOpen(true);
                   }}
                   onSelectIncome={(inc) => {
@@ -228,7 +228,7 @@ export const AppTabContent: React.FC = () => {
                   selectedAccountId={selectedHistoryAccountId}
                   onSelectAccount={setSelectedHistoryAccountId}
                   onSelectTransaction={(tx) => {
-                    setSelectedTransaction(tx);
+                    setSelectedTransaction(tx ?? null);
                     setIsTxModalOpen(true);
                   }}
                   onAddTransaction={() => {
@@ -327,7 +327,7 @@ export const AppTabContent: React.FC = () => {
                                   key={tx.id}
                                   type="button"
                                   onClick={() => {
-                                    setSelectedTransaction(tx);
+                                    setSelectedTransaction(tx ?? null);
                                     setIsTxModalOpen(true);
                                   }}
                                   className="ui-tx-row"
@@ -464,7 +464,7 @@ export const AppTabContent: React.FC = () => {
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      setSelectedTransaction(tx);
+                                      setSelectedTransaction(tx ?? null);
                                       setIsTxModalOpen(true);
                                     }}
                                     className="flex items-center gap-3.5 min-w-0 flex-1 text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
@@ -567,7 +567,7 @@ export const AppTabContent: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => {
-                                    setSelectedFixedExpense(exp);
+                                    setSelectedFixedExpense(exp ?? null);
                                     setIsFixedModalOpen(true);
                                   }}
                                   className="flex items-center gap-3.5 min-w-0 flex-1 text-left hover:opacity-85 transition-opacity cursor-pointer"
@@ -660,7 +660,7 @@ export const AppTabContent: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => {
-                                    setSelectedTransaction(tx);
+                                    setSelectedTransaction(tx ?? null);
                                     setIsTxModalOpen(true);
                                   }}
                                   className="flex items-center gap-3.5 min-w-0 flex-1 text-left hover:opacity-85 transition-opacity cursor-pointer"
@@ -796,7 +796,7 @@ export const AppTabContent: React.FC = () => {
                   onDeleteAccount={handleDeleteAccount}
                   onResetAccount={handleResetAccount}
                   onSelectTransaction={(tx) => {
-                    setSelectedTransaction(tx);
+                    setSelectedTransaction(tx ?? null);
                     setIsTxModalOpen(true);
                   }}
                   onAddIncome={handleAddIncome}
@@ -824,7 +824,7 @@ export const AppTabContent: React.FC = () => {
                     setIsFixedModalOpen(true);
                   }}
                   onOpenPreviewFixedModal={(exp) => {
-                    setSelectedFixedExpense(exp);
+                    setSelectedFixedExpense(exp ?? null);
                     setIsFixedModalOpen(true);
                   }}
                   onOpenAddIncomeModal={() => {
@@ -836,7 +836,7 @@ export const AppTabContent: React.FC = () => {
                     setIsTxModalOpen(true);
                   }}
                   onOpenPreviewTransactionModal={(tx) => {
-                    setSelectedTransaction(tx);
+                    setSelectedTransaction(tx ?? null);
                     setIsTxModalOpen(true);
                   }}
                   onOpenSection={(section) => {

@@ -1,4 +1,4 @@
-import type { MutableRefObject, SetStateAction } from 'react';
+import type { RefObject, SetStateAction } from 'react';
 import { CreateWizardStep, inferArtworkFromGoalName, formatInputThousands } from './goalHelpers';
 import type { GoalArtworkTheme } from '../ui/VisualArtwork';
 import React from 'react';
@@ -36,17 +36,17 @@ export interface GoalCreateWizardProps {
   handleSaveGoal: (overrideCurrentAmount?: number, overrideMonthly?: number) => void;
   goalNameInput: string;
   hasManuallyPickedArtwork: boolean;
-  goalCustomImage: string;
+  goalCustomImage: string | undefined;
   setGoalArtworkId: (value: SetStateAction<string>) => void;
   setGoalNameInput: (value: SetStateAction<string>) => void;
   artworkSearch: string;
   setArtworkSearch: (value: SetStateAction<string>) => void;
-  galleryInputRef: MutableRefObject<HTMLInputElement>;
+  galleryInputRef: RefObject<HTMLInputElement>;
   filteredArtworks: GoalArtworkTheme[];
-  setGoalCustomImage: (value: SetStateAction<string>) => void;
+  setGoalCustomImage: (value: SetStateAction<string | undefined>) => void;
   setHasManuallyPickedArtwork: (value: SetStateAction<boolean>) => void;
-  setGoalLinkedAccountId: (value: SetStateAction<string>) => void;
-  goalLinkedAccountId: string;
+  setGoalLinkedAccountId: (value: SetStateAction<string | undefined>) => void;
+  goalLinkedAccountId: string | undefined;
   accounts: AccountItem[];
   effectiveTotalBalance: number;
   formatKr: (amount: number) => string;

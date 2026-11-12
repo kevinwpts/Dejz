@@ -1,6 +1,6 @@
 import type { SavingsGoalItem } from '../../../utils/appCache';
 import type { ModalSubView } from './shared';
-import type { MutableRefObject, SetStateAction } from 'react';
+import type { RefObject, SetStateAction } from 'react';
 import React from 'react';
 import {
   X,
@@ -26,7 +26,7 @@ export interface FixedViewEditProps {
   slideAnimClass: "animate-slide-in-right" | "animate-slide-in-left";
   isCreateMode: boolean;
   onClose: () => void;
-  activeExpense: FixedExpenseItem;
+  activeExpense: FixedExpenseItem | null;
   setName: (value: SetStateAction<string>) => void;
   setAmount: (value: SetStateAction<string | number>) => void;
   setDueDay: (value: SetStateAction<number>) => void;
@@ -42,12 +42,12 @@ export interface FixedViewEditProps {
   availableGoals: SavingsGoalItem[];
   linkedGoalId: string;
   draftReceipts: ReceiptAttachment[];
-  fileInputRef: MutableRefObject<HTMLInputElement>;
-  setPreviewReceipt: (value: SetStateAction<ReceiptAttachment>) => void;
+  fileInputRef: RefObject<HTMLInputElement>;
+  setPreviewReceipt: (value: SetStateAction<ReceiptAttachment | null>) => void;
   handleRemoveReceiptAt: (index: number) => void;
   handleCreateSave: () => void;
   commitInlineChanges: (overrides?: Partial<FixedExpenseItem>) => void;
-  onDelete: (id: string) => void;
+  onDelete?: (id: string) => void;
   setShowDeleteConfirm: (value: SetStateAction<boolean>) => void;
   showDeleteConfirm: boolean;
   displayName: string;

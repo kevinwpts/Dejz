@@ -1,5 +1,5 @@
 import { ModalSubView } from './shared';
-import type { MutableRefObject } from 'react';
+import type { RefObject } from 'react';
 import React from 'react';
 import { X, FileText, CaretLeft, Plus } from '@phosphor-icons/react';
 import { TransactionItem } from '../../HomeTab';
@@ -7,13 +7,13 @@ import { ReceiptAttachment } from '../../../utils/swedishDate';
 
 export interface TxViewReceiptPreviewProps {
   subView: "details" | "edit" | "category-picker" | "payment-picker" | "date-picker" | "link-fixed-picker" | "similar" | "swish" | "receipt-preview";
-  previewReceipt: ReceiptAttachment;
+  previewReceipt: ReceiptAttachment | null;
   slideAnimClass: "animate-slide-in-right" | "animate-slide-in-left";
   navigateSubView: (next: ModalSubView, dir?: "forward" | "back") => void;
   pickerReturnView: "details" | "edit";
   onClose: () => void;
-  activeTx: TransactionItem;
-  fileInputRef: MutableRefObject<HTMLInputElement>;
+  activeTx: TransactionItem | null;
+  fileInputRef: RefObject<HTMLInputElement>;
 }
 
 export const TxViewReceiptPreview: React.FC<TxViewReceiptPreviewProps> = ({

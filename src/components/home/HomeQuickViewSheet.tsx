@@ -11,17 +11,17 @@ import type { FixedExpenseItem, IncomeItem, TransactionItem } from '../../app/mo
 import { getTransactionTime } from '../../app/models';
 
 export interface HomeQuickViewSheetProps {
-  activeHeroPopup: "income" | "fixed" | "variable";
-  setActiveHeroPopup: (value: SetStateAction<"income" | "fixed" | "variable">) => void;
+  activeHeroPopup: "income" | "fixed" | "variable" | null;
+  setActiveHeroPopup: (value: SetStateAction<"income" | "fixed" | "variable" | null>) => void;
   transactions: TransactionItem[];
   period: PeriodInfo;
   periodRecurringMatches: { claimedFixedTxIds: Set<string>; matchedFixedTxByExpId: Map<string, TransactionItem>; matchedFixedIds: Set<string>; claimedIncomeTxIds: Set<string>; matchedIncomeTxByIncId: Map<string, TransactionItem>; matchedIncomeIds: Set<string>; };
   incomes: IncomeItem[];
-  onSelectIncome: (inc: IncomeItem) => void;
+  onSelectIncome?: (inc: IncomeItem) => void;
   formatKr: (amount: number) => string;
   onSelectTransaction: (tx: TransactionItem) => void;
   fixedExpenses: FixedExpenseItem[];
-  onSelectFixed: (exp: FixedExpenseItem) => void;
+  onSelectFixed?: (exp: FixedExpenseItem) => void;
   variablePeriodTransactions: TransactionItem[];
   todayStr: string;
 }

@@ -15,8 +15,8 @@ export interface TxViewCategoryPickerProps {
   availableCategories: string[];
   category: string;
   setCategory: (value: SetStateAction<string>) => void;
-  activeTx: TransactionItem;
-  onUpdate: (tx: TransactionItem, applyToSimilarIds?: string[], options?: { renameScope?: "single" | "same-merchant" | "chain"; renameTargetIds?: string[]; categoryTargetIds?: string[]; }) => void;
+  activeTx: TransactionItem | null;
+  onUpdate?: (tx: TransactionItem, applyToSimilarIds?: string[], options?: { renameScope?: "single" | "same-merchant" | "chain"; renameTargetIds?: string[]; categoryTargetIds?: string[]; }) => void;
 }
 
 export const TxViewCategoryPicker: React.FC<TxViewCategoryPickerProps> = ({

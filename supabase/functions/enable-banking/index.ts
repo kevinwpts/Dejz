@@ -31,6 +31,130 @@ const BALANCE_TYPE_LABELS: Record<string, string> = {
   OTHR: "Övrigt saldo (OTHR)",
 };
 
+// Minimal shapes of the Enable Banking API responses (only the fields this function reads).
+interface EbAmount {
+  amount?: string | number | null;
+  currency?: string;
+  credit_debit_indicator?: string;
+}
+
+interface EbBalance {
+  balance_type?: string;
+  balance_amount?: EbAmount;
+  name?: string;
+}
+
+interface EbAspsp {
+  name: string;
+  country?: string;
+  logo?: string;
+  bic?: string;
+  maximum_consent_validity?: number;
+}
+
+interface EbAccount {
+  uid?: string;
+  resource_id?: string;
+  account_id?: {
+    iban?: string;
+    bban?: string;
+    other?: { identification?: string };
+  };
+  all_account_ids?: { identification?: string }[];
+  name?: string;
+  product?: string;
+  details?: string;
+  cash_account_type?: string;
+  currency?: string;
+}
+
+interface EbTransaction {
+  status?: string;
+  transaction_amount?: EbAmount;
+  amount?: string | number;
+  currency?: string;
+  credit_debit_indicator?: string;
+  card_transaction?: { acceptor_name?: string; merchant_name?: string };
+  creditor?: { name?: string };
+  creditor_name?: string;
+  debtor?: { name?: string };
+  debtor_name?: string;
+  remittance_information?: string[] | string;
+  remittance_information_unstructured?: string;
+  remittance_information_unstructured_array?: string[];
+  additional_information?: string;
+  bank_transaction_code?: { description?: string };
+  booking_date?: string;
+  value_date?: string;
+  transaction_date?: string;
+  entry_reference?: string;
+  transaction_id?: string;
+  internal_transaction_id?: string;
+  balance_after_transaction?: EbAmount;
+}
+
+interface EnableBankingResponse {
+  // Error details
+  message?: string;
+  detail?: string;
+  error_description?: string;
+  error?: string;
+  raw?: string;
+  // GET /aspsps
+  aspsps?: EbAspsp[];
+  // POST /auth
+  url?: string;
+  // POST /sessions
+  session_id?: string;
+  access?: { valid_until?: string };
+  accounts?: EbAccount[];
+  // GET /accounts/{uid}/balances
+  balances?: EbBalance[];
+  // GET /accounts/{uid}/transactions
+  transactions?: EbTransaction[];
+  continuation_key?: string | null;
+}
+
+type EnableBankingError = Error & { status?: number; apiError?: unknown };
+
+// Rows read from our own tables (the Supabase client is untyped, so only the fields used here).
+interface BankAccountRow {
+  id: string;
+  provider_account_uid: string;
+  last_synced_at?: string | null;
+  has_incomplete_history?: boolean | null;
+  continuation_key?: string | null;
+}
+
+interface BankConnectionRow {
+  id: string;
+}
+
+interface SavedBankAccount {
+  id: string;
+  [key: string]: unknown;
+}
+
+interface BankTransactionRow {
+  user_id: string;
+  connection_id: string;
+  bank_account_id: string;
+  external_key: string;
+  entry_reference: string | null;
+  transaction_id: string | null;
+  booking_status: EnableBankingBookingStatus;
+  booking_date: string | null;
+  value_date: string | null;
+  transaction_date: string | null;
+  amount: number;
+  currency: string;
+  credit_debit_indicator: string | null;
+  description: string;
+  counterparty_name: string | null;
+  raw_json: EbTransaction;
+  updated_at: string;
+}
+
 function base64UrlEncodeBytes(bytes: Uint8Array): string {
   let binary = "";
   for (let i = 0; i < bytes.byteLength; i++) {
@@ -176,7 +300,7 @@ async function enableBankingRequest(
     psuIpAddress?: string | null;
     psuUserAgent?: string | null;
   },
-) {
+): Promise<EnableBankingResponse | null> {
   const jwt = await createEnableBankingJwt(options.environment);
   const headers: Record<string, string> = {
     Authorization: `Bearer ${jwt}`,
@@ -201,7 +325,7 @@ async function enableBankingRequest(
   });
 
   const text = await response.text();
-  let data: any = null;
+  let data: EnableBankingResponse | null = null;
   if (text) {
     try {
       data = JSON.parse(text);
@@ -212,7 +336,7 @@ async function enableBankingRequest(
 
   if (!response.ok) {
     const detail = data?.message || data?.detail || data?.error_description || data?.error || text || `HTTP ${response.status}`;
-    const err: any = new Error(`Enable Banking API-fel (${response.status}): ${detail}`);
+    const err = new Error(`Enable Banking API-fel (${response.status}): ${detail}`) as EnableBankingError;
     err.status = response.status;
     err.apiError = data;
     throw err;
@@ -221,7 +345,7 @@ async function enableBankingRequest(
   return data;
 }
 
-function selectPreferredBalance(balances: any[]): {
+function selectPreferredBalance(balances: EbBalance[]): {
   amount: number | null;
   currency: string;
   balanceType: string | null;
@@ -287,7 +411,7 @@ function isLikelyIncomingCreditText(text: string): boolean {
   );
 }
 
-function extractCounterpartyAndDescription(tx: any, occurrenceIndex = 1): {
+function extractCounterpartyAndDescription(tx: EbTransaction, occurrenceIndex = 1): {
   description: string;
   counterpartyName: string | null;
   amount: number;
@@ -376,7 +500,7 @@ function extractCounterpartyAndDescription(tx: any, occurrenceIndex = 1): {
 
   // Preserve booking_date, value_date, and transaction_date strictly as distinct fields when present.
   // Never fabricate a date or copy booking_date into transaction_date when missing.
-  const normalizeIsoDate = (val: any): string | null => {
+  const normalizeIsoDate = (val: unknown): string | null => {
     if (!val || typeof val !== "string") return null;
     const trimmed = val.trim();
     const match = trimmed.match(/^(\d{4}-\d{2}-\d{2})/);
@@ -438,13 +562,13 @@ function extractCounterpartyAndDescription(tx: any, occurrenceIndex = 1): {
 }
 
 function buildBatchTransactionRows(
-  rawTxs: any[],
+  rawTxs: EbTransaction[],
   userId: string,
   connectionId: string,
   bankAccountId: string,
-): any[] {
+): BankTransactionRow[] {
   const baseKeyCounts = new Map<string, number>();
-  const rows: any[] = [];
+  const rows: BankTransactionRow[] = [];
 
   for (const tx of rawTxs) {
     const firstPass = extractCounterpartyAndDescription(tx, 1);
@@ -577,14 +701,14 @@ serve(async (req: Request) => {
       // Sort with SEB and major Swedish banks at the top
       const priorityBanks = ["SEB", "Swedbank", "Handelsbanken", "Nordea", "Länsförsäkringar", "Danske Bank", "Skandia", "ICA Banken", "Avanza", "Nordnet"];
       const aspsps = aspspsRaw
-        .map((bank: any) => ({
+        .map((bank: EbAspsp) => ({
           name: bank.name,
           country: bank.country || country,
           logo: bank.logo || null,
           bic: bank.bic || null,
           maximumConsentValidity: bank.maximum_consent_validity || 90 * 86400,
         }))
-        .sort((a: any, b: any) => {
+        .sort((a, b) => {
           const idxA = priorityBanks.findIndex((p) => a.name.toLowerCase().includes(p.toLowerCase()));
           const idxB = priorityBanks.findIndex((p) => b.name.toLowerCase().includes(p.toLowerCase()));
           if (idxA !== -1 && idxB !== -1) return idxA - idxB;
@@ -640,7 +764,7 @@ serve(async (req: Request) => {
         );
         const matchedAspsp = Array.isArray(aspspsData?.aspsps)
           ? aspspsData.aspsps.find(
-              (b: any) =>
+              (b: EbAspsp) =>
                 String(b?.name || "").toLowerCase() === aspspName.toLowerCase(),
             )
           : null;
@@ -722,7 +846,7 @@ serve(async (req: Request) => {
             psuIpAddress,
             psuUserAgent,
           });
-        } catch (err: any) {
+        } catch (err: unknown) {
           // If the bank rejects a >90d consent validity, retry immediately with 89 days
           if (validUntilDate !== fallback89DaysIso) {
             return await enableBankingRequest("/auth", {
@@ -737,10 +861,10 @@ serve(async (req: Request) => {
         }
       };
 
-      let authResponse: any;
+      let authResponse: EnableBankingResponse | null;
       try {
         authResponse = await requestAuthWithFallback(redirectUrlUsed);
-      } catch (firstErr: any) {
+      } catch (firstErr: unknown) {
         // If the current preview origin is not yet registered in Enable Banking's Redirect URLs,
         // fall back seamlessly to the configured production redirect URL (https://dejz.se/bank/callback).
         if (redirectUrlUsed !== configuredRedirectUrl) {
@@ -981,11 +1105,11 @@ serve(async (req: Request) => {
         .eq("user_id", user.id);
 
       const rawAccounts = Array.isArray(sessionData?.accounts) ? sessionData.accounts : [];
-      const upsertedAccounts: any[] = [];
+      const upsertedAccounts: SavedBankAccount[] = [];
 
       // Fetch initial balances for all accounts in parallel FIRST so the database never holds a partial subset of accounts mid-loop
       const preparedAccounts = await Promise.all(
-        rawAccounts.map(async (acc: any) => {
+        rawAccounts.map(async (acc: EbAccount) => {
           const uid = acc?.uid || acc?.account_id?.iban || acc?.resource_id;
           if (!uid) return null;
 
@@ -1006,7 +1130,7 @@ serve(async (req: Request) => {
             balanceType: null as string | null,
             balanceLabel: null as string | null,
           };
-          let rawBalances: any[] = [];
+          let rawBalances: EbBalance[] = [];
 
           try {
             const balRes = await enableBankingRequest(`/accounts/${encodeURIComponent(uid)}/balances`, {
@@ -1040,7 +1164,7 @@ serve(async (req: Request) => {
         const { uid, iban, bban, name, product, currency, stableKey, balanceInfo, rawBalances } = prep;
 
         // Check if this physical account already exists on this connection by stable_account_key, iban, bban, or uid
-        const matchedExisting = (existingConnAccounts || []).find((ea: any) => {
+        const matchedExisting = (existingConnAccounts || []).find((ea) => {
           if (ea.provider_account_uid === uid) return true;
           const eaStable = ea.stable_account_key || normalizeAccountIdentity(ea.iban, ea.bban, ea.provider_account_uid);
           if (stableKey && eaStable === stableKey) return true;
@@ -1049,10 +1173,10 @@ serve(async (req: Request) => {
           return false;
         });
 
-        let savedAcc: any = null;
+        let savedAcc: SavedBankAccount | null = null;
 
         if (matchedExisting) {
-          const updatePayload: Record<string, any> = {
+          const updatePayload: Record<string, unknown> = {
             connection_id: connectionId,
             provider_account_uid: uid,
             name,
@@ -1143,8 +1267,8 @@ serve(async (req: Request) => {
     // upserting each page idempotently without overwriting user reconciliation decisions,
     // healing legacy positive reserved holds, and resolving reservations against booked transactions.
     const syncAccountTransactionsMultiPage = async (params: {
-      acc: any;
-      conn: any;
+      acc: BankAccountRow;
+      conn: BankConnectionRow;
       envToUse: "production" | "sandbox";
       loadMoreOnly: boolean;
       fullSync?: boolean;
@@ -1193,7 +1317,7 @@ serve(async (req: Request) => {
 
         if (rawTxs.length > 0) {
           const rowsToUpsert = buildBatchTransactionRows(rawTxs, user.id, conn.id, acc.id);
-          const uniqueMap = new Map<string, any>();
+          const uniqueMap = new Map<string, BankTransactionRow>();
           for (const row of rowsToUpsert) {
             uniqueMap.set(row.external_key, row);
             if (row.booking_status === "PDNG" || row.booking_status === "HOLD") {
@@ -1358,8 +1482,8 @@ serve(async (req: Request) => {
             fullSync: true,
             maxPages: 12,
           });
-        } catch (syncErr: any) {
-          console.error("Initial transaction sync warning:", syncErr?.message || syncErr);
+        } catch (syncErr: unknown) {
+          console.error("Initial transaction sync warning:", (syncErr instanceof Error ? syncErr.message : undefined) || syncErr);
         }
       }
 
@@ -1397,7 +1521,7 @@ serve(async (req: Request) => {
         );
       }
 
-      const updates: Record<string, any> = {
+      const updates: Record<string, unknown> = {
         updated_at: new Date().toISOString(),
       };
       if (body?.customName !== undefined) {
@@ -1489,7 +1613,7 @@ serve(async (req: Request) => {
       }
 
       const activeConnIds = updatedConnections.map((c) => c.id);
-      let accounts: any[] = [];
+      let accounts: unknown[] = [];
       if (activeConnIds.length > 0) {
         const { data: accData, error: accErr } = await adminClient
           .from("bank_accounts")
@@ -1612,9 +1736,10 @@ serve(async (req: Request) => {
               loadMoreOnly,
               fullSync,
             });
-          } catch (err: any) {
-            const status = err?.status;
-            const message = err?.message || "Kunde inte uppdatera konto";
+          } catch (err: unknown) {
+            const ebErr = err instanceof Error ? (err as EnableBankingError) : null;
+            const status = ebErr?.status;
+            const message = ebErr?.message || "Kunde inte uppdatera konto";
             syncErrors.push(`${acc.name}: ${message}`);
 
             if (status === 401 || status === 403 || message.toLowerCase().includes("expired") || message.toLowerCase().includes("consent")) {
@@ -1659,7 +1784,7 @@ serve(async (req: Request) => {
         .neq("status", "revoked")
         .order("created_at", { ascending: false });
 
-      const activeIds = (refreshedConnections || []).map((c: any) => c.id);
+      const activeIds = (refreshedConnections || []).map((c) => c.id);
       const { data: refreshedAccounts } = activeIds.length > 0
         ? await adminClient
             .from("bank_accounts")
@@ -1696,7 +1821,7 @@ serve(async (req: Request) => {
         .eq("user_id", user.id)
         .neq("status", "revoked");
 
-      const activeConnIds = (activeConns || []).map((c: any) => c.id);
+      const activeConnIds = (activeConns || []).map((c) => c.id);
 
       const { data: selectedAccounts } = activeConnIds.length > 0
         ? await adminClient
@@ -1849,8 +1974,8 @@ serve(async (req: Request) => {
             },
           );
           providerRevoked = true;
-        } catch (revokeErr: any) {
-          console.warn("Enable Banking session revoke notice:", revokeErr?.message || revokeErr);
+        } catch (revokeErr: unknown) {
+          console.warn("Enable Banking session revoke notice:", (revokeErr instanceof Error ? revokeErr.message : undefined) || revokeErr);
         }
       }
 
@@ -2019,13 +2144,14 @@ serve(async (req: Request) => {
       JSON.stringify({ error: `Okänd åtgärd: ${action}` }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
-  } catch (error: any) {
-    console.error("enable-banking edge function error:", error?.message || "Unknown error");
+  } catch (error: unknown) {
+    const ebError = error instanceof Error ? (error as EnableBankingError) : null;
+    console.error("enable-banking edge function error:", ebError?.message || "Unknown error");
     return new Response(
       JSON.stringify({
-        error: error?.message || "Ett oväntat fel uppstod vid kommunikation med banktjänsten.",
+        error: ebError?.message || "Ett oväntat fel uppstod vid kommunikation med banktjänsten.",
       }),
-      { status: error?.status || 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      { status: ebError?.status || 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
 });

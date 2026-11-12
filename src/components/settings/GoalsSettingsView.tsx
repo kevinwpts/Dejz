@@ -3,11 +3,11 @@ import { SavingsGoalsView } from '../SavingsGoalsView';
 import { TransactionItem, AccountItem } from '../HomeTab';
 
 export interface GoalsSettingsViewProps {
-  userName: string;
+  userName?: string | null;
   transactions: TransactionItem[];
   accounts: AccountItem[];
-  selectedGoalId: string;
-  onSelectGoalId: (goalId: string) => void;
+  selectedGoalId?: string | null;
+  onSelectGoalId?: (goalId: string | null) => void;
 }
 
 export const GoalsSettingsView: React.FC<GoalsSettingsViewProps> = ({

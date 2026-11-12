@@ -15,8 +15,8 @@ import {
 } from './onboardingConfig';
 
 export interface OnboardingItemSheetProps {
-  sheetEditor: SheetEditorState;
-  setSheetEditor: (value: SetStateAction<SheetEditorState>) => void;
+  sheetEditor: SheetEditorState | null;
+  setSheetEditor: (value: SetStateAction<SheetEditorState | null>) => void;
   sheetSubView: "main" | "day-picker" | "category-picker" | "payment-picker";
   setSheetNavDir: (value: SetStateAction<"forward" | "back">) => void;
   setSheetSubView: (value: SetStateAction<"main" | "day-picker" | "category-picker" | "payment-picker">) => void;

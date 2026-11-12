@@ -103,7 +103,7 @@ export function reconcileFixedExpensesList(params: {
           ? idOverride.lastPaymentDate
           : f.lastPaymentDate;
 
-      if (isValidUuid(f.id)) {
+      if (f.id && isValidUuid(f.id)) {
         dbIds.add(f.id);
       }
 
@@ -336,7 +336,7 @@ export function reconcileIncomesList(params: {
       const finalCat = normalizeCategoryToValid(i.category || idOverride?.category || 'Lön', 'income');
       const finalPayday = i.deductionDay || i.payday || idOverride?.payday || targetPayday || 25;
 
-      if (isValidUuid(i.id)) {
+      if (i.id && isValidUuid(i.id)) {
         dbIds.add(i.id);
       }
 

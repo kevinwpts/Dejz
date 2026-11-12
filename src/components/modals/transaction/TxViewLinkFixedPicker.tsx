@@ -7,7 +7,7 @@ import { ItemLogo } from '../../ItemLogo';
 
 export interface TxViewLinkFixedPickerProps {
   subView: "details" | "edit" | "category-picker" | "payment-picker" | "date-picker" | "link-fixed-picker" | "similar" | "swish" | "receipt-preview";
-  activeTx: TransactionItem;
+  activeTx: TransactionItem | null;
   slideAnimClass: "animate-slide-in-right" | "animate-slide-in-left";
   navigateSubView: (next: ModalSubView, dir?: "forward" | "back") => void;
   pickerReturnView: "details" | "edit";
@@ -16,9 +16,9 @@ export interface TxViewLinkFixedPickerProps {
   incomes: IncomeItem[];
   fixedExpenses: FixedExpenseItem[];
   recurringStatus: RecurringMatchResult;
-  onLinkToFixed: (tx: TransactionItem, item: IncomeItem | FixedExpenseItem, kind: "expense" | "income") => void;
+  onLinkToFixed?: (tx: TransactionItem, item: IncomeItem | FixedExpenseItem | null, kind: "expense" | "income") => void;
   formatKr: (val: number) => string;
-  onMarkAsFixed: (tx: TransactionItem, kind: "expense" | "income") => void;
+  onMarkAsFixed?: (tx: TransactionItem, kind: "expense" | "income") => void;
 }
 
 export const TxViewLinkFixedPicker: React.FC<TxViewLinkFixedPickerProps> = ({

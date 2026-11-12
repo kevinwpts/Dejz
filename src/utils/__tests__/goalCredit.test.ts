@@ -18,7 +18,7 @@ test('med bank: dragningen fyller på målet med riktigt belopp', () => {
   const { goals, mutated } = creditGoalsFromBankMatches([goal()], [saving()], new Map([['fx-save', tx('t1', 1600, '2026-11-25')]]));
   assert.equal(mutated, true);
   assert.equal(goals[0].currentAmount, 2600);
-  assert.equal(goals[0].activities[0].amount, 1600);
+  assert.equal(goals[0].activities?.[0].amount, 1600);
 });
 
 test('med bank: samma dragning bokas aldrig två gånger', () => {
@@ -41,7 +41,7 @@ test('utan bank: fylls på när dragningsdagen passerat i perioden', () => {
   const after = creditGoalsWithoutBank([goal()], [saving({ dueDay: 28 })], start, new Date('2026-11-28T08:00:00'));
   assert.equal(after.mutated, true);
   assert.equal(after.goals[0].currentAmount, 2500);
-  assert.equal(after.goals[0].activities[0].date, '2026-11-28');
+  assert.equal(after.goals[0].activities?.[0].date, '2026-11-28');
 });
 
 test('utan bank: en gång per period, men igen nästa period', () => {
@@ -57,7 +57,7 @@ test('utan bank: en gång per period, men igen nästa period', () => {
 test('utan bank: dragningsdag 31 fungerar i kortare månader (sista dagen)', () => {
   const { mutated, goals } = creditGoalsWithoutBank([goal()], [saving({ dueDay: 31 })], new Date('2027-02-01T00:00:00'), new Date('2027-02-28T09:00:00'));
   assert.equal(mutated, true);
-  assert.equal(goals[0].activities[0].date, '2027-02-28');
+  assert.equal(goals[0].activities?.[0].date, '2027-02-28');
 });
 
 test('uppsagt sparande fyller inte på', () => {

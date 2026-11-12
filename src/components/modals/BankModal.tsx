@@ -99,6 +99,40 @@ export const BankModal: React.FC<BankModalProps> = ({
     }
   }, [isOpen, userEmail, environment, step, loadBanks]);
 
+  const handleSelectBank = useCallback(async (bank: BankAspsp, reconnectConnectionId?: string | null) => {
+    setSelectedBank(bank);
+    setStartingAuth(true);
+    setErrorMsg(null);
+    setShowManualCallback(false);
+
+    try {
+      const redirectUrl = `${appOrigin()}/bank/callback`;
+      const res = await bankService.startAuth({
+        aspspName: bank.name,
+        aspspCountry: bank.country || 'SE',
+        aspspLogo: bank.logo,
+        originContext: 'settings',
+        environment,
+        reconnectConnectionId: reconnectConnectionId || null,
+        redirectUrl,
+      });
+
+      setAuthUrl(res.url);
+      setAuthState(res.state);
+
+      const isInIframe = window.self !== window.top;
+      if (!isInIframe) {
+        window.location.assign(res.url);
+      } else {
+        setStep('authorizing');
+      }
+    } catch (err: unknown) {
+      setErrorMsg((err as { message?: string }).message || 'Kunde inte starta autentisering mot banken.');
+    } finally {
+      setStartingAuth(false);
+    }
+  }, [environment]);
+
   useEffect(() => {
     if (!isOpen) {
       setStep('list');
@@ -124,7 +158,7 @@ export const BankModal: React.FC<BankModalProps> = ({
         }
       );
     }
-  }, [isOpen, preselectedBankName, banks, step, startingAuth]);
+  }, [isOpen, preselectedBankName, banks, step, startingAuth, handleSelectBank]);
 
   // Poll status when window regains focus after bank auth
   useEffect(() => {
@@ -158,40 +192,6 @@ export const BankModal: React.FC<BankModalProps> = ({
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
   }, [isOpen, connections.length, onBankStateUpdated]);
-
-  const handleSelectBank = async (bank: BankAspsp, reconnectConnectionId?: string | null) => {
-    setSelectedBank(bank);
-    setStartingAuth(true);
-    setErrorMsg(null);
-    setShowManualCallback(false);
-
-    try {
-      const redirectUrl = `${appOrigin()}/bank/callback`;
-      const res = await bankService.startAuth({
-        aspspName: bank.name,
-        aspspCountry: bank.country || 'SE',
-        aspspLogo: bank.logo,
-        originContext: 'settings',
-        environment,
-        reconnectConnectionId: reconnectConnectionId || null,
-        redirectUrl,
-      });
-
-      setAuthUrl(res.url);
-      setAuthState(res.state);
-
-      const isInIframe = window.self !== window.top;
-      if (!isInIframe) {
-        window.location.assign(res.url);
-      } else {
-        setStep('authorizing');
-      }
-    } catch (err: unknown) {
-      setErrorMsg((err as { message?: string }).message || 'Kunde inte starta autentisering mot banken.');
-    } finally {
-      setStartingAuth(false);
-    }
-  };
 
   const handleExchangeManualCallback = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -567,7 +567,7 @@ export const BankModal: React.FC<BankModalProps> = ({
                   <div className="flex justify-center mb-3.5">
                     <ItemLogo
                       name={selectedBank?.name || 'Bank'}
-                      logoUrl={selectedBank?.logo}
+                      logoUrl={selectedBank?.logo ?? undefined}
                       size="xl"
                     />
                   </div>

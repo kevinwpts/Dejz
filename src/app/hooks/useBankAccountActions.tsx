@@ -98,7 +98,7 @@ export function useBankAccountActions({
     setFixedExpenses([]);
     setTransactions([]);
     setActiveTab('home');
-    setSettingsSubView(null);
+    setSettingsSubView('main');
     await supabase.auth.signOut().catch(() => {});
     setShowLanding(true);
     setIsOnboardingActive(false);

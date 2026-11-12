@@ -14,8 +14,8 @@ export interface TxViewDatePickerProps {
   pickerYearMonth: { year: number; month: number; };
   date: string;
   setDate: (value: SetStateAction<string>) => void;
-  activeTx: TransactionItem;
-  onUpdate: (tx: TransactionItem, applyToSimilarIds?: string[], options?: { renameScope?: "single" | "same-merchant" | "chain"; renameTargetIds?: string[]; categoryTargetIds?: string[]; }) => void;
+  activeTx: TransactionItem | null;
+  onUpdate?: (tx: TransactionItem, applyToSimilarIds?: string[], options?: { renameScope?: "single" | "same-merchant" | "chain"; renameTargetIds?: string[]; categoryTargetIds?: string[]; }) => void;
   setPickerYearMonth: (value: SetStateAction<{ year: number; month: number; }>) => void;
 }
 

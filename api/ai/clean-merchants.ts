@@ -1,4 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
+import { ApiRequest, ApiResponse, readJsonBody } from "../_http";
 
 let aiClient: GoogleGenAI | null = null;
 function getGenAI(): GoogleGenAI | null {
@@ -16,19 +17,36 @@ function getGenAI(): GoogleGenAI | null {
   return aiClient;
 }
 
-export default async function handler(req: any, res: any) {
+interface CleanMerchantsBody {
+  items: unknown;
+  expenseCategories: unknown;
+  incomeCategories: unknown;
+}
+
+interface BatchItem {
+  key: string;
+  rawText: string;
+  amount: number;
+  time: string;
+  type: "income" | "expense";
+}
+
+const asRecord = (v: unknown): Record<string, unknown> =>
+  v && typeof v === "object" ? (v as Record<string, unknown>) : {};
+
+export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { items, expenseCategories, incomeCategories } = req.body || {};
+  const { items, expenseCategories, incomeCategories } = readJsonBody<CleanMerchantsBody>(req);
   if (!Array.isArray(items) || items.length === 0) {
     return res.status(200).json({ results: [] });
   }
 
   const validExpenseCats: string[] =
     Array.isArray(expenseCategories) && expenseCategories.length > 0
-      ? expenseCategories
+      ? expenseCategories.map(String)
       : [
           "Mat & dryck",
           "Uteliv",
@@ -46,19 +64,22 @@ export default async function handler(req: any, res: any) {
 
   const validIncomeCats: string[] =
     Array.isArray(incomeCategories) && incomeCategories.length > 0
-      ? incomeCategories
+      ? incomeCategories.map(String)
       : ["Lön", "Bidrag", "Swish", "Övrigt"];
 
   const batch = items
     .slice(0, 40)
-    .map((it: any) => ({
-      key: String(it?.key || "").trim(),
-      rawText: String(it?.rawText || "").trim(),
-      amount: Number(it?.amount) || 0,
-      time: String(it?.time || "").trim(),
-      type: it?.type === "income" ? "income" : "expense",
-    }))
-    .filter((it: any) => it.key && it.rawText);
+    .map((raw: unknown): BatchItem => {
+      const it = asRecord(raw);
+      return {
+        key: String(it.key || "").trim(),
+        rawText: String(it.rawText || "").trim(),
+        amount: Number(it.amount) || 0,
+        time: String(it.time || "").trim(),
+        type: it.type === "income" ? "income" : "expense",
+      };
+    })
+    .filter((it) => it.key && it.rawText);
 
   if (batch.length === 0) {
     return res.status(200).json({ results: [] });
@@ -267,7 +288,7 @@ ${JSON.stringify(batch)}`;
     }
 
     const finalResults = batch.map(
-      (it: any) => byKey.get(it.key) || fallbackCleanItem(it)
+      (it) => byKey.get(it.key) || fallbackCleanItem(it)
     );
     return res.status(200).json({ results: finalResults });
   } catch {

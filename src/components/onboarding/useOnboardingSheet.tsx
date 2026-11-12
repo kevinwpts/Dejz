@@ -18,9 +18,9 @@ export interface UseOnboardingSheetContext
   > {
   setSheetSubView: (value: SetStateAction<"main" | "day-picker" | "category-picker" | "payment-picker">) => void;
   setSheetNavDir: (value: SetStateAction<"forward" | "back">) => void;
-  setSheetEditor: (value: SetStateAction<SheetEditorState>) => void;
+  setSheetEditor: (value: SetStateAction<SheetEditorState | null>) => void;
   payday: number;
-  sheetEditor: SheetEditorState;
+  sheetEditor: SheetEditorState | null;
   setSuggestedIncomes: (value: SetStateAction<{ id: string; name: string; amount: number; payday: number; category: string; evidenceSummary?: string; checked: boolean; logo?: string; isFromBank?: boolean; }[]>) => void;
   setPayday: (value: SetStateAction<number>) => void;
   suggestedIncomes: { id: string; name: string; amount: number; payday: number; category: string; evidenceSummary?: string; checked: boolean; logo?: string; isFromBank?: boolean; }[];

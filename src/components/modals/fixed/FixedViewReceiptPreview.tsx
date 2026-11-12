@@ -1,18 +1,18 @@
 import type { ModalSubView } from './shared';
-import type { MutableRefObject } from 'react';
+import type { RefObject } from 'react';
 import React from 'react';
 import { X, CaretLeft, FileText, Plus } from '@phosphor-icons/react';
 import { ReceiptAttachment } from '../../../utils/swedishDate';
 
 export interface FixedViewReceiptPreviewProps {
   subView: "details" | "edit" | "category-picker" | "day-picker" | "payment-picker" | "goal-picker" | "receipt-preview" | "similar" | "cancel-picker" | "cancel-guide";
-  previewReceipt: ReceiptAttachment;
+  previewReceipt: ReceiptAttachment | null;
   slideAnimClass: "animate-slide-in-right" | "animate-slide-in-left";
   navigateSubView: (next: ModalSubView, dir?: "forward" | "back") => void;
   pickerReturnView: "details" | "edit";
   onClose: () => void;
   displayName: string;
-  fileInputRef: MutableRefObject<HTMLInputElement>;
+  fileInputRef: RefObject<HTMLInputElement>;
 }
 
 export const FixedViewReceiptPreview: React.FC<FixedViewReceiptPreviewProps> = ({

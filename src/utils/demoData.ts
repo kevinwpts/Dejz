@@ -914,7 +914,7 @@ export function createFreshTestAccount(preferredLang?: string) {
     payday: 25,
     paydayType: PaydayType.TWENTY_FIFTH,
     paydayBeforeWeekend: true,
-    categories: DEFAULT_EXPENSE_CATEGORIES.map((c) => ({ ...c, budget: null })),
+    categories: DEFAULT_EXPENSE_CATEGORIES.map((c) => ({ ...c, budget: undefined })),
     incomeCategories: DEFAULT_INCOME_CATEGORIES,
     paymentMethods: ['Kortbetalning', 'Swish', 'Autogiro', 'Apple', 'Klarna', 'PayPal', 'Faktura', 'Banköverföring', 'Kontanter', 'Övrigt'],
     initialSpent: 0,

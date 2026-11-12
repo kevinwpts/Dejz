@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { AnalysisTab as AnalysisTabT } from '../components/AnalysisTab';
 import type { TransactionsTab as TransactionsTabT } from '../components/TransactionsTab';
 import type { FixedTab as FixedTabT } from '../components/FixedTab';
@@ -23,21 +23,41 @@ import type { LandingPage as LandingPageT } from '../components/LandingPage';
  * telefonen. Allt förladdas i bakgrunden när telefonen är ledig, så att bytet ändå går direkt.
  */
 
-type Loader = () => Promise<Record<string, unknown>>;
+type Loader = () => Promise<unknown>;
 const loaders: Loader[] = [];
 
-function lazyScreen<C extends React.ComponentType<any>>(
+/**
+ * Skärm som laddas vid behov. Visar `fallback` tills koden har hämtats (en gång per app-start).
+ * Egen liten laddare i stället för React.lazy, så att props är fullt typade.
+ */
+function lazyScreen<C extends React.ComponentType<P>, P extends object = React.ComponentProps<C>>(
   loader: () => Promise<Record<string, unknown>>,
   name: string,
   fallback: React.ReactNode = null
-): React.FC<React.ComponentProps<C>> {
-  loaders.push(loader);
-  const L = lazy(async () => ({ default: (await loader())[name] as C }));
-  const Wrapped: React.FC<React.ComponentProps<C>> = (props) => (
-    <Suspense fallback={fallback}>
-      <L {...(props as any)} />
-    </Suspense>
-  );
+): React.FC<P> {
+  let Loaded: React.ComponentType<P> | null = null;
+  let pending: Promise<void> | null = null;
+  const load = () => {
+    pending ??= loader().then((mod) => {
+      // Modulen exporterar komponenten under sitt namn (t.ex. export const SettingsTab)
+      Loaded = mod[name] as React.ComponentType<P>;
+    });
+    return pending;
+  };
+  loaders.push(load);
+
+  const Wrapped: React.FC<P> = (props) => {
+    const [, setReady] = useState(Loaded !== null);
+    useEffect(() => {
+      if (Loaded) return;
+      let active = true;
+      void load().then(() => active && setReady(true));
+      return () => {
+        active = false;
+      };
+    }, []);
+    return Loaded ? <Loaded {...props} /> : <>{fallback}</>;
+  };
   Wrapped.displayName = `Lazy(${name})`;
   return Wrapped;
 }
@@ -45,8 +65,7 @@ function lazyScreen<C extends React.ComponentType<any>>(
 /** Ladda ned alla skärmar i bakgrunden när webbläsaren är ledig */
 export function preloadScreens(): void {
   const run = () => loaders.forEach((l) => void l().catch(() => {}));
-  const w = window as unknown as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => void };
-  if (w.requestIdleCallback) w.requestIdleCallback(run, { timeout: 4000 });
+  if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(run, { timeout: 4000 });
   else window.setTimeout(run, 2500);
 }
 

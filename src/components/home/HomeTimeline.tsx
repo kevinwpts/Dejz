@@ -17,7 +17,7 @@ import type { FixedExpenseItem, IncomeItem, TransactionItem } from '../../app/mo
 import { getTransactionTime } from '../../app/models';
 
 export interface HomeTimelineProps {
-  timelineScrollRef: MutableRefObject<HTMLDivElement>;
+  timelineScrollRef: MutableRefObject<HTMLDivElement | null>;
   handleTimelineScroll: () => void;
   handleMouseDown: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   handleMouseMove: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
@@ -31,7 +31,7 @@ export interface HomeTimelineProps {
   incomes: IncomeItem[];
   periodRecurringMatches: { claimedFixedTxIds: Set<string>; matchedFixedTxByExpId: Map<string, TransactionItem>; matchedFixedIds: Set<string>; claimedIncomeTxIds: Set<string>; matchedIncomeTxByIncId: Map<string, TransactionItem>; matchedIncomeIds: Set<string>; };
   fixedExpenses: FixedExpenseItem[];
-  dayButtonRefs: MutableRefObject<Record<string, HTMLButtonElement>>;
+  dayButtonRefs: MutableRefObject<Record<string, HTMLButtonElement | null>>;
   dragStateRef: MutableRefObject<{ isDown: boolean; startX: number; scrollLeft: number; hasDragged: boolean; }>;
   setSelectedDateKey: (value: SetStateAction<string>) => void;
   isInitialLoading: boolean;
@@ -42,9 +42,9 @@ export interface HomeTimelineProps {
   formatKr: (amount: number) => string;
   handleMarkReviewed: (ids: string[]) => void;
   onSelectTransaction: (tx: TransactionItem) => void;
-  onToggleHeart: (id: string, isHearted: boolean) => void;
-  onTogglePackage: (id: string, isWaitingForPackage: boolean) => void;
-  onExcludeTransaction: (id: string, exclude: boolean) => void;
+  onToggleHeart?: (id: string, isHearted: boolean) => void;
+  onTogglePackage?: (id: string, isWaitingForPackage: boolean) => void;
+  onExcludeTransaction?: (id: string, exclude: boolean) => void;
 }
 
 export const HomeTimeline: React.FC<HomeTimelineProps> = ({

@@ -24,7 +24,8 @@
     "noEmit": true,
     "types": [
       "vite/client"
-    ]
+    ],
+    "strict": true
   },
   "exclude": [
     "node_modules",

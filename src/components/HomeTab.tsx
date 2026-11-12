@@ -5,7 +5,6 @@ import { deduplicateTransactions } from '../utils/transactionDedup';
 import {
   formatSwedishDateHeading,
   getSwedishDateStr,
-  getYesterdaySwedishDateStr,
 } from '../utils/swedishDate';
 import { checkIsRecurringTransaction, reconcilePeriodRecurringMatches } from '../utils/recurring';
 import {
@@ -111,10 +110,15 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const [activeHeroPopup, setActiveHeroPopup] = useState<'income' | 'fixed' | 'variable' | null>(
     null
   );
-  const savingsGoals = useMemo(
-    () => getSavingsGoals(),
-    [transactions, fixedExpenses, incomes, accounts, totalBalance]
-  );
+  const savingsGoals = useMemo(() => {
+    // Sparmålen ligger i localStorage – läs om dem när köp, räkningar, inkomster eller saldon ändras
+    void transactions;
+    void fixedExpenses;
+    void incomes;
+    void accounts;
+    void totalBalance;
+    return getSavingsGoals();
+  }, [transactions, fixedExpenses, incomes, accounts, totalBalance]);
   const resolveHomeGoalAmount = useCallback(
     (g: (typeof savingsGoals)[number]): number => {
       if (g.linkedAccountId === '__TOTAL__') {
@@ -178,7 +182,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const [accountNameDraft, setAccountNameDraft] = useState('');
   const [copiedAccountNumber, setCopiedAccountNumber] = useState(false);
   const todayStr = useMemo(() => getSwedishDateStr(), []);
-  const yesterdayStr = useMemo(() => getYesterdaySwedishDateStr(), []);
   const [selectedDateKey, setSelectedDateKey] = useState<string>(() => getSwedishDateStr());
   const [isTodayScrolledOut, setIsTodayScrolledOut] = useState<boolean>(false);
   const [_reviewedIds, setReviewedIds] = useState<Set<string>>(() => getReviewedTransactionIds());
@@ -458,7 +461,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     }
 
     return result;
-  }, [todayStr, yesterdayStr]);
+  }, [todayStr]);
 
   const centerDateButton = useCallback((dateKey: string, behavior: ScrollBehavior) => {
     const btn = dayButtonRefs.current[dateKey];

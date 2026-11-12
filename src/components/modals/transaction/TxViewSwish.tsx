@@ -9,7 +9,7 @@ import { SwishLogo } from '../../SwishLogo';
 
 export interface TxViewSwishProps {
   subView: "details" | "edit" | "category-picker" | "payment-picker" | "date-picker" | "link-fixed-picker" | "similar" | "swish" | "receipt-preview";
-  activeTx: TransactionItem;
+  activeTx: TransactionItem | null;
   slideAnimClass: "animate-slide-in-right" | "animate-slide-in-left";
   navigateSubView: (next: ModalSubView, dir?: "forward" | "back") => void;
   onClose: () => void;
@@ -18,7 +18,7 @@ export interface TxViewSwishProps {
   formatKr: (val: number) => string;
   setSwishSplitMode: (value: SetStateAction<"equal" | "custom">) => void;
   setSwishCustomShare: (value: SetStateAction<string>) => void;
-  onUpdate: (tx: TransactionItem, applyToSimilarIds?: string[], options?: { renameScope?: "single" | "same-merchant" | "chain"; renameTargetIds?: string[]; categoryTargetIds?: string[]; }) => void;
+  onUpdate?: (tx: TransactionItem, applyToSimilarIds?: string[], options?: { renameScope?: "single" | "same-merchant" | "chain"; renameTargetIds?: string[]; categoryTargetIds?: string[]; }) => void;
 }
 
 export const TxViewSwish: React.FC<TxViewSwishProps> = ({

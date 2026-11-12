@@ -99,9 +99,9 @@ Returnera ENDAST giltig JSON i detta format:
       JSON.stringify(parsedData),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     return new Response(
-      JSON.stringify({ error: error.message || 'Kunde inte hitta uppsägningsinformation' }),
+      JSON.stringify({ error: (error instanceof Error ? error.message : '') || 'Kunde inte hitta uppsägningsinformation' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

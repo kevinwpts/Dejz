@@ -13,13 +13,13 @@ export interface FixedViewCancelGuideProps {
   displayName: string;
   onClose: () => void;
   category: string;
-  activeExpense: FixedExpenseItem;
+  activeExpense: FixedExpenseItem | null;
   formatKr: (val: number) => string;
   amount: string | number;
   paymentMethod: string;
   isLoadingCancelGuide: boolean;
-  cancelGuide: CancelGuideData;
-  onDelete: (id: string) => void;
+  cancelGuide: CancelGuideData | null;
+  onDelete?: (id: string) => void;
   setShowDeleteConfirm: (value: SetStateAction<boolean>) => void;
   showDeleteConfirm: boolean;
   handleDelete: () => void;

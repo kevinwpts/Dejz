@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useCallback } from 'react';
 import {
   Plus,
 } from '@phosphor-icons/react';
@@ -91,10 +91,16 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     };
   }, []);
 
+  // onAutoOpenConsumed skapas om vid varje render hos föräldern – läs senaste via ref
+  const onAutoOpenConsumedRef = useRef(onAutoOpenConsumed);
+  React.useEffect(() => {
+    onAutoOpenConsumedRef.current = onAutoOpenConsumed;
+  }, [onAutoOpenConsumed]);
+
   React.useEffect(() => {
     if (autoOpenCreate) {
       openCreateGoal();
-      onAutoOpenConsumed?.();
+      onAutoOpenConsumedRef.current?.();
     }
   }, [autoOpenCreate]);
 
@@ -129,7 +135,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     );
   }, [totalBalance, accounts]);
 
-  const resolveGoalAmount = (goal: SavingsGoalItem): number => {
+  const resolveGoalAmount = useCallback((goal: SavingsGoalItem): number => {
     if (goal.linkedAccountId === '__TOTAL__') {
       return accounts.length > 0 || typeof totalBalance === 'number'
         ? effectiveTotalBalance
@@ -147,7 +153,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
       }
     }
     return Math.max(0, Math.round(Number(goal.currentAmount) || 0));
-  };
+  }, [accounts, totalBalance, effectiveTotalBalance]);
 
   const resolveGoalLinkedLabel = (goal: SavingsGoalItem): string | null => {
     if (goal.linkedAccountId === '__TOTAL__') return 'Totalsaldo';
@@ -257,6 +263,12 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     setSelectedGoalId(newId);
   };
 
+  // Senaste handleSaveGoal (skapas om vid varje render) så att Enter sparar med färska värden
+  const handleSaveGoalRef = useRef(handleSaveGoal);
+  React.useEffect(() => {
+    handleSaveGoalRef.current = handleSaveGoal;
+  });
+
   // Physical keyboard support for Numpad steps (Step 3 & Step 5)
   React.useEffect(() => {
     if (!isCreateWizardOpen || (wizardStep !== 3 && wizardStep !== 5 && wizardStep !== 6)) return;
@@ -285,7 +297,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
         } else if (wizardStep === 5) {
           navigateWizardStep(6, 'forward');
         } else {
-          handleSaveGoal();
+          handleSaveGoalRef.current();
         }
       }
     };
@@ -344,7 +356,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     }
 
     return sum;
-  }, [savingsGoals, accounts, effectiveTotalBalance]);
+  }, [savingsGoals, accounts, resolveGoalAmount]);
   const totalTarget = savingsGoals.reduce((sum, g) => sum + (Number(g.targetAmount) || 0), 0);
 
   const sharedHiddenFileInput = (

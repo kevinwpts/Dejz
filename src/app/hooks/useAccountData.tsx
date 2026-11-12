@@ -327,7 +327,23 @@ export function useAccountData({
     const promise = runRefresh();
     refreshInFlightRef.current = promise;
     return promise;
-  }, [targetPayday, weekendHandling]);
+  }, [
+    targetPayday,
+    weekendHandling,
+    fixedExpensesRef,
+    incomesRef,
+    isDeletingAccountRef,
+    pendingRefreshRef,
+    refreshInFlightRef,
+    setBankAccounts,
+    setConnections,
+    setFixedExpenses,
+    setIncomes,
+    setIsInitialLoading,
+    setTransactions,
+    transactionsRef,
+    userIdRef,
+  ]);
 
   // Atomär helhetshydrering av både Supabase-tabeller och Bankdata samtidigt vid appstart
   const loadSupabaseUserData = useCallback(
@@ -473,7 +489,9 @@ export function useAccountData({
                     explicitTime && explicitTime !== '00:00' && explicitTime !== '12:00'
                       ? explicitTime
                       : '',
-                  createdAt: t.timestamp || undefined,
+                  // timestamp är millisekunder (number) men createdAt ska vara en ISO-sträng –
+                  // annars kraschar sorteringen (localeCompare) i models.ts
+                  createdAt: t.timestamp ? new Date(t.timestamp).toISOString() : undefined,
                   note: t.note,
                   logo: t.logo || getLogoUrl(title, cat),
                 },
@@ -626,7 +644,28 @@ export function useAccountData({
         return { connections: [], accounts: [] };
       }
     },
-    [targetPayday, weekendHandling, userAvatar]
+    [
+      targetPayday,
+      weekendHandling,
+      userAvatar,
+      fixedExpensesRef,
+      incomesRef,
+      isDeletingAccountRef,
+      lastHydratedUserIdRef,
+      setBankAccounts,
+      setConnections,
+      setExcludeInternalTransfersState,
+      setFixedExpenses,
+      setIncomes,
+      setIsInitialLoading,
+      setIsOnboardingActive,
+      setTargetPayday,
+      setTransactions,
+      setUserAvatar,
+      setWeekendHandling,
+      transactionsRef,
+      userIdRef,
+    ]
   );
 
   // Tyst bakgrundssynk mot Enable Banking via Supabase Edge Function
@@ -650,7 +689,7 @@ export function useAccountData({
         syncInFlightRef.current = false;
       }
     },
-    [refreshBankStatus]
+    [refreshBankStatus, lastSyncTimestampRef, syncInFlightRef]
   );
 
   // Hantera Enable Banking OAuth callback (?code=...&state=...) koordinerat utan race conditions
@@ -742,13 +781,22 @@ export function useAccountData({
 
     pending.promise = runExchange();
     await pending.promise;
-  }, [refreshBankStatus]);
+  }, [
+    refreshBankStatus,
+    pendingBankCallbackRef,
+    setBankAccounts,
+    setCallbackStatusMsg,
+    setConnections,
+    setIsBankModalOpen,
+    setIsOnboardingActive,
+    setShowLanding,
+  ]);
 
   useEffect(() => {
     if (userId && pendingBankCallbackRef.current && !pendingBankCallbackRef.current.done) {
       processPendingBankCallback();
     }
-  }, [userId, processPendingBankCallback]);
+  }, [userId, processPendingBankCallback, pendingBankCallbackRef]);
 
   // Swish-nummer som du själv döpt: visa det nya namnet direkt
   useEffect(() => {
@@ -757,7 +805,7 @@ export function useAccountData({
     };
     window.addEventListener('dejz:swish-directory-updated', handleDirectoryUpdate);
     return () => window.removeEventListener('dejz:swish-directory-updated', handleDirectoryUpdate);
-  }, []);
+  }, [setTransactions]);
 
   // Initiera Supabase-session och trigga en enda koordinerad, atomär hydrering vid appstart
   useEffect(() => {
@@ -980,7 +1028,28 @@ export function useAccountData({
     return () => {
       subscription?.unsubscribe();
     };
-  }, [loadSupabaseUserData, performSilentBankSync]);
+  }, [
+    loadSupabaseUserData,
+    performSilentBankSync,
+    processPendingBankCallback,
+    hydrationInFlightRef,
+    isDeletingAccountRef,
+    lastSyncTimestampRef,
+    pendingBankCallbackRef,
+    setBankAccounts,
+    setConnections,
+    setFixedExpenses,
+    setIncomes,
+    setIsInitialLoading,
+    setIsOnboardingActive,
+    setShowLanding,
+    setTransactions,
+    setUserAvatar,
+    setUserEmail,
+    setUserId,
+    setUserName,
+    userIdRef,
+  ]);
 
   const { hasActiveBankConnection } = useLiveSync({
     userId,

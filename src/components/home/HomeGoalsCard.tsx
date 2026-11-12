@@ -9,7 +9,7 @@ import {
 } from '../ui/VisualArtwork';
 
 export interface HomeGoalsCardProps {
-  onNavigateToGoals: () => void;
+  onNavigateToGoals?: () => void;
   showGoals: boolean;
   setShowGoals: (value: SetStateAction<boolean>) => void;
   formatKr: (amount: number) => string;

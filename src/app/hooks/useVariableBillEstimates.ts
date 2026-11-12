@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { FixedExpenseItem, TransactionItem } from '../models';
 import type { PeriodInfo } from '../../utils/periodEngine';
 import type { PeriodMatches } from '../../utils/budgetEngine';
@@ -22,6 +22,12 @@ export function useVariableBillEstimates({
   hasActiveBankConnection: boolean;
   onUpdateFixed: (exp: FixedExpenseItem) => unknown;
 }) {
+  // Senaste versionen av onUpdateFixed (skapas om vid varje render) – utan att uppskattningen körs om för det
+  const onUpdateFixedRef = useRef(onUpdateFixed);
+  useEffect(() => {
+    onUpdateFixedRef.current = onUpdateFixed;
+  }, [onUpdateFixed]);
+
   // Räkningar som varierar (el m.m.): uppskatta nästa dragning som snittet av de 3 senaste.
   // Körs högst en gång per räkning och löneperiod, bara innan räkningen dragits, och bara med bank.
   // Ändrar man beloppet själv efteråt får det stå kvar resten av perioden.
@@ -39,7 +45,7 @@ export function useVariableBillEstimates({
       } catch {
         continue;
       }
-      void onUpdateFixed({ ...exp, amount: est.estimate });
+      void onUpdateFixedRef.current({ ...exp, amount: est.estimate });
     }
   }, [hasActiveBankConnection, period?.startDate, fixedExpenses, transactions, periodRecurringMatches]);
 }

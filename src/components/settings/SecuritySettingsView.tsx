@@ -6,8 +6,8 @@ import { ConfirmDialog } from '../ui/ConfirmDialog';
 export interface SecuritySettingsViewProps {
   handleExportGdprData: () => void;
   securityProcessing: boolean;
-  setSecurityConfirmAction: (value: SetStateAction<"reset" | "delete">) => void;
-  securityConfirmAction: "reset" | "delete";
+  setSecurityConfirmAction: (value: SetStateAction<"reset" | "delete" | null>) => void;
+  securityConfirmAction: "reset" | "delete" | null;
   setSecurityProcessing: (value: SetStateAction<boolean>) => void;
   onDeleteAccount: () => void;
   onResetAccount: () => void;

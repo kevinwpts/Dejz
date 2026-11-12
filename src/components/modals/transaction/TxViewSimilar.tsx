@@ -8,13 +8,13 @@ import { formatSwedishDateHeading } from '../../../utils/swedishDate';
 
 export interface TxViewSimilarProps {
   subView: "details" | "edit" | "category-picker" | "payment-picker" | "date-picker" | "link-fixed-picker" | "similar" | "swish" | "receipt-preview";
-  activeTx: TransactionItem;
+  activeTx: TransactionItem | null;
   slideAnimClass: "animate-slide-in-right" | "animate-slide-in-left";
   navigateSubView: (next: ModalSubView, dir?: "forward" | "back") => void;
   onClose: () => void;
   similarInfo: SimilarTransactionsSummary;
   formatKr: (val: number) => string;
-  onSelectTransaction: (tx: TransactionItem) => void;
+  onSelectTransaction?: (tx: TransactionItem) => void;
 }
 
 export const TxViewSimilar: React.FC<TxViewSimilarProps> = ({

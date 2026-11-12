@@ -9,14 +9,14 @@ export interface HomeHeroCardProps {
   totalIncome: number;
   totalFixedExpenses: number;
   totalVariableSpent: number;
-  onOpenBalance: () => void;
+  onOpenBalance?: () => void;
   accounts: AccountItem[];
   period: PeriodInfo;
   formatKr: (amount: number) => string;
   showBudgetBreakdown: boolean;
   setShowBudgetBreakdown: (value: SetStateAction<boolean>) => void;
   isInitialLoading: boolean;
-  setActiveHeroPopup: (value: SetStateAction<"income" | "fixed" | "variable">) => void;
+  setActiveHeroPopup: (value: SetStateAction<"income" | "fixed" | "variable" | null>) => void;
 }
 
 export const HomeHeroCard: React.FC<HomeHeroCardProps> = ({

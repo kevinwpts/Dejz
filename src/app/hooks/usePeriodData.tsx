@@ -32,8 +32,8 @@ export interface UsePeriodDataContext {
   weekendHandling: "before" | "after" | "none";
   excludeInternalTransfers: boolean;
   transactions: TransactionItem[];
-  userEmail: string;
-  userName: string;
+  userEmail: string | null;
+  userName: string | null;
   fixedExpenses: FixedExpenseItem[];
   incomes: IncomeItem[];
   hasActiveBankConnection: boolean;
@@ -66,6 +66,8 @@ export function usePeriodData({
 
     const activeAccs = bankAccounts.filter((a) => a.is_selected !== false);
     const listToUse = activeAccs.length > 0 ? activeAccs : bankAccounts;
+    // accountMetaVersion höjs när egna kontonamn/inställningar sparas – då läses de om här
+    void accountMetaVersion;
     const accountMeta = getAccountMetaMap();
 
     return listToUse.map((ba) => {

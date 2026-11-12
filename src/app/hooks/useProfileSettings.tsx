@@ -7,11 +7,11 @@ import { saveCachedAppState } from '../../utils/appCache';
 
 export interface UseProfileSettingsContext {
   setTargetPayday: (value: SetStateAction<number>) => void;
-  userId: string;
+  userId: string | null;
   setWeekendHandling: (value: SetStateAction<WeekendHandlingMode>) => void;
-  setUserAvatar: (value: SetStateAction<string>) => void;
-  setUserEmail: (value: SetStateAction<string>) => void;
-  setUserName: (value: SetStateAction<string>) => void;
+  setUserAvatar: (value: SetStateAction<string | null>) => void;
+  setUserEmail: (value: SetStateAction<string | null>) => void;
+  setUserName: (value: SetStateAction<string | null>) => void;
 }
 
 export function useProfileSettings({
@@ -31,7 +31,7 @@ export function useProfileSettings({
         dataService.updateProfile(userId, { payday: day }).catch(() => {});
       }
     },
-    [userId]
+    [userId, setTargetPayday]
   );
 
   // Uppdatera helghantering & spara till Supabase + cache
@@ -45,7 +45,7 @@ export function useProfileSettings({
           .catch(() => {});
       }
     },
-    [userId]
+    [userId, setWeekendHandling]
   );
 
   // Uppdatera profilbild
@@ -57,7 +57,7 @@ export function useProfileSettings({
         dataService.updateProfile(userId, { avatar_url: avatarDataUrl }).catch(() => {});
       }
     },
-    [userId]
+    [userId, setUserAvatar]
   );
 
   // Uppdatera e-post
@@ -69,7 +69,7 @@ export function useProfileSettings({
         supabase.auth.updateUser({ email }).catch(() => {});
       }
     },
-    [userId]
+    [userId, setUserEmail]
   );
 
   // Uppdatera namn
@@ -90,7 +90,7 @@ export function useProfileSettings({
         supabase.auth.updateUser({ data: { full_name: clean } }).catch(() => {});
       }
     },
-    [userId]
+    [userId, setUserName]
   );
 
   return {

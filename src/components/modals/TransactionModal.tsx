@@ -166,12 +166,15 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
   const isIncome = isCreateMode ? txType === 'income' : activeTx?.type === 'income';
 
+  // Listorna ligger i localStorage – läs om dem varje gång rutan öppnas
   const availableCategories = useMemo(() => {
+    void isOpen;
     const list = isIncome ? getStoredIncomeCategories() : getStoredExpenseCategories();
     return list.map((c) => c.name);
   }, [isOpen, isIncome]);
 
   const availablePaymentMethods = useMemo(() => {
+    void isOpen;
     const stored = getStoredPaymentMethods().map((m) => m.name);
     if (paymentMethod && !stored.includes(paymentMethod)) {
       return [...stored, paymentMethod];
@@ -235,6 +238,12 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     }
   }, [initialTransaction, isOpen, prefill]);
 
+  // Senaste kategorin, utan att AI-gissningen startas om när kategorin ändras (då skulle den skriva över användarens val)
+  const categoryRef = useRef(category);
+  useEffect(() => {
+    categoryRef.current = category;
+  }, [category]);
+
   // Live AI-kategorisering om ett företagsnamn saknas i den lokala ordlistan
   useEffect(() => {
     if (!isOpen || subView !== 'edit') return;
@@ -248,7 +257,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
     let cancelled = false;
     const timer = window.setTimeout(() => {
-      fetchLogoForName(trimmed, category).then(() => {
+      fetchLogoForName(trimmed, categoryRef.current).then(() => {
         if (cancelled) return;
         const aiCat = getLearnedBrandCategory(trimmed);
         if (aiCat) {

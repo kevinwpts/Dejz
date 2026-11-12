@@ -112,10 +112,10 @@ Returnera ENDAST giltig JSON utan markdown-kodblock:
       JSON.stringify(parsedData),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[parse-income] Internal error:', error);
     return new Response(
-      JSON.stringify({ error: error.message || 'Failed to parse income' }),
+      JSON.stringify({ error: (error instanceof Error ? error.message : '') || 'Failed to parse income' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

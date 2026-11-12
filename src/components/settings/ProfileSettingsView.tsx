@@ -1,4 +1,4 @@
-import type { MutableRefObject, SetStateAction } from 'react';
+import type { RefObject, SetStateAction } from 'react';
 import React from 'react';
 import { isDemoMode } from '../../utils/demoUtils';
 import { EmailVerificationStatus } from '../EmailVerification';
@@ -20,43 +20,43 @@ import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { appOrigin } from '../../utils/platform';
 
 export interface ProfileSettingsViewProps {
-  onUpdateName: (name: string) => void;
+  onUpdateName?: (name: string) => void;
   editName: string;
   editEmail: string;
-  onUpdateEmail: (email: string) => void;
-  userEmail: string;
+  onUpdateEmail?: (email: string) => void;
+  userEmail: string | null;
   editPhone: string;
   setProfileSaved: (value: SetStateAction<boolean>) => void;
   newPassword: string;
-  setPasswordStatus: (value: SetStateAction<{ type: "success" | "error"; text: string; }>) => void;
+  setPasswordStatus: (value: SetStateAction<{ type: "success" | "error"; text: string; } | null>) => void;
   confirmPassword: string;
   setPasswordSaving: (value: SetStateAction<boolean>) => void;
   setNewPassword: (value: SetStateAction<string>) => void;
   setConfirmPassword: (value: SetStateAction<string>) => void;
   setIsPasswordSheetOpen: (value: SetStateAction<boolean>) => void;
-  setResetEmailStatus: (value: SetStateAction<string>) => void;
-  userName: string;
+  setResetEmailStatus: (value: SetStateAction<string | null>) => void;
+  userName?: string | null;
   hiddenAvatarInput: React.ReactElement;
-  fileInputRef: MutableRefObject<HTMLInputElement>;
-  userAvatar: string;
-  onUpdateAvatar: (avatarDataUrl: string) => void;
+  fileInputRef: RefObject<HTMLInputElement>;
+  userAvatar?: string | null;
+  onUpdateAvatar?: (avatarDataUrl: string | null) => void;
   setEditName: (value: SetStateAction<string>) => void;
   setEditEmail: (value: SetStateAction<string>) => void;
   setEditPhone: (value: SetStateAction<string>) => void;
   profileSaved: boolean;
   privacyBlurProfile: boolean;
   setPrivacyBlurProfile: (value: SetStateAction<boolean>) => void;
-  resetEmailStatus: string;
+  resetEmailStatus: string | null;
   isPasswordSheetOpen: boolean;
   showNewPassword: boolean;
   setShowNewPassword: (value: SetStateAction<boolean>) => void;
-  passwordStatus: { type: "success" | "error"; text: string; };
+  passwordStatus: { type: "success" | "error"; text: string; } | null;
   passwordSaving: boolean;
-  securityConfirmAction: "reset" | "delete";
+  securityConfirmAction: "reset" | "delete" | null;
   securityProcessing: boolean;
   setSecurityProcessing: (value: SetStateAction<boolean>) => void;
   onDeleteAccount: () => void;
-  setSecurityConfirmAction: (value: SetStateAction<"reset" | "delete">) => void;
+  setSecurityConfirmAction: (value: SetStateAction<"reset" | "delete" | null>) => void;
 }
 
 export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({

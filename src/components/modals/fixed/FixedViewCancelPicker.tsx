@@ -11,7 +11,7 @@ export interface FixedViewCancelPickerProps {
   navigateSubView: (next: ModalSubView, dir?: "forward" | "back") => void;
   displayName: string;
   onClose: () => void;
-  activeExpense: FixedExpenseItem;
+  activeExpense: FixedExpenseItem | null;
   commitInlineChanges: (overrides?: Partial<FixedExpenseItem>) => void;
   setShowCustomMonthPicker: (value: SetStateAction<boolean>) => void;
   showCustomMonthPicker: boolean;

@@ -193,7 +193,7 @@ export function useAiMerchantCleaning({
       .finally(() => {
         aiCleanInFlightRef.current = false;
       });
-  }, [transactions]);
+  }, [transactions, fixedExpensesRef, incomesRef, isDeletingAccountRef, setTransactions, userIdRef]);
 
   return aiCleanedKeysRef;
 }

@@ -12,7 +12,7 @@ export interface HomeAccountsCardProps {
   isInitialLoading: boolean;
   formatKr: (amount: number) => string;
   totalBalance: number;
-  setSelectedAccountModalId: (value: SetStateAction<string>) => void;
+  setSelectedAccountModalId: (value: SetStateAction<string | null>) => void;
   setAccountNameDraft: (value: SetStateAction<string>) => void;
   setIsEditingAccountName: (value: SetStateAction<boolean>) => void;
   setCopiedAccountNumber: (value: SetStateAction<boolean>) => void;

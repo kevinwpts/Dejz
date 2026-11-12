@@ -98,11 +98,13 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
     setSubView(next);
   };
 
-  const availableCategories = useMemo(
-    () => getStoredExpenseCategories().map((c) => c.name),
-    [isOpen]
-  );
+  // Listorna ligger i localStorage – läs om dem varje gång rutan öppnas
+  const availableCategories = useMemo(() => {
+    void isOpen;
+    return getStoredExpenseCategories().map((c) => c.name);
+  }, [isOpen]);
   const availablePaymentMethods = useMemo(() => {
+    void isOpen;
     const stored = getStoredPaymentMethods().map((m) => m.name);
     if (paymentMethod && !stored.includes(paymentMethod)) {
       return [...stored, paymentMethod];
@@ -110,7 +112,10 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
     return stored;
   }, [isOpen, paymentMethod]);
 
-  const availableGoals = useMemo(() => getSavingsGoals(), [isOpen]);
+  const availableGoals = useMemo(() => {
+    void isOpen;
+    return getSavingsGoals();
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -144,6 +149,12 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
     setIsLoadingCancelGuide(false);
   }, [initialExpense, isOpen]);
 
+  // Senaste kategorin, utan att AI-gissningen startas om när kategorin ändras (då skulle den skriva över användarens val)
+  const categoryRef = useRef(category);
+  useEffect(() => {
+    categoryRef.current = category;
+  }, [category]);
+
   // Live AI-kategorisering om en tjänst/butik saknas i den lokala ordlistan
   useEffect(() => {
     if (!isOpen || subView !== 'edit') return;
@@ -154,7 +165,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
 
     let cancelled = false;
     const timer = window.setTimeout(() => {
-      fetchLogoForName(trimmed, category).then(() => {
+      fetchLogoForName(trimmed, categoryRef.current).then(() => {
         if (cancelled) return;
         const aiCat = getLearnedBrandCategory(trimmed);
         if (aiCat) {

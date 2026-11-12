@@ -51,11 +51,40 @@ export function hasValidSavedCategoryBudgets(cats: unknown): boolean {
   return !isLegacyPercentDefault && budgetVals.some((v: number) => v > 0);
 }
 
+/**
+ * Inställningarna som de läses från profiles-tabellen. Kolumnerna kan vara null i databasen,
+ * så de fälten är typade som de faktiskt kommer tillbaka (inte som en färdig Config).
+ */
+export type StoredSettings = Omit<
+  Config,
+  | 'currency'
+  | 'language'
+  | 'payday'
+  | 'paydayBeforeWeekend'
+  | 'categories'
+  | 'incomeCategories'
+  | 'initialSpent'
+  | 'securityLock'
+  | 'includeFixedExpensesInAnalysis'
+  | 'hideEmptyCategories'
+> & {
+  currency: string | null;
+  language: string | null;
+  payday: number | null;
+  paydayBeforeWeekend: boolean | null;
+  categories: Category[] | null | undefined;
+  incomeCategories: Category[] | undefined;
+  initialSpent: number | null;
+  securityLock: boolean | null;
+  includeFixedExpensesInAnalysis: boolean | null;
+  hideEmptyCategories?: boolean | null;
+};
+
 const isUuid = (id?: string) => Boolean(id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id));
 
 export const dataService = {
   // --- User Settings ---
-  async getSettings(userId: string): Promise<Config | null> {    // Get settings from profiles table
+  async getSettings(userId: string): Promise<StoredSettings | null> {    // Get settings from profiles table
     if (userId === 'demo-user') {
       let saved = localStorage.getItem('demo_settings');
       if (!saved || !JSON.parse(saved).categories) {
@@ -92,7 +121,7 @@ export const dataService = {
     const resolvedCategories = hasValidSavedCategoryBudgets(dbCategories)
       ? dbCategories
       : (localSavedConfig?.hasSavedInitialBudget !== false && hasValidSavedCategoryBudgets(localSavedConfig?.categories)
-          ? localSavedConfig.categories
+          ? localSavedConfig?.categories
           : (dbCategories || localSavedConfig?.categories));
 
     return {
@@ -908,7 +937,7 @@ export const dataService = {
         for (const row of splitRows) {
           if (Array.isArray(row.splits)) {
             let splitChanged = false;
-            const updatedSplits = row.splits.map((s: { category?: string }) => {
+            const updatedSplits = fromJson<{ category?: string }[]>(row.splits).map((s) => {
               if ((s.category || '').trim().toLowerCase() === trimmedOld.toLowerCase()) {
                 splitChanged = true;
                 return { ...s, category: trimmedNew };

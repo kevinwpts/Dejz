@@ -18,9 +18,9 @@ export interface FixedViewSimilarProps {
   similarInfo: SimilarTransactionsSummary;
   formatKr: (val: number) => string;
   fixedExpenses: FixedExpenseItem[];
-  activeExpense: FixedExpenseItem;
-  onSelectTransaction: (tx: TransactionItem) => void;
-  onMarkAsFixed: (tx: TransactionItem, kind: "expense" | "income") => void;
+  activeExpense: FixedExpenseItem | null;
+  onSelectTransaction?: (tx: TransactionItem) => void;
+  onMarkAsFixed?: (tx: TransactionItem, kind: "expense" | "income") => void;
   displayName: string;
 }
 

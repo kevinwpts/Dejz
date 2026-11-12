@@ -169,8 +169,9 @@ export function runCoreBankDetection(
         195, 199, 209, 219, 229, 239, 249, 259, 269, 279, 289, 299, 319, 329, 349, 359, 379, 399,
         449, 499,
       ]);
-      const isStandardSubTier =
-        matchedRule.requireMultipleMonthsForCard && STANDARD_APPLE_GOOGLE_SUB_TIERS.has(absAmount);
+      const isStandardSubTier = Boolean(
+        matchedRule.requireMultipleMonthsForCard && STANDARD_APPLE_GOOGLE_SUB_TIERS.has(absAmount)
+      );
 
       const hasExplicitAutogiroOrInvoice =
         (!matchedRule.requireMultipleMonthsForCard || isStandardSubTier) &&

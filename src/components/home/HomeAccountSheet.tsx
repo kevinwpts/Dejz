@@ -9,18 +9,18 @@ import { checkIsRecurringTransaction } from '../../utils/recurring';
 import type { AccountItem, FixedExpenseItem, IncomeItem, TransactionItem } from '../../app/models';
 
 export interface HomeAccountSheetProps {
-  activeModalAccount: AccountItem;
-  setSelectedAccountModalId: (value: SetStateAction<string>) => void;
+  activeModalAccount: AccountItem | null;
+  setSelectedAccountModalId: (value: SetStateAction<string | null>) => void;
   setIsEditingAccountName: (value: SetStateAction<boolean>) => void;
   isEditingAccountName: boolean;
   accountNameDraft: string;
   setAccountNameDraft: (value: SetStateAction<string>) => void;
-  onUpdateAccountMeta: (accountId: string, patch: { customName?: string; excludeFromTotalBalance?: boolean; }) => void;
+  onUpdateAccountMeta?: (accountId: string, patch: { customName?: string; excludeFromTotalBalance?: boolean; }) => void;
   formatKr: (amount: number) => string;
   setCopiedAccountNumber: (value: SetStateAction<boolean>) => void;
   copiedAccountNumber: boolean;
   activeAccountTransactions: TransactionItem[];
-  onSelectAccount: (accountId: string) => void;
+  onSelectAccount?: (accountId: string) => void;
   fixedExpenses: FixedExpenseItem[];
   incomes: IncomeItem[];
   onSelectTransaction: (tx: TransactionItem) => void;

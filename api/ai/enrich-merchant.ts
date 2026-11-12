@@ -1,19 +1,20 @@
 import { GoogleGenAI, Type } from '@google/genai';
+import { ApiRequest, ApiResponse, readJsonBody } from '../_http';
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req: ApiRequest, res: ApiResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    res.status(200).end?.();
+    return;
   }
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   try {
-    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const { name, type, categories } = body || {};
+    const { name, type, categories } = readJsonBody<{ name: string; type: string; categories: unknown }>(req);
     const query = String(name || '').trim();
     if (!query || query.length < 2 || query.length > 200) {
       return res.status(200).json({ domain: '', category: '' });
@@ -21,7 +22,7 @@ export default async function handler(req: any, res: any) {
 
     const validCats: string[] =
       Array.isArray(categories) && categories.length > 0
-        ? categories
+        ? categories.map(String)
         : type === 'income'
         ? ['Lön', 'Bidrag', 'Pension', 'CSN', 'Swish', 'Återbetalning', 'Övrigt']
         : [

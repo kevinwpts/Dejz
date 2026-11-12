@@ -1,7 +1,7 @@
 import type { SavingsGoalItem } from '../../../utils/appCache';
 import type { SimilarTransactionsSummary } from '../../../utils/recurring';
 import type { ModalSubView } from './shared';
-import type { MutableRefObject, SetStateAction } from 'react';
+import type { RefObject, SetStateAction } from 'react';
 import React from 'react';
 import {
   X,
@@ -31,23 +31,23 @@ export interface FixedViewDetailsProps {
   category: string;
   displayName: string;
   setLogoPrefTick: (value: SetStateAction<number>) => void;
-  activeExpense: FixedExpenseItem;
+  activeExpense: FixedExpenseItem | null;
   name: string;
   amount: string | number;
   navigateSubView: (next: ModalSubView, dir?: "forward" | "back") => void;
   dueDay: number;
   draftReceipts: ReceiptAttachment[];
-  setPreviewReceipt: (value: SetStateAction<ReceiptAttachment>) => void;
-  fileInputRef: MutableRefObject<HTMLInputElement>;
+  setPreviewReceipt: (value: SetStateAction<ReceiptAttachment | null>) => void;
+  fileInputRef: RefObject<HTMLInputElement>;
   similarInfo: SimilarTransactionsSummary;
   paymentMethod: string;
   availableGoals: SavingsGoalItem[];
   linkedGoalId: string;
-  resolvedAccountInfo: { label: string; fullNumber: string; maskedNumber: string; };
+  resolvedAccountInfo: { label: string; fullNumber: string; maskedNumber: string; } | null;
   showFullAccount: boolean;
   setShowFullAccount: (value: SetStateAction<boolean>) => void;
   handleRemoveReceiptAt: (index: number) => void;
-  onDelete: (id: string) => void;
+  onDelete?: (id: string) => void;
   setShowDeleteConfirm: (value: SetStateAction<boolean>) => void;
   showDeleteConfirm: boolean;
   handleDelete: () => void;

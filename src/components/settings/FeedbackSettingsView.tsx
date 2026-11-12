@@ -8,12 +8,12 @@ export interface FeedbackSettingsViewProps {
   feedbackSending: boolean;
   setFeedbackSending: (value: SetStateAction<boolean>) => void;
   feedbackType: "idea" | "bug" | "praise";
-  userEmail: string;
+  userEmail: string | null;
   setFeedbackSent: (value: SetStateAction<boolean>) => void;
   setFeedbackMessage: (value: SetStateAction<string>) => void;
   setFeedbackType: (value: SetStateAction<"idea" | "bug" | "praise">) => void;
   feedbackSent: boolean;
-  onStartOnboarding: () => void;
+  onStartOnboarding?: () => void;
 }
 
 export const FeedbackSettingsView: React.FC<FeedbackSettingsViewProps> = ({

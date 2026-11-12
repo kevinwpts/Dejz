@@ -1,16 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
+import { ApiRequest, ApiResponse, errorMessage, readJsonBody } from '../_http';
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   try {
-    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const { userId } = body;
+    const { userId } = readJsonBody<{ userId: string }>(req);
 
     const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
+    // Aldrig med VITE_-prefix: sådana variabler kan hamna i den publika appen
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
       return res.status(500).json({ error: 'Missing configuration' });
@@ -20,7 +21,7 @@ export default async function handler(req: any, res: any) {
       return res.status(400).json({ error: 'Missing userId in request body' });
     }
 
-    const supabaseAdmin = createClient(supabaseUrl as string, supabaseKey);
+    const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
 
     const authHeader = req.headers?.authorization || req.headers?.Authorization;
     const token = typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
@@ -77,8 +78,8 @@ export default async function handler(req: any, res: any) {
 
     console.log(`Successfully deleted account for user: ${userId}`);
     res.status(200).json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Delete account error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: errorMessage(error) });
   }
 }

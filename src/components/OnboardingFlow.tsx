@@ -249,6 +249,27 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     };
   }, []);
 
+  // Senaste värdena som analysen läser när den startar. Ligger i en ref så att analysen
+  // INTE startas om när de ändras (se ovan) men ändå får färska värden vid start.
+  const bankAnalysisInputsRef = React.useRef({
+    connectionsCount: connections.length,
+    fetchedAccounts,
+    bankAccounts: _bankAccounts,
+    onBankStateUpdated,
+    payday,
+    weekendHandling,
+  });
+  useEffect(() => {
+    bankAnalysisInputsRef.current = {
+      connectionsCount: connections.length,
+      fetchedAccounts,
+      bankAccounts: _bankAccounts,
+      onBankStateUpdated,
+      payday,
+      weekendHandling,
+    };
+  });
+
   useEffect(() => {
     if (step !== 3 && step !== 4) return;
 
@@ -259,6 +280,14 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     if (bankAnalysisInFlightRef.current) return;
     if (bankAnalysisDoneRef.current && !pendingSyncConnectionIdRef.current) return;
     bankAnalysisInFlightRef.current = true;
+    const {
+      connectionsCount,
+      fetchedAccounts: fetchedAccountsAtStart,
+      bankAccounts: bankAccountsAtStart,
+      onBankStateUpdated: onBankStateUpdatedAtStart,
+      payday: paydayAtStart,
+      weekendHandling: weekendHandlingAtStart,
+    } = bankAnalysisInputsRef.current;
 
     const runBankAnalysis = async () => {
       const isMounted = () => onboardingMountedRef.current;
@@ -274,8 +303,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             })
             .catch(() => {});
           const status = await bankService.getStatus().catch(() => null);
-          if (status && onBankStateUpdated && isMounted()) {
-            onBankStateUpdated(status.connections, status.accounts);
+          if (status && onBankStateUpdatedAtStart && isMounted()) {
+            onBankStateUpdatedAtStart(status.connections, status.accounts);
           }
         }
 
@@ -284,14 +313,15 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           .catch(() => []);
 
         // Om användaren laddade om på steg 3 och transaktionerna inte hunnit hämtas än, kör en full synk av valda konton nu
-        if ((!bankTxs || bankTxs.length === 0) && connections.length > 0) {
+        if ((!bankTxs || bankTxs.length === 0) && connectionsCount > 0) {
           await bankService.sync({ fullSync: true }).catch(() => {});
           bankTxs = await bankService
             .listAllTransactionsForReconciliation(5000, false)
             .catch(() => []);
         }
 
-        let accountsForAnalysis = fetchedAccounts.length > 0 ? fetchedAccounts : _bankAccounts;
+        let accountsForAnalysis =
+          fetchedAccountsAtStart.length > 0 ? fetchedAccountsAtStart : bankAccountsAtStart;
         if (!accountsForAnalysis || accountsForAnalysis.length === 0) {
           accountsForAnalysis = (await bankService.getStatus().catch(() => null))?.accounts || [];
         }
@@ -300,8 +330,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           const { baseAnalysis } =
             extractOnboardingAiCandidates(
               bankTxs,
-              payday,
-              weekendHandling === 'before',
+              paydayAtStart,
+              weekendHandlingAtStart === 'before',
               accountsForAnalysis
             );
 
@@ -534,15 +564,20 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   >('main');
   const [sheetNavDir, setSheetNavDir] = useState<'forward' | 'back'>('forward');
 
-  const availableExpenseCategories = React.useMemo(
-    () => getStoredExpenseCategories().map((c) => c.name),
-    [sheetEditor?.type, sheetEditor?.mode]
-  );
+  // Kategorierna ligger i localStorage – läs om dem när redigeringsrutan öppnas/byter läge
+  const sheetEditorType = sheetEditor?.type;
+  const sheetEditorMode = sheetEditor?.mode;
+  const availableExpenseCategories = React.useMemo(() => {
+    void sheetEditorType;
+    void sheetEditorMode;
+    return getStoredExpenseCategories().map((c) => c.name);
+  }, [sheetEditorType, sheetEditorMode]);
 
-  const availableIncomeCategories = React.useMemo(
-    () => getStoredIncomeCategories().map((c) => c.name),
-    [sheetEditor?.type, sheetEditor?.mode]
-  );
+  const availableIncomeCategories = React.useMemo(() => {
+    void sheetEditorType;
+    void sheetEditorMode;
+    return getStoredIncomeCategories().map((c) => c.name);
+  }, [sheetEditorType, sheetEditorMode]);
 
   const availablePaymentMethods = React.useMemo(() => {
     const stored = getStoredPaymentMethods().map((m) => m.name);

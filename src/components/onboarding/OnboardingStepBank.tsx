@@ -24,9 +24,9 @@ export interface OnboardingStepBankProps {
   formatKr: (val: number) => string;
   savingAccounts: boolean;
   handleSaveSelectedAccounts: () => Promise<void>;
-  authError: string;
-  setAuthError: (value: SetStateAction<string>) => void;
-  bankCallbackStatusMsg: string;
+  authError: string | null;
+  setAuthError: (value: SetStateAction<string | null>) => void;
+  bankCallbackStatusMsg: string | null;
   verifyingBankReturn: boolean;
   hasConnectedBank: boolean;
   connections: BankConnection[];
@@ -36,7 +36,7 @@ export interface OnboardingStepBankProps {
   setBankSearchQuery: (value: SetStateAction<string>) => void;
   filteredBanks: BankAspsp[];
   startingAuth: boolean;
-  connectingBankName: string;
+  connectingBankName: string | null;
   handleSelectBankInline: (bank: BankAspsp | { name: string; country?: string; logo?: string; }) => Promise<void>;
   goNext: (from: OnboardingStep) => void;
 }

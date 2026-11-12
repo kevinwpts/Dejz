@@ -86,10 +86,11 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
     setSubView(next);
   };
 
-  const availableIncomeCategories = useMemo(
-    () => getStoredIncomeCategories().map((c) => c.name),
-    [isOpen]
-  );
+  // Kategorierna ligger i localStorage – läs om dem varje gång rutan öppnas
+  const availableIncomeCategories = useMemo(() => {
+    void isOpen;
+    return getStoredIncomeCategories().map((c) => c.name);
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;

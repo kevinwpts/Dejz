@@ -1085,7 +1085,7 @@ export function mapBankTransactionsToAppItems(
       });
       if (withBal.length >= 2) {
         const meta = withBal.map((t) => {
-          const after = Number(t.rawJson.balance_after_transaction.amount);
+          const after = Number(t.rawJson?.balance_after_transaction?.amount);
           const signed =
             typeof t.rawJson?.exactSignedSekAmount === 'number'
               ? t.rawJson.exactSignedSekAmount

@@ -44,7 +44,7 @@ export function useTransactionActions({
     setSelectedTransaction((prev) =>
       prev && prev.id === id ? { ...prev, isHearted } : prev
     );
-  }, []);
+  }, [setSelectedTransaction, setTransactions, transactionsRef]);
 
   const handleTogglePackage = useCallback((id: string, isWaitingForPackage: boolean) => {
     saveTransactionMeta(id, { isWaitingForPackage });
@@ -57,7 +57,7 @@ export function useTransactionActions({
     setSelectedTransaction((prev) =>
       prev && prev.id === id ? { ...prev, isWaitingForPackage } : prev
     );
-  }, []);
+  }, [setSelectedTransaction, setTransactions, transactionsRef]);
 
   const handleCategoryMutated = useCallback(
     (oldName: string, newName: string, kind: 'expense' | 'income') => {
@@ -101,7 +101,7 @@ export function useTransactionActions({
         transactions: transactionsRef.current,
       });
     },
-    []
+    [fixedExpensesRef, incomesRef, setFixedExpenses, setIncomes, setTransactions, transactionsRef]
   );
 
   const handleAddTransaction = async (data: Omit<TransactionItem, 'id'>) => {
