@@ -104,7 +104,7 @@ export const BankModal: React.FC<BankModalProps> = ({
         )}
 
         <button
-          type="button"
+          type="button" aria-label="Stäng"
           onClick={() => {
             setStep('list');
             onClose();

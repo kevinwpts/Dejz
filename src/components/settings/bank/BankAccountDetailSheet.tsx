@@ -102,6 +102,7 @@ export const BankAccountDetailSheet: React.FC<BankAccountDetailSheetProps> = ({
               type="button"
               role="switch"
               aria-checked={accountIncludedInput}
+              aria-label="Synka och visa i översikten"
               onClick={() => setAccountIncludedInput((prev) => !prev)}
               className={`ui-switch ${
                 accountIncludedInput ? 'ui-switch-on' : 'ui-switch-off'

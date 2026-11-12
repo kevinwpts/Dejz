@@ -105,6 +105,7 @@ export const FeedbackSheet: React.FC = () => {
               ))}
             </div>
             <textarea
+              aria-label="Meddelande"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder={current.placeholder}

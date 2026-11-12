@@ -126,6 +126,9 @@ export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
 
       {/* Sheet Container (Does NOT cover the whole screen) */}
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Nytt sparmål"
         onClick={(e) => e.stopPropagation()}
         className="w-full max-w-md mx-auto h-[89dvh] max-h-[89dvh] rounded-t-3xl bg-[var(--bg-color)] text-[var(--text-primary)] border-t border-[var(--border-subtle)] shadow-[0_-16px_48px_rgba(0,0,0,0.45)] flex flex-col justify-between px-6 pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] font-sans overflow-hidden select-none animate-slide-up"
       >

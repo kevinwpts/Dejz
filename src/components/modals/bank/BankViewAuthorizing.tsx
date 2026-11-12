@@ -70,6 +70,7 @@ export const BankViewAuthorizing: React.FC<BankViewAuthorizingProps> = ({
       >
         <div className="flex gap-2">
           <input
+            aria-label="Återkopplingslänk"
             type="text"
             value={manualCallbackUrl}
             onChange={(e) => setManualCallbackUrl(e.target.value)}

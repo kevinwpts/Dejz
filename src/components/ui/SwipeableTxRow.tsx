@@ -91,6 +91,7 @@ export const SwipeableTxRow: React.FC<SwipeableTxRowProps> = ({
         >
           {onToggleHeart && (
             <button
+              aria-label={isHearted ? 'Ta bort sparat köp' : 'Spara köp'}
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
@@ -109,6 +110,7 @@ export const SwipeableTxRow: React.FC<SwipeableTxRowProps> = ({
           )}
           {onTogglePackage && (
             <button
+              aria-label={isWaitingForPackage ? 'Markera paket mottaget' : 'Väntar på paket'}
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
@@ -127,6 +129,7 @@ export const SwipeableTxRow: React.FC<SwipeableTxRowProps> = ({
           )}
           {onToggleExclude && (
             <button
+              aria-label={isExcluded ? 'Inkludera i budget' : 'Exkludera ur budget'}
               type="button"
               onClick={(e) => {
                 e.stopPropagation();

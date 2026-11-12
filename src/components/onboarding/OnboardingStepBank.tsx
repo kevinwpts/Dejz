@@ -232,6 +232,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                       className="ui-input-icon"
                     />
                     <input
+                      aria-label="Sök bank"
                       type="text"
                       value={bankSearchQuery}
                       onChange={(e) => setBankSearchQuery(e.target.value)}

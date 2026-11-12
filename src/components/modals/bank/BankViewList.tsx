@@ -126,6 +126,7 @@ export const BankViewList: React.FC<BankViewListProps> = ({
         className="ui-input-icon"
       />
       <input
+        aria-label="Sök bank"
         type="text"
         value={search}
         onChange={(e) => setSearch(e.target.value)}

@@ -479,6 +479,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               type="button"
               role="switch"
               aria-checked={isWeekendBeforeEnabled}
+              aria-label="Helghantering: fredagen före om lönedagen infaller på helg"
               onClick={() =>
                 onUpdateWeekendHandling(isWeekendBeforeEnabled ? 'none' : 'before')
               }

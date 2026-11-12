@@ -48,7 +48,7 @@ export const TxViewPaymentPicker: React.FC<TxViewPaymentPickerProps> = ({
             Välj betalsätt
           </span>
           <button
-            type="button"
+            type="button" aria-label="Stäng"
             onClick={onClose}
             className="ui-icon-btn"
           >

@@ -69,6 +69,7 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
               {isEditingAccountName ? (
                 <div className="mt-3 w-full max-w-[260px] flex items-center gap-1.5">
                   <input
+                    aria-label="Kontonamn"
                     type="text"
                     value={accountNameDraft}
                     onChange={(e) => setAccountNameDraft(e.target.value)}
@@ -87,6 +88,7 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
                     className="flex-1 min-w-0 px-3 py-1.5 rounded-xl bg-[var(--surface-raised)] border border-[var(--border-subtle)] text-callout font-medium text-[var(--text-primary)] text-center focus:outline-none focus:border-[var(--text-primary)]"
                   />
                   <button
+                    aria-label="Spara namn"
                     type="button"
                     onClick={() => {
                       onUpdateAccountMeta?.(activeModalAccount.id, {
@@ -100,6 +102,7 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
                     <Check size={14} weight="bold" />
                   </button>
                   <button
+                    aria-label="Avbryt"
                     type="button"
                     onClick={() => setIsEditingAccountName(false)}
                     className="w-8 h-8 rounded-xl bg-[var(--surface-raised)] text-[var(--text-secondary)] flex items-center justify-center shrink-0 cursor-pointer"
@@ -182,6 +185,7 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
                   type="button"
                   role="switch"
                   aria-checked={!activeModalAccount.excludeFromTotalBalance}
+                  aria-label="Räkna med i Totalt saldo"
                   onClick={() => {
                     onUpdateAccountMeta?.(activeModalAccount.id, {
                       excludeFromTotalBalance: !activeModalAccount.excludeFromTotalBalance,

@@ -69,7 +69,7 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
                   {sheetEditor.type === 'income' ? 'Välj utbetalningsdag' : 'Välj förfallodag'}
                 </span>
                 <button
-                  type="button"
+                  type="button" aria-label="Stäng"
                   onClick={() => setSheetEditor(null)}
                   className="ui-icon-btn"
                 >
@@ -109,7 +109,7 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
                 </button>
                 <span className="ui-sheet-title">Välj kategori</span>
                 <button
-                  type="button"
+                  type="button" aria-label="Stäng"
                   onClick={() => setSheetEditor(null)}
                   className="ui-icon-btn"
                 >
@@ -180,7 +180,7 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
                 </button>
                 <span className="ui-sheet-title">Välj betalsätt</span>
                 <button
-                  type="button"
+                  type="button" aria-label="Stäng"
                   onClick={() => setSheetEditor(null)}
                   className="ui-icon-btn"
                 >
@@ -247,7 +247,7 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
                     : 'Redigera fast utgift'}
                 </span>
                 <button
-                  type="button"
+                  type="button" aria-label="Stäng"
                   onClick={() => setSheetEditor(null)}
                   className="ui-icon-btn"
                 >

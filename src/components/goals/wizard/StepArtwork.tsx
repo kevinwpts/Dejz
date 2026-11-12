@@ -72,6 +72,7 @@ export const StepArtwork: React.FC<StepArtworkProps> = ({
         <div className="relative shrink-0">
           <MagnifyingGlass size={15} className="ui-input-icon" />
           <input
+            aria-label="Sök bild"
             type="text"
             value={artworkSearch}
             onChange={(e) => setArtworkSearch(e.target.value)}

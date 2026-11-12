@@ -45,7 +45,7 @@ export const FixedViewPaymentPicker: React.FC<FixedViewPaymentPickerProps> = ({
             Välj betalsätt
           </span>
           <button
-            type="button"
+            type="button" aria-label="Stäng"
             onClick={onClose}
             className="ui-icon-btn"
           >

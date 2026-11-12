@@ -77,6 +77,7 @@ export const PackagesTab: React.FC = () => {
                         </span>
                       </div>
                       <button
+                        aria-label="Markera som mottaget"
                         type="button"
                         onClick={() => handleTogglePackage(tx.id, false)}
                         title="Markera som mottaget"

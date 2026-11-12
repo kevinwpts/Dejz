@@ -229,7 +229,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </span>
         )}
         <button
-          type="button"
+          type="button" aria-label="Stäng"
           onClick={onClose}
           className="ui-icon-btn"
         >
@@ -418,6 +418,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setShowPassword((prev) => !prev)}
+                      aria-label={showPassword ? 'Dölj lösenord' : 'Visa lösenord'}
                       className="ui-clear-btn"
                     >
                       {showPassword ? <EyeSlash size={17} /> : <Eye size={17} />}

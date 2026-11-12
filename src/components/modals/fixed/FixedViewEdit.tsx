@@ -92,7 +92,7 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
         {isCreateMode ? (
           <div className="ui-sheet-header">
             <span className="ui-sheet-title">Lägg till fast utgift</span>
-            <button type="button" onClick={onClose} className="ui-icon-btn">
+            <button type="button" aria-label="Stäng" onClick={onClose} className="ui-icon-btn">
               <X size={16} />
             </button>
           </div>
@@ -307,6 +307,7 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
                   </span>
                 </button>
                 <button
+                  aria-label="Ta bort kvitto"
                   type="button"
                   onClick={() => handleRemoveReceiptAt(idx)}
                   className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-negative-solid transition-colors cursor-pointer shrink-0"

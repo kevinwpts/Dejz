@@ -46,11 +46,14 @@ export const TxRenameScopeDialog: React.FC<TxRenameScopeDialogProps> = ({
       onClick={onDismiss}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tx-rename-scope-title"
         className="w-full max-w-[348px] rounded-modal bg-[var(--surface-color)] border border-[var(--border-subtle)] p-5 shadow-2xl space-y-4 animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="text-center">
-          <h3 className="font-display font-semibold text-base text-[var(--text-primary)]">
+          <h3 id="tx-rename-scope-title" className="font-display font-semibold text-base text-[var(--text-primary)]">
             {isTitleChanged
               ? activeSwishPhone
                 ? 'Byt namn på Swish?'

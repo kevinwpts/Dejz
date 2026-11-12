@@ -107,6 +107,7 @@ export const IncomeViewDetails: React.FC<IncomeViewDetailsProps> = ({
                     ? 'Tryck för att visa företagslogga'
                     : 'Tryck för att visa kategori-ikon'
                 }
+                aria-label={prefersCatIcon ? 'Visa företagslogga' : 'Visa kategoriikon'}
                 className="relative group/logo cursor-pointer rounded-2xl focus:outline-none active:scale-95 transition-transform"
               >
                 <ItemLogo

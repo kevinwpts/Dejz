@@ -378,6 +378,7 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
               type="button"
               role="switch"
               aria-checked={privacyBlurProfile}
+              aria-label="Sekretessläge (dölj belopp)"
               onClick={() => {
                 const next = !privacyBlurProfile;
                 setPrivacyBlurProfile(next);
@@ -432,6 +433,7 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
                 />
               </label>
               <button
+                aria-label={showNewPassword ? 'Dölj lösenord' : 'Visa lösenord'}
                 type="button"
                 onClick={() => setShowNewPassword((prev) => !prev)}
                 className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer shrink-0"

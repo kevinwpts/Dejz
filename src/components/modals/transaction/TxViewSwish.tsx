@@ -48,7 +48,7 @@ export const TxViewSwish: React.FC<TxViewSwishProps> = ({
             <CaretLeft size={15} weight="bold" />
           </button>
           <span className="ui-sheet-title">Dela utlägg</span>
-          <button type="button" onClick={onClose} className="ui-icon-btn">
+          <button type="button" aria-label="Stäng" onClick={onClose} className="ui-icon-btn">
             <X size={16} />
           </button>
         </div>
@@ -127,6 +127,7 @@ export const TxViewSwish: React.FC<TxViewSwishProps> = ({
                       Belopp att få tillbaka (kr)
                     </span>
                     <input
+                      aria-label="Belopp att få tillbaka (kr)"
                       type="text"
                       inputMode="numeric"
                       value={swishCustomShare}

@@ -20,6 +20,7 @@ export const AnalysisPeriodNav: React.FC<AnalysisPeriodNavProps> = ({
 }) => (
   <div className="flex items-center justify-between gap-2 px-1">
     <button
+      aria-label="Föregående period"
       type="button"
       onClick={() => setPeriodOffset((prev) => Math.max(-5, prev - 1))}
       disabled={periodOffset <= -5}
@@ -50,6 +51,7 @@ export const AnalysisPeriodNav: React.FC<AnalysisPeriodNavProps> = ({
     </button>
 
     <button
+      aria-label="Nästa period"
       type="button"
       onClick={() => setPeriodOffset((prev) => Math.min(0, prev + 1))}
       disabled={periodOffset >= 0}

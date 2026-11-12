@@ -48,7 +48,7 @@ export const IncomeViewEdit: React.FC<IncomeViewEditProps> = ({
       {isCreateMode ? (
         <div className="ui-sheet-header">
           <span className="ui-sheet-title">Lägg till inkomst</span>
-          <button type="button" onClick={onClose} className="ui-icon-btn">
+          <button type="button" aria-label="Stäng" onClick={onClose} className="ui-icon-btn">
             <X size={16} />
           </button>
         </div>

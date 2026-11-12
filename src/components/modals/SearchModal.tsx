@@ -242,6 +242,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
             <div className="ui-search-box flex-1">
               <MagnifyingGlass size={15} className="text-[var(--text-muted)] shrink-0" />
               <input
+                aria-label="Sök"
                 type="text"
                 autoFocus
                 value={query}
@@ -253,6 +254,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setQuery('')}
+                  aria-label="Rensa sökning"
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 rounded-md cursor-pointer"
                 >
                   <X size={14} />

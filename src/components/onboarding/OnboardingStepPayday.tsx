@@ -70,6 +70,7 @@ export const OnboardingStepPayday: React.FC<OnboardingStepPaydayProps> = ({
               type="button"
               role="switch"
               aria-checked={weekendHandling === 'before'}
+              aria-label="Betalas ut fredagen före vid helg"
               onClick={() =>
                 setWeekendHandling((prev) => (prev === 'before' ? 'none' : 'before'))
               }

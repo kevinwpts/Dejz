@@ -53,7 +53,7 @@ export const TxViewLinkFixedPicker: React.FC<TxViewLinkFixedPickerProps> = ({
             {isIncome ? 'Koppla till fast inkomst' : 'Koppla till fast utgift'}
           </span>
           <button
-            type="button"
+            type="button" aria-label="Stäng"
             onClick={onClose}
             className="ui-icon-btn"
           >

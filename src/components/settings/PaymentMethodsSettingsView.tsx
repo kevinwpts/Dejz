@@ -183,7 +183,7 @@ export const PaymentMethodsSettingsView: React.FC<PaymentMethodsSettingsViewProp
             {pmSheetMode === 'new' ? 'Nytt betalsätt' : 'Redigera betalsätt'}
           </span>
           <button
-            type="button"
+            type="button" aria-label="Stäng"
             onClick={closePmSheet}
             className="ui-icon-btn"
           >
@@ -227,6 +227,8 @@ export const PaymentMethodsSettingsView: React.FC<PaymentMethodsSettingsViewProp
                 const isSelected = pmFormIcon === item.id;
                 return (
                   <button
+                    aria-label={item.label}
+                    aria-pressed={isSelected}
                     key={item.id}
                     type="button"
                     title={item.label}

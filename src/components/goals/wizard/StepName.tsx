@@ -25,6 +25,7 @@ export const StepName: React.FC<StepNameProps> = ({
   >
     <div className="my-auto py-6 flex flex-col items-center justify-center">
       <input
+        aria-label="Sparmålets namn"
         type="text"
         autoFocus
         required

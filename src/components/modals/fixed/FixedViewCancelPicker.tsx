@@ -47,7 +47,7 @@ export const FixedViewCancelPicker: React.FC<FixedViewCancelPickerProps> = ({
             Uppsagd · {displayName}
           </span>
           <button
-            type="button"
+            type="button" aria-label="Stäng"
             onClick={onClose}
             className="ui-icon-btn"
           >

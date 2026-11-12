@@ -360,6 +360,7 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
                       </span>
                     </button>
                     <button
+                      aria-label="Ta bort kvitto"
                       type="button"
                       onClick={() => handleRemoveReceiptAt(idx)}
                       className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-negative-solid transition-colors cursor-pointer shrink-0"

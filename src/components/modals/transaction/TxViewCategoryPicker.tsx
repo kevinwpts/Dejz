@@ -48,7 +48,7 @@ export const TxViewCategoryPicker: React.FC<TxViewCategoryPickerProps> = ({
             Välj kategori
           </span>
           <button
-            type="button"
+            type="button" aria-label="Stäng"
             onClick={onClose}
             className="ui-icon-btn"
           >

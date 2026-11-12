@@ -90,6 +90,7 @@ export const ReceiptsTab: React.FC = () => {
                       </div>
                       {expReceipts[0] && (
                         <button
+                          aria-label="Öppna kvitto"
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -178,6 +179,7 @@ export const ReceiptsTab: React.FC = () => {
                       </div>
                       {txReceipts[0] && (
                         <button
+                          aria-label="Öppna kvitto"
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();

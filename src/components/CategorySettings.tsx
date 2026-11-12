@@ -341,7 +341,7 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
             {sheetMode === 'new' ? 'Ny kategori' : 'Redigera kategori'}
           </span>
           <button
-            type="button"
+            type="button" aria-label="Stäng"
             onClick={closeSheet}
             className="ui-icon-btn"
           >
@@ -394,6 +394,8 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
                 const isSelected = formIcon === item.id;
                 return (
                   <button
+                    aria-label={item.label}
+                    aria-pressed={isSelected}
                     key={item.id}
                     type="button"
                     title={item.label}

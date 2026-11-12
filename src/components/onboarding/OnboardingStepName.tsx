@@ -33,6 +33,7 @@ export const OnboardingStepName: React.FC<OnboardingStepNameProps> = ({
         <div className="my-auto py-4">
           <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] focus-within:border-[var(--text-primary)] rounded-3xl px-5 py-4 transition-colors">
             <input
+              aria-label="Förnamn"
               type="text"
               autoFocus
               required

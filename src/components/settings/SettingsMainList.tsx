@@ -268,6 +268,7 @@ export const SettingsMainList: React.FC<SettingsMainListProps> = ({
                 type="button"
                 role="switch"
                 aria-checked={excludeInternalTransfers}
+                aria-label="Dölj egna överföringar"
                 onClick={() => onToggleExcludeInternalTransfers(!excludeInternalTransfers)}
                 className={`ui-switch ${
                   excludeInternalTransfers ? 'ui-switch-on' : 'ui-switch-off'

@@ -512,7 +512,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
               Välj dragningsdag
             </span>
             <button
-              type="button"
+              type="button" aria-label="Stäng"
               onClick={onClose}
               className="ui-icon-btn"
             >

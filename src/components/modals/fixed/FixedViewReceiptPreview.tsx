@@ -42,7 +42,7 @@ export const FixedViewReceiptPreview: React.FC<FixedViewReceiptPreviewProps> = (
             {previewReceipt.name || 'Kvitto'}
           </span>
           <button
-            type="button"
+            type="button" aria-label="Stäng"
             onClick={onClose}
             className="ui-icon-btn"
           >

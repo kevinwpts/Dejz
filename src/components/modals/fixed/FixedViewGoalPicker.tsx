@@ -47,7 +47,7 @@ export const FixedViewGoalPicker: React.FC<FixedViewGoalPickerProps> = ({
             Koppla till sparmål
           </span>
           <button
-            type="button"
+            type="button" aria-label="Stäng"
             onClick={onClose}
             className="ui-icon-btn"
           >

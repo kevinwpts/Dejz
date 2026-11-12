@@ -123,6 +123,7 @@ export const AuthFormView: React.FC<AuthFormViewProps> = ({ form, animClass }) =
               </div>
               <div className="flex items-center justify-between gap-2">
                 <input
+                  aria-label="Lösenord"
                   type={showPassword ? 'text' : 'password'}
                   required
                   minLength={6}

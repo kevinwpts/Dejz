@@ -49,7 +49,7 @@ export const TxViewDatePicker: React.FC<TxViewDatePickerProps> = ({
             Välj datum
           </span>
           <button
-            type="button"
+            type="button" aria-label="Stäng"
             onClick={onClose}
             className="ui-icon-btn"
           >
@@ -156,6 +156,7 @@ export const TxViewDatePicker: React.FC<TxViewDatePickerProps> = ({
                           : { year: prev.year, month: prev.month - 1 }
                       )
                     }
+                    aria-label="Föregående månad"
                     className="ui-icon-btn w-8 h-8 rounded-xl"
                   >
                     <CaretLeft size={14} weight="bold" />
@@ -172,6 +173,7 @@ export const TxViewDatePicker: React.FC<TxViewDatePickerProps> = ({
                           : { year: prev.year, month: prev.month + 1 }
                       )
                     }
+                    aria-label="Nästa månad"
                     className="ui-icon-btn w-8 h-8 rounded-xl"
                   >
                     <CaretRight size={14} weight="bold" />

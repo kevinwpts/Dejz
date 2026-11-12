@@ -130,6 +130,8 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
           <div className="flex items-center gap-1">
             {onToggleHeart && (
               <button
+                aria-label="Spara köp"
+                aria-pressed={Boolean(activeTx.isHearted)}
                 type="button"
                 onClick={() => onToggleHeart(activeTx.id, !activeTx.isHearted)}
                 title="Spara köp"
@@ -146,6 +148,8 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
             )}
             {!isIncome && onTogglePackage && (
               <button
+                aria-label="Väntar på paket"
+                aria-pressed={Boolean(activeTx.isWaitingForPackage)}
                 type="button"
                 onClick={() =>
                   onTogglePackage(activeTx.id, !activeTx.isWaitingForPackage)
@@ -208,6 +212,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                         ? 'Tryck för att visa företagslogga'
                         : 'Tryck för att visa kategori-ikon'
                     }
+                    aria-label={prefersCatIcon ? 'Visa företagslogga' : 'Visa kategoriikon'}
                     className="relative group/logo cursor-pointer rounded-2xl focus:outline-none active:scale-95 transition-transform"
                   >
                     <ItemLogo
@@ -442,6 +447,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                         Öppna
                       </button>
                       <button
+                        aria-label="Ta bort kvitto"
                         type="button"
                         onClick={() => handleRemoveReceiptAt(idx)}
                         className="p-1 rounded-md text-[var(--text-muted)] hover:text-negative-solid transition-colors cursor-pointer"
@@ -459,6 +465,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
             <div className="ui-row">
               <span className="ui-info-label shrink-0">Anteckning</span>
               <input
+                aria-label="Anteckning"
                 type="text"
                 placeholder="Lägg till anteckning..."
                 value={note}
@@ -481,6 +488,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                   type="button"
                   role="switch"
                   aria-checked={!isExcluded}
+                  aria-label="Räkna i budget"
                   onClick={() => {
                     onExclude(activeTx.id, !isExcluded);
                     setLogoPrefTick((t) => t + 1);

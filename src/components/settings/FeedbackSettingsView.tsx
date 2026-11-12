@@ -84,6 +84,7 @@ export const FeedbackSettingsView: React.FC<FeedbackSettingsViewProps> = ({
           </div>
 
           <textarea
+            aria-label="Ditt meddelande"
             rows={4}
             value={feedbackMessage}
             onChange={(e) => setFeedbackMessage(e.target.value)}

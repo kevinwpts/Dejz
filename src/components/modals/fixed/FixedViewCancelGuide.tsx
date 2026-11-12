@@ -60,7 +60,7 @@ export const FixedViewCancelGuide: React.FC<FixedViewCancelGuideProps> = ({
             Säg upp {displayName}
           </span>
           <button
-            type="button"
+            type="button" aria-label="Stäng"
             onClick={onClose}
             className="ui-icon-btn"
           >

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useId } from 'react';
 import { createPortal } from 'react-dom';
 
 interface ConfirmDialogProps {
@@ -24,6 +24,9 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const titleId = useId();
+  const descriptionId = useId();
+
   useEffect(() => {
     if (!isOpen || loading) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -50,15 +53,17 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       <div
         role="alertdialog"
         aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={description ? descriptionId : undefined}
         className="w-full max-w-[310px] rounded-modal bg-[var(--surface-color)] border border-[var(--border-subtle)] p-5 shadow-2xl text-center space-y-4 animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="space-y-1.5 px-1">
-          <h3 className="font-display font-semibold text-[16px] text-[var(--text-primary)] leading-snug">
+          <h3 id={titleId} className="font-display font-semibold text-[16px] text-[var(--text-primary)] leading-snug">
             {title}
           </h3>
           {description && (
-            <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+            <p id={descriptionId} className="text-xs text-[var(--text-muted)] leading-relaxed">
               {description}
             </p>
           )}

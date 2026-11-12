@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Check } from '@phosphor-icons/react';
 
@@ -111,6 +111,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   const [isDragging, setIsDragging] = useState(false);
 
   const sheetRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
   const closeTimeoutRef = useRef<number | null>(null);
   const dragStartYRef = useRef<number | null>(null);
 
@@ -249,6 +250,9 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
       {/* Bottom Sheet / Fullscreen Container */}
       <div
         ref={sheetRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? titleId : undefined}
         onClick={(e) => e.stopPropagation()}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -293,7 +297,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
           {title && (
             <div className="flex items-center justify-between pb-3.5 border-b border-[var(--border-subtle)]">
               <div className="min-w-0">
-                <span className="ui-sheet-title block">
+                <span id={titleId} className="ui-sheet-title block">
                   {title}
                 </span>
                 {subtitle && (
@@ -305,6 +309,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
               <button
                 type="button"
                 onClick={triggerAnimatedClose}
+                aria-label="Stäng"
                 className="ui-icon-btn"
               >
                 <X size={16} />

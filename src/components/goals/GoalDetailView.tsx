@@ -191,6 +191,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
         <div className="relative z-10 mt-10 space-y-3">
           <div className="max-w-[68%]">
             <input
+              aria-label="Sparmålets namn"
               type="text"
               spellCheck={false}
               autoCorrect="off"
@@ -535,6 +536,8 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               !selectedGoal.customImageUrl && selectedGoal.artworkId === art.id;
             return (
               <button
+                aria-label={art.label}
+                aria-pressed={isSelected}
                 key={art.id}
                 type="button"
                 onClick={() => {

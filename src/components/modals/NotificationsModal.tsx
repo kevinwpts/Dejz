@@ -37,7 +37,7 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
           Notiser
         </span>
         <button
-          type="button"
+          type="button" aria-label="Stäng"
           onClick={onClose}
           className="ui-icon-btn-surface"
         >

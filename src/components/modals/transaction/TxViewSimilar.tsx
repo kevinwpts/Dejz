@@ -44,7 +44,7 @@ export const TxViewSimilar: React.FC<TxViewSimilarProps> = ({
             Liknande transaktioner
           </span>
           <button
-            type="button"
+            type="button" aria-label="Stäng"
             onClick={onClose}
             className="ui-icon-btn"
           >

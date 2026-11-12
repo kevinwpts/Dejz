@@ -127,6 +127,7 @@ export const FixedViewDetails: React.FC<FixedViewDetailsProps> = ({
                         ? 'Tryck för att visa företagslogga'
                         : 'Tryck för att visa kategori-ikon'
                     }
+                    aria-label={prefersCatIcon ? 'Visa företagslogga' : 'Visa kategoriikon'}
                     className="relative group/logo cursor-pointer rounded-2xl focus:outline-none active:scale-95 transition-transform"
                   >
                     <ItemLogo
@@ -373,6 +374,7 @@ export const FixedViewDetails: React.FC<FixedViewDetailsProps> = ({
                         Öppna
                       </button>
                       <button
+                        aria-label="Ta bort kvitto"
                         type="button"
                         onClick={() => handleRemoveReceiptAt(idx)}
                         className="p-1 rounded-md text-[var(--text-muted)] hover:text-negative-solid transition-colors cursor-pointer"
