@@ -37,7 +37,7 @@
 ## Så jobbar vi
 - Testa ändringar lokalt (`npm run dev`, http://localhost:3000) och visa resultatet innan något publiceras.
 - `npm run dev` kör samma serverfunktioner som dejz.se (mappen `api/`). Lägg nya serverfunktioner där – aldrig i `server.ts`, annars fungerar de bara lokalt.
-- **Pusha bara när jag säger "pusha".** Fråga inte om vi ska pusha – jag säger till själv. Vercel publicerar automatiskt från `main`; kontrollera efteråt att ändringen syns på dejz.se.
+- **Pusha direkt när en ändring är klar** och alla kontroller är gröna (typecheck, lint, test, e2e) – fråga inte först. Vercel publicerar automatiskt från `main`; kontrollera efteråt att ändringen syns på dejz.se.
 - Uppdatera skärmbilderna på startsidan (`public/screens/*.png` + `.webp`) när hemskärmen ändras, och höj `?v=N` i `src/components/WaitlistLanding.tsx`.
 - Koden har **0 TypeScript-fel och 0 lint-varningar** – håll det så. Innan push: `npm run typecheck`, `npm run lint`, `npm test` och `npm run e2e` (klicktester i demoläget). Samma kontroller körs automatiskt på GitHub vid varje push.
 - Räknereglerna för "kvar till lön" finns på ett ställe: `src/utils/budgetEngine.ts` (med tester). Appens datatyper finns i `src/app/models.ts`.

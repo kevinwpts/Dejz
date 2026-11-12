@@ -1,4 +1,5 @@
 import { BrandLogo } from './BrandLogo';
+import { signInWithProvider } from '../utils/nativeAuth';
 import { friendlyAuthError } from '../utils/authErrors';
 import React, { useState, useEffect } from 'react';
 import {
@@ -155,13 +156,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       } catch {
         // ignore
       }
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: appOrigin(),
-        },
-      });
-      if (error) throw error;
+      // Webben: vanlig omdirigering. iPhone-appen: iPhonens inloggningsfönster.
+      await signInWithProvider(provider);
     } catch (err: unknown) {
       if (view === 'register') {
         try {

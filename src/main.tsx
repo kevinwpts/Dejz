@@ -6,12 +6,15 @@ import { EmailVerifiedNotice } from './components/EmailVerification';
 import './index.css';
 import { captureFirstTouch } from './utils/attribution';
 import { initMonitoring } from './utils/monitoring';
+import { initNativeAuthListener } from './utils/nativeAuth';
 import { getPublicPageKind, PublicInfoPage } from './components/PublicInfoPage';
 
 // Spara utm-länken (t.ex. ?utm_source=tiktok) innan något annat hinner ändra adressen
 captureFirstTouch();
 // Felövervakning (bara om VITE_SENTRY_DSN finns)
 initMonitoring();
+// iPhone-appen: ta emot inloggning från Google/Apple-fönstret
+void initNativeAuthListener();
 
 const renderApp = () => {
   let container = document.getElementById('root');

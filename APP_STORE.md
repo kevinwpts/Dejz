@@ -1,6 +1,6 @@
 # Dejz i App Store – checklista
 
-Senast uppdaterad: 2026-11-11
+Senast uppdaterad: 2026-11-12
 
 Det här är allt som behövs för att Dejz ska godkännas i App Store. Det som går att göra i koden är redan gjort. Det som bara du kan göra står längre ned, i den ordning du gör det.
 
@@ -23,6 +23,10 @@ Det här är allt som behövs för att Dejz ska godkännas i App Store. Det som 
 | Startskärm | ✅ `resources/splash.png` och `resources/splash-dark.png` |
 | Capacitor (gör om webbappen till iPhone-app) | ✅ Installerat och inställt (`capacitor.config.ts`) |
 | Säkra zoner för notch och hemknapp | ✅ Appen använder `safe-area` överallt |
+| Google/Apple-inloggning i appen (Google blockerar inbäddade webbvyer) | ✅ Öppnas i iPhonens inloggningsfönster och hoppar tillbaka via `se.dejz.app://` (`src/utils/nativeAuth.ts`) |
+| Behörighetstexter för kamera och bilder (annars kraschar "Bifoga kvitto") | ✅ Läggs in automatiskt av `npm run ios:build` (`scripts/ios-setup.mjs`) |
+| Exportfrågan om kryptering | ✅ Besvaras i appen (`ITSAppUsesNonExemptEncryption = NO`) – du slipper den vid varje uppladdning |
+| Kod och kvalitet | ✅ Strikt TypeScript, 0 lint-fel, tester + klicktester vid varje push, felövervakning förberedd |
 
 ---
 
@@ -51,7 +55,7 @@ Xcode öppnas. Välj ditt team under *Signing & Capabilities* och tryck på ▶ 
 3. I Vercel: *Settings → Environment Variables* → lägg till `VITE_ENABLE_APPLE_SIGNIN` = `true` och publicera om.
 
 ### Steg 5 – Inloggning med Google och Apple inne i appen
-Google tillåter inte inloggning i inbäddade webbvyer. När iPhone-appen finns kopplar jag in systemets inloggningsfönster (Capacitor Browser + en egen länk `se.dejz.app://`). Säg till när du är på steg 3, så gör jag det.
+Redan klart i koden. Det enda du behöver göra: i Supabase → *Authentication → URL Configuration → Redirect URLs*, lägg till `se.dejz.app://auth-callback` (ingår i steg 10).
 
 ### Steg 6 – App Store Connect (https://appstoreconnect.apple.com)
 - **Namn:** Dejz – Kvar till lön
@@ -81,7 +85,7 @@ Dejz spårar **inte** användare mellan appar, så ingen "App Tracking Transpare
 Skapa ett konto med påhittad data (lön, några räkningar och köp) och skriv in e-post och lösenord under *App Review Information*. Utan det nekas appen.
 
 ### Steg 9 – Skärmbilder
-Krävs för 6,9-tumsskärm (1320 × 2868). Säg till så tar jag dem från demoläget med "Elin".
+Krävs för 6,9-tumsskärm (1320 × 2868). Färdiga bilder från demoläget ("Elin") finns i `marketing/appstore/`.
 
 ### Steg 10 – Säkerhet i Supabase (5 minuter, gör före lansering)
 1. *Authentication → Settings → Password security* → slå på **Leaked password protection** (stoppar lösenord som läckt på nätet).

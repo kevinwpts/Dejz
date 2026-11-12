@@ -11,11 +11,13 @@
     "typecheck": "tsc --noEmit -p .",
     "test": "tsx --test src/utils/__tests__/*.test.ts",
     "e2e": "playwright test",
-    "ios:build": "vite build && npx cap sync ios",
+    "ios:build": "vite build && npx cap sync ios && node scripts/ios-setup.mjs",
     "ios:open": "npx cap open ios",
     "ios:assets": "npx capacitor-assets generate --ios"
   },
   "dependencies": {
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/browser": "^8.0.5",
     "@capacitor/core": "^8.6.0",
     "@capacitor/ios": "^8.6.0",
     "@capacitor/splash-screen": "^8.0.2",
