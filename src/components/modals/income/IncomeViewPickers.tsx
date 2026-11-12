@@ -1,6 +1,6 @@
 // Inkomstfönstret: väljare för kategori och utbetalningsdag.
 import React from 'react';
-import { X, Check, CaretLeft } from '@phosphor-icons/react';
+import { Check } from '@phosphor-icons/react';
 import type { SetStateAction } from 'react';
 import { CategoryIcon } from '../../CategoryIcon';
 import { DayOfMonthPicker } from '../../ui/DayOfMonthPicker';
@@ -11,6 +11,7 @@ import type {
   PickerReturnView,
   SlideAnimClass,
 } from './shared';
+import { SheetHeader } from '../../ui/SheetHeader';
 
 interface PickerHeaderProps {
   title: string;
@@ -19,27 +20,7 @@ interface PickerHeaderProps {
 }
 
 const PickerHeader: React.FC<PickerHeaderProps> = ({ title, onBack, onClose }) => (
-  <div className="ui-sheet-sub-header">
-    <button
-      type="button"
-      onClick={onBack}
-      title="Tillbaka"
-      aria-label="Tillbaka"
-      className="ui-icon-btn"
-    >
-      <CaretLeft size={15} weight="bold" />
-    </button>
-    <span className="ui-sheet-title">
-      {title}
-    </span>
-    <button
-      type="button" aria-label="Stäng"
-      onClick={onClose}
-      className="ui-icon-btn"
-    >
-      <X size={16} />
-    </button>
-  </div>
+  <SheetHeader title={title} onBack={onBack} onClose={onClose} flush />
 );
 
 export interface IncomeViewCategoryPickerProps {

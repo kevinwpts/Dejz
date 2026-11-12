@@ -105,7 +105,7 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
                         }}
                         className="ui-tx-row"
                       >
-                        <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
                           <ItemLogo
                             name={inc.name}
                             category={catLabel}
@@ -160,7 +160,7 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
                         }}
                         className="ui-tx-row"
                       >
-                        <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
                           <ItemLogo
                             name={tx.title}
                             category={catLabel}
@@ -223,7 +223,7 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
                       }}
                       className="ui-tx-row"
                     >
-                      <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
                         <ItemLogo
                           name={exp.name}
                           category={catLabel}

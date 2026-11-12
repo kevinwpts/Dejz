@@ -13,9 +13,18 @@ import { SettingsTabContent } from './tabs/SettingsTabContent';
 
 /** Innehållet för den valda fliken, med "dra ner för att uppdatera". Varje flik ligger i mappen tabs/. */
 export const AppTabContent: React.FC = () => {
-  const { activeTab, performSilentBankSync, refreshBankStatus } = useApp();
+  const { activeTab, selectedHistoryAccountId, performSilentBankSync, refreshBankStatus } = useApp();
+  // iOS-liknande stor rubrik på flikarna (Hem har hemkortet som rubrik)
+  const largeTitle =
+    activeTab === 'transactions' && !selectedHistoryAccountId
+      ? 'Historik'
+      : activeTab === 'analysis'
+      ? 'Analys'
+      : activeTab === 'fixed'
+      ? 'Fasta'
+      : null;
   return (
-    <main className="flex-1 w-full max-w-md mx-auto px-4 pt-4">
+    <main className="flex-1 w-full max-w-md mx-auto px-4 pt-2">
       <PullToRefresh
         onRefresh={async () => {
           await performSilentBankSync(true);
@@ -23,6 +32,7 @@ export const AppTabContent: React.FC = () => {
         }}
       >
         <>
+          {largeTitle && <h1 className="ui-large-title">{largeTitle}</h1>}
           {activeTab === 'home' && <HomeTabContent />}
           {activeTab === 'fixed' && <FixedTabContent />}
           {activeTab === 'analysis' && <AnalysisTabContent />}

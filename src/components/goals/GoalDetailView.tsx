@@ -243,7 +243,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               setTransferAmountInput('');
               setTransferMode('withdraw');
             }}
-            className="py-3 px-4 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-display font-semibold text-xs flex items-center justify-center gap-2 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            className="py-3 px-4 rounded-2xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-[var(--text-primary)] font-display font-semibold text-xs flex items-center justify-center gap-2 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Minus size={15} weight="bold" />
             <span>Ta ut</span>
@@ -315,7 +315,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                 key={act.id}
                 className="py-3.5 flex items-center justify-between gap-3.5"
               >
-                <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
                   <div className="w-10 h-10 rounded-full bg-positive-solid/20 text-positive dark:bg-positive-solid dark:text-on-positive font-display font-bold text-xs flex items-center justify-center shrink-0">
                     {act.authorInitials || userInitials}
                   </div>

@@ -28,9 +28,9 @@ export const Switch: React.FC<SwitchProps> = ({
   };
   const isSm = size === 'sm';
 
-  const trackWidth = isSm ? 'w-9 h-5' : 'w-11 h-6';
-  const thumbSize = isSm ? 'w-3.5 h-3.5' : 'w-4.5 h-4.5';
-  const translateChecked = isSm ? 'translate-x-4' : 'translate-x-5';
+  const trackWidth = isSm ? 'w-9 h-[22px]' : 'w-[51px] h-[31px]';
+  const thumbSize = isSm ? 'w-[18px] h-[18px]' : 'w-[27px] h-[27px]';
+  const translateChecked = isSm ? 'translate-x-[14px]' : 'translate-x-5';
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
     if (disabled) return;
@@ -52,15 +52,15 @@ export const Switch: React.FC<SwitchProps> = ({
       onKeyDown={handleKeyDown}
       className={`relative inline-flex items-center shrink-0 cursor-pointer rounded-full transition-colors duration-[var(--duration-normal,150ms)] ease-out focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[var(--focus-color)] disabled:bg-[var(--surface-nested)] disabled:cursor-not-allowed select-none ${trackWidth} ${
         checked
-          ? 'bg-[var(--accent-color)] border border-transparent'
-          : 'bg-[var(--surface-nested)] border border-[var(--border-control)]'
+          ? 'bg-[var(--accent-color)]'
+          : 'bg-[var(--segment-track)]'
       } ${className}`}
     >
       <span
-        className={`pointer-events-none inline-block rounded-full shadow-none transform transition-transform duration-[var(--duration-normal,150ms)] ease-out ${thumbSize} ${
+        className={`pointer-events-none inline-block rounded-full shadow-[0_3px_8px_rgba(0,0,0,0.15),0_3px_1px_rgba(0,0,0,0.06)] transform transition-transform duration-[var(--duration-normal,150ms)] ease-out ${thumbSize} ${
           checked
-            ? `${translateChecked} ml-1 bg-[var(--on-accent)]`
-            : 'translate-x-1 bg-[var(--surface-color)] dark:bg-white border-none'
+            ? `${translateChecked} ml-0.5 bg-white`
+            : 'translate-x-0 ml-0.5 bg-white'
         }`}
       />
     </button>

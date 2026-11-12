@@ -39,7 +39,7 @@ export const AnalysisDonutChart: React.FC<AnalysisDonutChartProps> = ({
         <button
           type="button"
           onClick={onShowAll}
-          className="absolute top-3 right-1 px-2.5 py-1 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-caption font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+          className="absolute top-3 right-1 px-2.5 py-1 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-caption font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
         >
           Visa alla
         </button>

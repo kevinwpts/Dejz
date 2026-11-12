@@ -32,7 +32,7 @@ export const HomeGoalsCard: React.FC<HomeGoalsCardProps> = ({
       {/* MODUL 2.5: SPARMÅL · BUFFERT & DRÖMMAR                         */}
       {/* ============================================================== */}
       {onNavigateToGoals && (
-        <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-2xl px-4 py-3.5 sm:px-5 sm:py-4">
+        <section className="bg-[var(--surface-color)] shadow-[var(--card-shadow)] rounded-card px-4 py-4 sm:px-5">
           <button
             type="button"
             onClick={() => {

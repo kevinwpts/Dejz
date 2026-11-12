@@ -1,39 +1,134 @@
 import React, { useState } from 'react';
 import {
+  Airplane,
   ArrowsClockwise,
   ArrowsLeftRight,
+  Baby,
   Bank,
+  Barbell,
+  Bicycle,
+  Books,
+  Briefcase,
+  Bus,
+  Car,
+  Coffee,
+  Coin,
   Coins,
   CreditCard,
   DeviceMobile,
   DeviceMobileCamera,
+  Diamond,
   Envelope,
   FileText,
+  FilmSlate,
+  ForkKnife,
+  GameController,
+  GasPump,
+  Gift,
+  GraduationCap,
+  Hamburger,
+  HandCoins,
+  Heart,
+  House,
+  Key,
+  Lightbulb,
   Lightning,
+  MaskHappy,
   Money,
+  MusicNotes,
+  Package,
+  PawPrint,
+  PiggyBank,
+  Pill,
+  Pizza,
   Receipt,
   ShieldCheck,
   ShoppingBag,
+  ShoppingCart,
+  Sparkle,
+  Stethoscope,
   Tag,
+  Television,
+  Train,
+  TrendUp,
+  TShirt,
   Wallet,
+  WifiHigh,
+  Wrench,
 } from '@phosphor-icons/react';
+import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
 import { getStoredExpenseCategories, getStoredIncomeCategories, getStoredPaymentMethods } from '../utils/cache/categories';
-import {
-  FLUENT_EMOJI_FALLBACK_KEY,
-  FLUENT_EMOJI_SVGS,
-  FluentEmojiKey,
-} from '../utils/fluentEmojiIcons';
 import { SwishLogo } from './SwishLogo';
 import { getLogoUrl } from '../utils/logo';
+
+/** Ikonnycklar (de gamla emoji-namnen behålls så att sparade val fungerar) */
+type GlyphKey =
+  | 'shopping-cart'
+  | 'fork-and-knife-with-plate'
+  | 'hot-beverage'
+  | 'hamburger'
+  | 'pizza'
+  | 'automobile'
+  | 'bus'
+  | 'train'
+  | 'bicycle'
+  | 'fuel-pump'
+  | 'shopping-bags'
+  | 't-shirt'
+  | 'package'
+  | 'clapper-board'
+  | 'video-game'
+  | 'musical-note'
+  | 'performing-arts'
+  | 'house-with-garden'
+  | 'light-bulb'
+  | 'key'
+  | 'red-heart'
+  | 'stethoscope'
+  | 'pill'
+  | 'flexed-biceps'
+  | 'shield'
+  | 'television'
+  | 'satellite-antenna'
+  | 'mobile-phone'
+  | 'mobile-phone-with-arrow'
+  | 'money-bag'
+  | 'coin'
+  | 'dollar-banknote'
+  | 'purse'
+  | 'briefcase'
+  | 'wrapped-gift'
+  | 'palms-up-together'
+  | 'money-with-wings'
+  | 'left-right-arrow'
+  | 'counterclockwise-arrows-button'
+  | 'credit-card'
+  | 'page-facing-up'
+  | 'receipt'
+  | 'envelope'
+  | 'bank'
+  | 'pig-face'
+  | 'gem-stone'
+  | 'chart-increasing'
+  | 'airplane'
+  | 'sparkles'
+  | 'graduation-cap'
+  | 'books'
+  | 'teddy-bear'
+  | 'paw-prints'
+  | 'hammer-and-wrench'
+  | 'label';
+
+const GLYPH_FALLBACK_KEY: GlyphKey = 'label';
 
 export interface CategoryIconOption {
   id: string;
   label: string;
-  fluentKey: FluentEmojiKey;
+  fluentKey: GlyphKey;
 }
 
 /**
- * Curated Fluent Emoji Flat options for the Category Icon Picker.
+ * Ikonval for the Category Icon Picker.
  * Preserves all existing icon IDs so user selections never reset.
  */
 export const AVAILABLE_CATEGORY_ICONS: CategoryIconOption[] = [
@@ -88,7 +183,7 @@ export const AVAILABLE_CATEGORY_ICONS: CategoryIconOption[] = [
 ];
 
 /**
- * Curated Fluent Emoji Flat options for the Payment Method Icon Picker.
+ * Ikonval for the Payment Method Icon Picker.
  * Preserves all default payment method icon IDs.
  */
 export const AVAILABLE_PAYMENT_METHOD_ICONS: CategoryIconOption[] = [
@@ -111,9 +206,9 @@ export const AVAILABLE_PAYMENT_METHOD_ICONS: CategoryIconOption[] = [
 ];
 
 /**
- * Direct mapping from canonical or legacy icon IDs to FluentEmojiKey.
+ * Direct mapping from canonical or legacy icon IDs to GlyphKey.
  */
-const ICON_ID_TO_FLUENT_KEY: Record<string, FluentEmojiKey> = {
+const ICON_ID_TO_FLUENT_KEY: Record<string, GlyphKey> = {
   // Primary category & payment method IDs
   cart: 'shopping-cart',
   'fork-knife': 'fork-and-knife-with-plate',
@@ -654,109 +749,140 @@ export function resolveCategoryColor(category?: string, explicitColor?: string):
   }
 }
 
-function resolveFluentEmojiKey(iconId?: string): FluentEmojiKey {
-  if (!iconId) return FLUENT_EMOJI_FALLBACK_KEY;
+function resolveGlyphKey(iconId?: string): GlyphKey {
+  if (!iconId) return GLYPH_FALLBACK_KEY;
   const clean = iconId.trim().toLowerCase();
-  return ICON_ID_TO_FLUENT_KEY[clean] || FLUENT_EMOJI_FALLBACK_KEY;
+  return ICON_ID_TO_FLUENT_KEY[clean] || GLYPH_FALLBACK_KEY;
 }
 
-// Fluent-ikonerna är fast SVG-kod som ligger i appen. De visas som en bild (data-URI) i stället för
-// att klistras in som HTML – då kan ingen kod i SVG:n köras och vi slipper dangerouslySetInnerHTML.
-const fluentEmojiDataUriCache = new Map<FluentEmojiKey, string>();
-function getFluentEmojiDataUri(fluentKey: FluentEmojiKey): string {
-  const cached = fluentEmojiDataUriCache.get(fluentKey);
-  if (cached) return cached;
-  const svgBody = FLUENT_EMOJI_SVGS[fluentKey] || FLUENT_EMOJI_SVGS[FLUENT_EMOJI_FALLBACK_KEY];
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="1 1 30 30" fill="none">${svgBody}</svg>`;
-  const uri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-  fluentEmojiDataUriCache.set(fluentKey, uri);
-  return uri;
-}
-
-interface FluentEmojiSvgProps {
-  fluentKey: FluentEmojiKey;
-  size: number;
-  className?: string;
-}
-
-const FluentEmojiSvg: React.FC<FluentEmojiSvgProps> = ({
-  fluentKey,
-  size,
-  className = '',
-}) => {
-  return (
-    <img
-      src={getFluentEmojiDataUri(fluentKey)}
-      width={size}
-      height={size}
-      alt=""
-      aria-hidden="true"
-      draggable={false}
-      className={`inline-block shrink-0 select-none pointer-events-none ${className}`}
-    />
-  );
+/**
+ * En ikonfamilj i hela appen: Phosphor-glyfer (fyllda) i stället för 3D-emojis.
+ * Nycklarna är de gamla emoji-namnen, så att sparade val hos användarna fortsätter fungera.
+ */
+const GLYPHS: Record<GlyphKey, PhosphorIcon> = {
+  'shopping-cart': ShoppingCart,
+  'fork-and-knife-with-plate': ForkKnife,
+  'hot-beverage': Coffee,
+  hamburger: Hamburger,
+  pizza: Pizza,
+  automobile: Car,
+  bus: Bus,
+  train: Train,
+  bicycle: Bicycle,
+  'fuel-pump': GasPump,
+  'shopping-bags': ShoppingBag,
+  't-shirt': TShirt,
+  package: Package,
+  'clapper-board': FilmSlate,
+  'video-game': GameController,
+  'musical-note': MusicNotes,
+  'performing-arts': MaskHappy,
+  'house-with-garden': House,
+  'light-bulb': Lightbulb,
+  key: Key,
+  'red-heart': Heart,
+  stethoscope: Stethoscope,
+  pill: Pill,
+  'flexed-biceps': Barbell,
+  shield: ShieldCheck,
+  television: Television,
+  'satellite-antenna': WifiHigh,
+  'mobile-phone': DeviceMobile,
+  'mobile-phone-with-arrow': DeviceMobileCamera,
+  'money-bag': Coins,
+  coin: Coin,
+  'dollar-banknote': Money,
+  purse: Wallet,
+  briefcase: Briefcase,
+  'wrapped-gift': Gift,
+  'palms-up-together': HandCoins,
+  'money-with-wings': ArrowsLeftRight,
+  'left-right-arrow': ArrowsLeftRight,
+  'counterclockwise-arrows-button': ArrowsClockwise,
+  'credit-card': CreditCard,
+  'page-facing-up': FileText,
+  receipt: Receipt,
+  envelope: Envelope,
+  bank: Bank,
+  'pig-face': PiggyBank,
+  'gem-stone': Diamond,
+  'chart-increasing': TrendUp,
+  airplane: Airplane,
+  sparkles: Sparkle,
+  'graduation-cap': GraduationCap,
+  books: Books,
+  'teddy-bear': Baby,
+  'paw-prints': PawPrint,
+  'hammer-and-wrench': Wrench,
+  label: Tag,
 };
+
+/** Kategorifärgen som CSS-variabel – rutan (.ui-cat-tile) och glyfen (.ui-cat-glyph) tonas med den */
+export function categoryColorStyle(category?: string, explicitColor?: string): React.CSSProperties {
+  return { '--cat': resolveCategoryColor(category, explicitColor) } as React.CSSProperties;
+}
 
 interface CategoryIconProps {
   category?: string;
   iconId?: string;
   color?: string;
   size?: number;
+  /** Liten tonad ruta runt ikonen (väljare och listor) */
   badge?: boolean;
   className?: string;
   weight?: 'regular' | 'bold' | 'fill' | 'duotone' | 'light';
   /**
-   * Dämpad variant för små inline-ikoner under en butikslogga, så att loggan
-   * förblir radens enda färgstarka element. Standard: på för storlek ≤ 11.
+   * Dämpad variant för små inline-ikoner (t.ex. under en butikslogga): ikonen tar textens färg
+   * så att radens logga/ruta förblir det enda färgstarka. Standard: på för storlek ≤ 13.
    */
   muted?: boolean;
 }
 
-/** Dämpning för små kategori-emojis i rader som redan har en logga */
-const MUTED_EMOJI_STYLE: React.CSSProperties = { filter: 'saturate(0.55)', opacity: 0.8 };
-
 export const CategoryIcon: React.FC<CategoryIconProps> = ({
   category,
   iconId,
+  color,
   size = 14,
   badge = false,
   className = '',
+  weight = 'fill',
   muted,
 }) => {
-  const isMuted = muted ?? (!badge && size <= 11);
+  const isMuted = muted ?? (!badge && size <= 13);
   const resolvedId = resolveCategoryIconId(category, iconId);
-  const fluentKey = resolveFluentEmojiKey(resolvedId);
-
-  // Optically balance colorful Fluent Emoji Flat icons across inline subtitles, pickers, and headers
-  const opticalSize = badge
-    ? Math.max(size + 5, 19)
-    : size <= 10
-    ? 11
-    : size <= 11
-    ? 12
-    : size <= 13
-    ? size + 3
-    : size <= 16
-    ? size + 2
-    : size;
+  const Glyph = GLYPHS[resolveGlyphKey(resolvedId)];
 
   if (badge) {
+    const box = Math.max(size + 14, 28);
     return (
       <span
-        className={`inline-flex items-center justify-center shrink-0 select-none ${className}`}
-        style={{ width: opticalSize + 2, height: opticalSize + 2 }}
+        className={`ui-cat-tile rounded-lg inline-flex items-center justify-center shrink-0 select-none ${className}`}
+        style={{ ...categoryColorStyle(category || iconId, color), width: box, height: box }}
+        aria-hidden="true"
       >
-        <FluentEmojiSvg fluentKey={fluentKey} size={opticalSize} />
+        <Glyph size={Math.round(box * 0.56)} weight={weight} />
+      </span>
+    );
+  }
+
+  if (isMuted) {
+    return (
+      <span
+        className={`inline-flex items-center justify-center shrink-0 select-none opacity-80 ${className}`}
+        aria-hidden="true"
+      >
+        <Glyph size={Math.max(size + 1, 12)} weight={weight} />
       </span>
     );
   }
 
   return (
     <span
-      className={`inline-flex items-center justify-center shrink-0 select-none ${className}`}
-      style={isMuted ? MUTED_EMOJI_STYLE : undefined}
+      className={`ui-cat-glyph inline-flex items-center justify-center shrink-0 select-none ${className}`}
+      style={categoryColorStyle(category || iconId, color)}
+      aria-hidden="true"
     >
-      <FluentEmojiSvg fluentKey={fluentKey} size={opticalSize} />
+      <Glyph size={size} weight={weight} />
     </span>
   );
 };
@@ -814,30 +940,16 @@ export const PaymentMethodIcon: React.FC<PaymentMethodIconProps> = ({
     );
   }
 
+  // Färgvariant: Swish och Klarna visas med sina riktiga loggor, annars samma glyf (fylld)
   const rawMethod = (method || '').trim().toLowerCase();
   const resolvedId = resolvePaymentMethodIconId(method, iconId);
-  const fluentKey = resolveFluentEmojiKey(resolvedId);
+  const Glyph = GLYPHS[resolveGlyphKey(resolvedId)];
+  const opticalSize = badge ? Math.max(size + 5, 19) : Math.max(size, 12);
 
-  const opticalSize = badge
-    ? Math.max(size + 5, 19)
-    : size <= 10
-    ? 12
-    : size <= 12
-    ? 14
-    : size <= 14
-    ? size + 2
-    : size <= 16
-    ? size + 2
-    : size;
-
-  // Preserve official payment service logos for Swish and Klarna unless the user chose a custom icon
   const isDefaultSwish =
-    (rawMethod === 'swish' || rawMethod.includes('swish')) &&
-    (!iconId || iconId === 'smartphone' || iconId === 'swish');
-
+    rawMethod.includes('swish') && (!iconId || iconId === 'smartphone' || iconId === 'swish');
   const isDefaultKlarna =
-    (rawMethod === 'klarna' || rawMethod.includes('klarna')) &&
-    (!iconId || iconId === 'shopping-bag' || iconId === 'klarna');
+    rawMethod.includes('klarna') && (!iconId || iconId === 'shopping-bag' || iconId === 'klarna');
 
   if (isDefaultSwish) {
     return (
@@ -871,7 +983,7 @@ export const PaymentMethodIcon: React.FC<PaymentMethodIconProps> = ({
 
   return (
     <span className={`inline-flex items-center justify-center shrink-0 select-none ${className}`}>
-      <FluentEmojiSvg fluentKey={fluentKey} size={opticalSize} />
+      <Glyph size={opticalSize} weight="fill" aria-hidden="true" />
     </span>
   );
 };

@@ -113,8 +113,8 @@
 
   /* Central Semantic Radii */
   --radius-sheet: 28px; /* bottenark (överkant) */
-  --radius-card: 26px;
-  --radius-card-nested: 16px;
+  --radius-card: 22px;
+  --radius-card-nested: 14px;
   --radius-btn: var(--radius-button);
   --radius-button: 14px;
   --radius-button-sm: 10px;
@@ -749,7 +749,7 @@ h6 {
   --text-primary: #16141F;
   --text-metric-label: #16141F;
   --text-secondary: #56546B;
-  --text-tertiary: #75738A;
+  --text-tertiary: #6F6D84;
   --text-muted: #8F8DA3;
   --text-disabled: #AEACBF;
   --text-inactive: #8F8DA3;
@@ -771,6 +771,29 @@ h6 {
   --surface-nested: #F5F4FA;
   --remaining-today-gradient: #FFFFFF;
 
+  /* Inset grouped (iOS): grå fyllning för grupper i ark, avdelare, tryckfeedback */
+  --fill-grouped: #F3F2F8;
+  --separator: rgba(22, 20, 31, 0.08);
+  --press-overlay: rgba(22, 20, 31, 0.05);
+  --header-btn-bg: #FFFFFF;
+  --logo-tile-ring: rgba(22, 20, 31, 0.06);
+
+  /* Segmentväljare: grått spår, vit vald tumme */
+  --segment-track: rgba(118, 118, 128, 0.12);
+  --segment-thumb: #FFFFFF;
+  --segment-thumb-shadow: 0 3px 8px rgba(0, 0, 0, 0.08), 0 1px 1px rgba(0, 0, 0, 0.04);
+
+  /* Bottenmenyn (glas) */
+  --nav-glass-bg: rgba(255, 255, 255, 0.72);
+  --nav-glass-border: rgba(22, 20, 31, 0.06);
+  --nav-active-bg: rgba(91, 61, 245, 0.08);
+  --fab-shadow: 0 1px 2px rgba(40, 20, 140, 0.2), 0 8px 20px -10px rgba(40, 20, 140, 0.45);
+
+  /* Kategorirutor: hur starkt kategorifärgen tonar rutan och ikonen */
+  --cat-tile-mix: 13%;
+  --cat-glyph-mix: 100%;
+  --cat-glyph-base: #000000;
+
   /* Custom Elevation Levels - Minimal Card Shadows, Discreet Nav & Menu Shadows */
   --shadow-level-1: 0 2px 10px -4px rgba(36, 24, 99, 0.04);
   --shadow-level-2: 0 8px 24px -6px rgba(36, 24, 99, 0.07);
@@ -783,7 +806,7 @@ h6 {
   /* Ruta bakom kategoriikoner (samma form som butikslogor) */
   --icon-tile-bg: #EFEDF7;
   --cta-fg: #FFFFFF;
-  --cta-shadow: 0 8px 20px -10px rgba(91, 61, 245, 0.55);
+  --cta-shadow: 0 1px 2px rgba(40, 20, 140, 0.18);
   --accent-hover: #4E30E6;
   --accent-pressed: #4224CC;
   --accent-gradient: none;
@@ -806,8 +829,8 @@ h6 {
 
   --modal-bg: var(--bg-color);
   --shadow-modal: 0 20px 44px -12px rgba(36, 24, 99, 0.14), 0 4px 12px -4px rgba(36, 24, 99, 0.05);
-  --shadow-nav: 0 10px 30px -6px rgba(36, 24, 99, 0.10), 0 2px 8px -2px rgba(36, 24, 99, 0.05);
-  --shadow-subtle: 0 1px 4px rgba(36, 24, 99, 0.03);
+  --shadow-nav: 0 10px 30px -10px rgba(22, 20, 31, 0.18), 0 1px 3px rgba(22, 20, 31, 0.06);
+  --shadow-subtle: 0 1px 2px rgba(22, 20, 31, 0.04), 0 2px 10px -4px rgba(22, 20, 31, 0.05);
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
   --bg-hover: #F1EFF8;
@@ -849,7 +872,7 @@ h6 {
 
   --date-active-bg: #5B3DF5;
   --date-active-color: #FFFFFF;
-  --date-active-shadow: 0 8px 18px -8px rgba(91, 61, 245, 0.6);
+  --date-active-shadow: none;
   --date-inactive-bg: transparent;
   --date-inactive-border: transparent;
   --date-inactive-color: #66647A;
@@ -973,36 +996,53 @@ h6 {
   --bg-gradient: none;
 
   /* Layer 1: Surface */
-  --surface-color: #15141C;
-  --surface-gradient: #15141C;
-  --surface-solid: #15141C;
+  --surface-color: #18171F;
+  --surface-gradient: #18171F;
+  --surface-solid: #18171F;
 
   /* Layer 2: Surface Raised (Bottom sheets, modals, popups, dropdowns, chips) */
-  --surface-raised: #1D1B26;
-  --surface-elevated: #1D1B26;
-  --surface-elevated-gradient: #1D1B26;
+  --surface-raised: #22212B;
+  --surface-elevated: #22212B;
+  --surface-elevated-gradient: #22212B;
+
+  /* Inset grouped – mörkt: grupper är ljusare än arket (som iOS) */
+  --fill-grouped: #24232E;
+  --separator: rgba(255, 255, 255, 0.08);
+  --press-overlay: rgba(255, 255, 255, 0.06);
+  --header-btn-bg: rgba(255, 255, 255, 0.08);
+  --logo-tile-ring: transparent;
+  --segment-track: rgba(118, 118, 128, 0.24);
+  --segment-thumb: #3A3946;
+  --segment-thumb-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  --nav-glass-bg: rgba(30, 29, 38, 0.72);
+  --nav-glass-border: rgba(255, 255, 255, 0.08);
+  --nav-active-bg: rgba(167, 151, 255, 0.14);
+  --fab-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.7);
+  --cat-tile-mix: 22%;
+  --cat-glyph-mix: 78%;
+  --cat-glyph-base: #FFFFFF;
   --modal-bg: var(--bg-color);
 
   /* Layer 3: Surface High (Fields inside modals, switch off, tooltip, toast, progress track) */
-  --surface-high: #1D1B26;
-  --surface-muted: #1D1B26;
-  --surface-input: #1D1B26;
-  --surface-hover: #252331;
-  --bg-hover: #252331;
+  --surface-high: #22212B;
+  --surface-muted: #22212B;
+  --surface-input: #22212B;
+  --surface-hover: #26252F;
+  --bg-hover: #26252F;
   --surface-tint: transparent;
 
   /* Typography */
   --text-primary: #F5F4FA;
   --text-metric-label: #F5F4FA;
-  --text-secondary: #9D9BB0;
-  --text-tertiary: #8F8DA3;
-  --text-muted: #6F6D84;
+  --text-secondary: #A3A1B5;
+  --text-tertiary: #8E8CA2;
+  --text-muted: #77758C;
   --text-disabled: #48484A;
   --text-inactive: #6E6E73;
 
   /* Borders */
-  --border-subtle: rgba(255, 255, 255, 0.07);
-  --border-color: rgba(255, 255, 255, 0.07);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-color: rgba(255, 255, 255, 0.06);
   --border-control: rgba(255, 255, 255, 0.12);
   --border-strong: rgba(255, 255, 255, 0.18);
   --border-divider: rgba(255, 255, 255, 0.065);
@@ -1013,7 +1053,7 @@ h6 {
   --cta-bg: #6B4EFF;
   --icon-tile-bg: rgba(255, 255, 255, 0.07);
   --cta-fg: #FFFFFF;
-  --cta-shadow: 0 8px 24px -12px rgba(107, 78, 255, 0.7);
+  --cta-shadow: none;
   --accent-hover: #8B77FF;
   --accent-pressed: #6A52F0;
   --on-accent: #FFFFFF;
@@ -1025,17 +1065,17 @@ h6 {
   --btn-primary-text: #FFFFFF;
   --btn-primary-hover: #8B77FF;
   --btn-primary-pressed: #6A52F0;
-  --btn-secondary-bg: #1D1B26;
+  --btn-secondary-bg: #22212B;
 
   --chip-bg: rgba(255, 255, 255, 0.06);
   --chip-text: #98989F;
   --chip-active-bg: #7A63FF;
   --chip-active-text: #FFFFFF;
 
-  --transaction-bg: #15141C;
-  --card-nested-bg: #1D1B26;
-  --surface-nested: #1D1B26;
-  --remaining-today-gradient: #15141C;
+  --transaction-bg: #18171F;
+  --card-nested-bg: #24232E;
+  --surface-nested: #24232E;
+  --remaining-today-gradient: #18171F;
   --card-bg: var(--surface-color);
   --bg-primary: var(--bg-color);
 
@@ -1814,13 +1854,20 @@ b {
 
 /* ==========================================================================
    DEJZ UNIFIED GLOBAL UI DESIGN SYSTEM (.ui-*)
-   Centralized styling for pages, cards, lists, rows, sheets, buttons & inputs
+   iOS-liknande "inset grouped": grå bakgrund, vita kort utan kantlinjer,
+   avdelare som börjar efter ikonen, tydlig 3-nivåers typografi
+   (rubrik / radtext 15 px / sekundärtext 13 px) och 8-punktsavstånd.
    ========================================================================== */
 @layer components {
   /* 1. Page & Section Structure */
   .ui-page {
-    @apply space-y-5 sm:space-y-6 pb-40 sm:pb-44;
+    @apply space-y-6 pb-40 sm:pb-44;
     animation: fadeIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  /* Stor sidrubrik överst på flikarna (iOS "Large Title") */
+  .ui-large-title {
+    @apply font-display text-[30px] font-bold leading-[1.1] tracking-[-0.03em] text-[var(--text-primary)] px-1 pt-1 pb-4;
   }
 
   .ui-section {
@@ -1832,49 +1879,74 @@ b {
   }
 
   .ui-section-title {
-    @apply font-display font-semibold text-[16px] sm:text-[17px] tracking-[-0.015em] text-[var(--text-primary)] flex items-center gap-1.5;
+    @apply font-display font-semibold text-[19px] leading-tight tracking-[-0.02em] text-[var(--text-primary)] flex items-center gap-1.5;
   }
 
   .ui-section-meta {
-    @apply text-meta font-normal text-[var(--text-secondary)] tabular-nums;
+    @apply text-footnote font-normal text-[var(--text-secondary)] tabular-nums;
   }
 
   .ui-section-action {
-    @apply py-1.5 px-3 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-meta font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 transition-all flex items-center gap-1 cursor-pointer;
+    @apply h-8 px-3 rounded-full bg-[var(--accent-soft)] text-footnote font-semibold text-[var(--on-accent-container)] hover:opacity-85 active:scale-[0.97] transition-all flex items-center gap-1 cursor-pointer;
   }
 
   .ui-date-header {
-    @apply flex items-center justify-between gap-2 px-1.5 pb-1.5 pt-1 text-footnote;
+    @apply flex items-center justify-between gap-2 px-1 pb-2 pt-1 text-callout;
   }
 
-  /* 2. Cards & Grouped Containers */
+  /* 2. Cards & Grouped Containers – inga kantlinjer, bara yta + mjuk skugga */
   .ui-card {
-    @apply bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[22px] shadow-subtle overflow-hidden;
+    @apply bg-[var(--surface-color)] rounded-card shadow-[var(--card-shadow)] overflow-hidden;
   }
 
   .ui-card-p {
-    @apply bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[22px] shadow-subtle p-4 sm:p-5;
+    @apply bg-[var(--surface-color)] rounded-card shadow-[var(--card-shadow)] p-4 sm:p-5;
   }
 
   .ui-list-card {
-    @apply bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[22px] px-4 py-0.5 sm:px-4 sm:py-1 divide-y divide-[var(--border-subtle)] overflow-hidden;
+    @apply bg-[var(--surface-color)] rounded-card shadow-[var(--card-shadow)] px-4 overflow-hidden;
+  }
+
+  /* Avdelare mellan rader: börjar efter ikonen (40 px + 12 px mellanrum) */
+  .ui-list-card > * + *,
+  .ui-inset-divide > * + * {
+    position: relative;
+  }
+  .ui-list-card > * + *::before,
+  .ui-inset-divide > * + *::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: var(--row-inset, 52px);
+    right: 0;
+    height: 1px;
+    background-color: var(--separator);
+    pointer-events: none;
+    z-index: 20;
+  }
+  .ui-inset-divide {
+    --row-inset: 68px;
+  }
+  /* Listor med bockruta före ikonen (introduktionen) */
+  .ui-list-card-check {
+    --row-inset: 92px;
   }
 
   .ui-group-card {
-    @apply bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[22px] divide-y divide-[var(--border-subtle)] overflow-hidden;
+    @apply bg-[var(--surface-color)] rounded-card shadow-[var(--card-shadow)] divide-y divide-[var(--separator)] overflow-hidden;
   }
 
-  /* Admin & Settings Lists — clean 48px rows, regular 13px row titles, subtle dividers */
+  /* Admin & Settings Lists — 52 px rader, avdelare indragna */
   .ui-admin-card {
-    @apply bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[22px] overflow-hidden;
+    @apply bg-[var(--surface-color)] rounded-card shadow-[var(--card-shadow)] overflow-hidden;
   }
 
   .ui-admin-row {
-    @apply relative w-full px-4 py-3 sm:py-3.5 min-h-[48px] flex items-center justify-between gap-3 text-footnote sm:text-callout font-normal text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer;
+    @apply relative w-full px-4 py-3 min-h-[52px] flex items-center justify-between gap-3 text-subhead font-normal text-left active:bg-[var(--press-overlay)] transition-colors cursor-pointer;
   }
 
   .ui-admin-row-static {
-    @apply relative w-full px-4 py-3 sm:py-3.5 min-h-[48px] flex items-center justify-between gap-3 text-footnote sm:text-callout font-normal text-left;
+    @apply relative w-full px-4 py-3 min-h-[52px] flex items-center justify-between gap-3 text-subhead font-normal text-left;
   }
 
   .ui-admin-row:not(:last-child)::after,
@@ -1882,10 +1954,10 @@ b {
     content: '';
     position: absolute;
     bottom: 0;
-    left: 1rem;
-    right: 1rem;
+    left: 3.125rem;
+    right: 0;
     height: 1px;
-    background-color: var(--border-subtle);
+    background-color: var(--separator);
     pointer-events: none;
   }
 
@@ -1898,7 +1970,7 @@ b {
   }
 
   .ui-admin-value {
-    @apply min-w-[2.25rem] text-right text-meta font-normal text-[var(--text-secondary)] tabular-nums;
+    @apply min-w-[2.25rem] text-right text-callout font-normal text-[var(--text-secondary)] tabular-nums;
   }
 
   .ui-admin-chevron {
@@ -1909,78 +1981,93 @@ b {
     @apply py-2 px-3 text-xs font-normal text-[var(--text-muted)] hover:text-[var(--text-secondary)] flex items-center justify-center gap-1.5 transition-colors cursor-pointer;
   }
 
+  /* Grupperade rader i ark: grå fyllning, inga kanter, indragna avdelare */
   .ui-sheet-group {
-    @apply rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] text-footnote overflow-hidden;
+    @apply rounded-card-nested bg-[var(--fill-grouped)] text-callout overflow-hidden;
+  }
+  .ui-sheet-group > * + * {
+    position: relative;
+  }
+  .ui-sheet-group > * + *::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 1rem;
+    right: 0;
+    height: 1px;
+    background-color: var(--separator);
+    pointer-events: none;
+    z-index: 20;
   }
 
   .ui-sheet-box {
-    @apply p-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)];
+    @apply p-4 rounded-card-nested bg-[var(--fill-grouped)];
   }
 
   /* 3. List Rows & Transaction Rows */
   .ui-tx-row {
-    @apply w-full py-2.5 sm:py-3 flex items-center justify-between gap-3 text-footnote sm:text-callout text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer;
+    @apply w-full min-h-[60px] py-2.5 flex items-center justify-between gap-3 text-subhead text-left transition-opacity active:opacity-60 cursor-pointer;
   }
 
   .ui-tx-row-static {
-    @apply w-full py-2.5 sm:py-3 flex items-center justify-between gap-3 text-footnote sm:text-callout text-left;
+    @apply w-full min-h-[60px] py-2.5 flex items-center justify-between gap-3 text-subhead text-left;
   }
 
   .ui-row {
-    @apply w-full px-4 py-3 min-h-[46px] flex items-center justify-between gap-3 text-footnote sm:text-callout text-left;
+    @apply w-full px-4 py-3 min-h-[50px] flex items-center justify-between gap-3 text-callout text-left;
   }
 
   .ui-locked-row {
-    @apply w-full px-4 py-3 min-h-[46px] flex items-center justify-between gap-3 text-footnote sm:text-callout text-left bg-[var(--surface-hover)]/45 text-[var(--text-secondary)] select-none;
+    @apply w-full px-4 py-3 min-h-[50px] flex items-center justify-between gap-3 text-callout text-left text-[var(--text-secondary)] select-none;
   }
 
   .ui-row-btn {
-    @apply w-full px-4 py-3 min-h-[46px] flex items-center justify-between gap-3 text-footnote sm:text-callout text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer;
+    @apply w-full px-4 py-3 min-h-[50px] flex items-center justify-between gap-3 text-callout text-left active:bg-[var(--press-overlay)] transition-colors cursor-pointer;
   }
 
   .ui-input-row {
-    @apply w-full px-4 py-3 min-h-[48px] flex items-center justify-between gap-3 text-footnote sm:text-callout cursor-text hover:bg-[var(--surface-color)]/60 focus-within:bg-[var(--surface-color)] transition-colors;
+    @apply w-full px-4 py-3 min-h-[50px] flex items-center justify-between gap-3 text-callout cursor-text transition-colors;
   }
 
   .ui-row-title {
-    @apply font-normal text-footnote sm:text-callout tracking-[-0.005em] leading-snug text-[var(--text-primary)] block truncate;
+    @apply font-medium text-subhead tracking-[-0.01em] leading-snug text-[var(--text-primary)] block truncate;
   }
 
   .ui-row-subtitle {
-    @apply text-meta font-normal text-[var(--text-muted)] flex items-center gap-1.5 mt-0.5 truncate;
+    @apply text-footnote font-normal text-[var(--text-tertiary)] flex items-center gap-1.5 mt-0.5 truncate;
   }
 
   .ui-info-label {
-    @apply text-footnote font-normal text-[var(--text-secondary)] shrink-0;
+    @apply text-callout font-normal text-[var(--text-primary)] shrink-0;
   }
 
   .ui-info-value {
-    @apply text-footnote font-normal text-[var(--text-primary)];
+    @apply text-callout font-normal text-[var(--text-secondary)];
   }
 
   .ui-row-amount {
-    @apply font-display font-semibold text-callout tracking-[-0.01em] text-[var(--text-primary)] tabular-nums block;
+    @apply font-display font-semibold text-subhead tracking-[-0.015em] text-[var(--text-primary)] tabular-nums block;
   }
 
   .ui-row-amount-income {
-    @apply font-display font-semibold text-callout tracking-[-0.01em] text-positive tabular-nums block;
+    @apply font-display font-semibold text-subhead tracking-[-0.015em] text-positive tabular-nums block;
   }
 
   .ui-row-meta {
-    @apply text-caption font-normal text-[var(--text-muted)] tabular-nums block mt-0.5;
+    @apply text-meta font-normal text-[var(--text-tertiary)] tabular-nums block mt-0.5;
   }
 
   /* 4. 3-Column Summary & Stat Grids */
   .ui-stat-grid {
-    @apply grid grid-cols-3 divide-x divide-[var(--border-subtle)];
+    @apply grid grid-cols-3 divide-x divide-[var(--separator)];
   }
 
   .ui-stat-label {
-    @apply text-meta font-normal text-[var(--text-secondary)] block truncate;
+    @apply text-footnote font-normal text-[var(--text-secondary)] block truncate;
   }
 
   .ui-stat-value {
-    @apply font-display font-semibold text-callout sm:text-callout tracking-[-0.01em] text-[var(--text-primary)] tabular-nums block mt-0.5 truncate;
+    @apply font-display font-semibold text-subhead tracking-[-0.015em] text-[var(--text-primary)] tabular-nums block mt-0.5 truncate;
   }
 
   .ui-stat-sub {
@@ -1989,117 +2076,138 @@ b {
 
   /* 5. BottomSheet Headers, Heroes & Icon Badges */
   .ui-sheet-header {
-    @apply sticky top-0 z-30 -mx-5 px-5 bg-[var(--surface-color)] pt-1.5 flex items-center justify-between pb-3.5 border-b border-[var(--border-subtle)] mb-5;
+    @apply sticky top-0 z-30 -mx-5 px-5 bg-[var(--surface-color)] pt-1 flex items-center justify-between pb-3 mb-4;
   }
 
   .ui-sheet-sub-header {
-    @apply sticky top-0 z-30 -mx-5 px-5 bg-[var(--surface-color)] pt-1.5 flex items-center justify-between pb-3.5 border-b border-[var(--border-subtle)];
+    @apply sticky top-0 z-30 -mx-5 px-5 bg-[var(--surface-color)] pt-1 flex items-center justify-between pb-3;
   }
 
   .ui-sheet-title {
-    @apply font-display font-semibold text-subhead tracking-[-0.01em] leading-snug text-[var(--text-primary)] truncate;
+    @apply font-display font-semibold text-[17px] tracking-[-0.02em] leading-snug text-[var(--text-primary)] truncate;
   }
 
+  /* Rund ikonknapp (stäng, hjärta …) – grå fylld cirkel som i iOS */
   .ui-icon-btn {
-    @apply w-8 h-8 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 flex items-center justify-center transition-all cursor-pointer shrink-0;
+    @apply w-8 h-8 rounded-full bg-[var(--fill-grouped)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-[0.92] flex items-center justify-center transition-all cursor-pointer shrink-0;
   }
 
   .ui-icon-btn-surface {
-    @apply w-8 h-8 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 flex items-center justify-center transition-all cursor-pointer shrink-0;
+    @apply w-8 h-8 rounded-full bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-[0.92] flex items-center justify-center transition-all cursor-pointer shrink-0;
+  }
+
+  /* Toppradens knappar (sekretess, feedback, notiser) – 36 px cirklar */
+  .ui-header-btn {
+    @apply w-9 h-9 rounded-full bg-[var(--header-btn-bg)] text-[var(--text-primary)] active:scale-[0.92] transition-all flex items-center justify-center cursor-pointer shrink-0;
   }
 
   .ui-hero-header {
-    @apply text-center pb-5 border-b border-[var(--border-subtle)];
+    @apply text-center pb-5;
   }
 
   .ui-hero-icon {
-    @apply w-15 h-15 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center mx-auto mb-3 text-[var(--text-primary)] shrink-0;
+    @apply w-15 h-15 rounded-2xl bg-[var(--fill-grouped)] flex items-center justify-center mx-auto mb-3 text-[var(--text-primary)] shrink-0;
   }
 
   .ui-hero-amount {
-    @apply font-display font-semibold text-2xl sm:text-[28px] text-[var(--text-primary)] tabular-nums tracking-[-0.02em];
+    @apply font-display font-bold text-[32px] leading-none text-[var(--text-primary)] tabular-nums tracking-[-0.035em];
   }
 
   .ui-hero-amount-income {
-    @apply font-display font-semibold text-2xl sm:text-[28px] text-positive tabular-nums tracking-[-0.02em];
+    @apply font-display font-bold text-[32px] leading-none text-positive tabular-nums tracking-[-0.035em];
   }
 
   .ui-icon-badge {
-    @apply w-9 h-9 rounded-xl bg-[var(--bg-color)] flex items-center justify-center text-[var(--text-primary)] shrink-0;
+    @apply w-9 h-9 rounded-xl bg-[var(--fill-grouped)] flex items-center justify-center text-[var(--text-primary)] shrink-0;
   }
 
-  /* 6. Buttons & Confirmation Bars (Compact 48px Capsule CTAs & Unified Pill Actions) */
+  /* Kategoriruta: tonad med kategorins färg (--cat sätts av CategoryIcon/categoryColorStyle) */
+  .ui-cat-tile {
+    background-color: color-mix(in srgb, var(--cat, var(--text-muted)) var(--cat-tile-mix), transparent);
+    color: color-mix(in srgb, var(--cat, var(--text-muted)) var(--cat-glyph-mix), var(--cat-glyph-base));
+  }
+  .ui-cat-glyph {
+    color: color-mix(in srgb, var(--cat, var(--text-muted)) var(--cat-glyph-mix), var(--cat-glyph-base));
+  }
+
+  /* Ruta för butikslogor – samma form som kategorirutan, tunn kant mot vita kort */
+  .ui-logo-tile {
+    background-color: #FFFFFF;
+    box-shadow: inset 0 0 0 1px var(--logo-tile-ring);
+  }
+
+  /* 6. Buttons – 52 px huvudknappar, röda åtgärder som ren text */
   .ui-btn-primary {
-    @apply w-full h-[48px] px-5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-callout sm:text-callout tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] disabled:opacity-40 transition-all cursor-pointer;
+    @apply w-full h-[52px] px-5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-subhead tracking-[-0.01em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.97] disabled:opacity-40 transition-all cursor-pointer;
   }
 
   .ui-btn-primary-lg {
-    @apply w-full h-[48px] px-5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-callout sm:text-callout tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] disabled:opacity-40 transition-all cursor-pointer;
+    @apply w-full h-[52px] px-5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-subhead tracking-[-0.01em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.97] disabled:opacity-40 transition-all cursor-pointer;
   }
 
   .ui-btn-secondary {
-    @apply w-full h-[48px] px-5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] text-callout sm:text-callout font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
+    @apply w-full h-[52px] px-5 rounded-full bg-[var(--fill-grouped)] text-subhead font-semibold text-[var(--text-primary)] hover:opacity-90 active:scale-[0.97] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
   }
 
   .ui-btn-danger {
-    @apply w-full h-[48px] px-5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] text-callout sm:text-callout font-semibold text-negative hover:opacity-80 active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
+    @apply w-full h-12 px-5 rounded-full bg-transparent text-subhead font-medium text-negative hover:opacity-80 active:opacity-60 disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
   }
 
   .ui-btn-sm {
-    @apply px-3 py-1.5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] text-meta font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0;
+    @apply h-8 px-3 rounded-full bg-[var(--fill-grouped)] text-footnote font-semibold text-[var(--text-primary)] hover:opacity-85 active:scale-[0.96] flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0;
   }
 
   .ui-btn-sm-primary {
-    @apply px-3 py-1.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] text-meta font-semibold hover:opacity-90 active:scale-95 flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0;
+    @apply h-8 px-3 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] text-footnote font-semibold hover:opacity-90 active:scale-[0.96] flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0;
   }
 
   .ui-confirm-danger {
-    @apply p-3 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-3 text-xs;
+    @apply p-3 rounded-xl bg-[var(--fill-grouped)] flex items-center justify-between gap-3 text-xs;
   }
 
   .ui-confirm-neutral {
-    @apply p-3 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-3 text-xs;
+    @apply p-3 rounded-xl bg-[var(--fill-grouped)] flex items-center justify-between gap-3 text-xs;
   }
 
-  /* 7. Segmented Controls, Chips, Switches, Inputs & Day Buttons */
+  /* 7. Segmented Controls (iOS: grått spår, vit vald "tumme"), Chips, Switches, Inputs */
   .ui-segmented {
-    @apply grid p-1 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)];
+    @apply grid p-[3px] rounded-xl bg-[var(--segment-track)];
   }
 
   .ui-segmented-surface {
-    @apply grid p-1 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)];
+    @apply grid p-[3px] rounded-xl bg-[var(--segment-track)];
   }
 
   .ui-segmented-tab {
-    @apply py-1.5 px-3 rounded-lg text-meta sm:text-footnote font-normal transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)];
+    @apply h-8 px-3 rounded-[9px] text-footnote font-medium transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)];
   }
 
   .ui-segmented-tab-active {
-    @apply py-1.5 px-3 rounded-lg text-meta sm:text-footnote font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 bg-[var(--text-primary)] text-[var(--bg-color)];
+    @apply h-8 px-3 rounded-[9px] text-footnote font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 bg-[var(--segment-thumb)] text-[var(--text-primary)] shadow-[var(--segment-thumb-shadow)];
   }
 
   .ui-chip {
-    @apply px-3 py-1.5 rounded-full text-meta font-normal transition-all cursor-pointer shrink-0 border flex items-center gap-1.5 bg-[var(--surface-color)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)];
+    @apply h-8 px-3 rounded-full text-footnote font-medium transition-all cursor-pointer shrink-0 flex items-center gap-1.5 bg-[var(--surface-color)] text-[var(--text-secondary)] shadow-[var(--card-shadow)];
   }
 
   .ui-chip-active {
-    @apply px-3 py-1.5 rounded-full text-meta font-semibold transition-all cursor-pointer shrink-0 border flex items-center gap-1.5 bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)];
+    @apply h-8 px-3 rounded-full text-footnote font-semibold transition-all cursor-pointer shrink-0 flex items-center gap-1.5 bg-[var(--text-primary)] text-[var(--bg-color)];
   }
 
   .ui-search-box {
-    @apply relative flex items-center bg-[var(--surface-color)] border border-[var(--border-subtle)] focus-within:border-[var(--text-primary)] rounded-xl px-3 py-2 transition-colors;
+    @apply relative flex items-center h-11 bg-[var(--surface-color)] shadow-[var(--card-shadow)] rounded-xl px-3 transition-shadow focus-within:shadow-[0_0_0_2px_var(--accent-soft)];
   }
 
   .ui-search-input {
-    @apply w-full bg-transparent border-0 p-0 pl-2 pr-6 text-callout font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none;
+    @apply w-full bg-transparent border-0 p-0 pl-2 pr-6 text-subhead font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none;
   }
 
   .ui-box-input {
-    @apply w-full p-3.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-callout font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/60 focus:outline-none focus:border-[var(--text-primary)] transition-colors;
+    @apply w-full p-3.5 rounded-card-nested bg-[var(--fill-grouped)] border border-transparent text-subhead font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/70 focus:outline-none focus:border-[var(--accent-color)] transition-colors;
   }
 
   .ui-inline-input {
-    @apply flex-1 min-w-0 bg-transparent border-0 p-0 text-callout font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/70 text-right focus:outline-none transition-colors;
+    @apply flex-1 min-w-0 bg-transparent border-0 p-0 text-callout font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/80 text-right focus:outline-none transition-colors;
   }
 
   .ui-inline-amount-input {
@@ -2110,9 +2218,9 @@ b {
     -webkit-appearance: none;
     appearance: none;
     width: 100%;
-    height: 8px;
+    height: 6px;
     border-radius: 9999px;
-    background: var(--border-subtle);
+    background: var(--segment-track);
     outline: none;
     cursor: pointer;
   }
@@ -2123,9 +2231,9 @@ b {
     width: 28px;
     height: 28px;
     border-radius: 9999px;
-    background: var(--text-primary);
-    border: 3px solid var(--surface-color);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    background: #FFFFFF;
+    border: 0;
+    box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 3px 8px rgba(0, 0, 0, 0.15), 0 3px 1px rgba(0, 0, 0, 0.06);
     cursor: pointer;
     transition: transform 0.12s ease;
   }
@@ -2138,15 +2246,15 @@ b {
     width: 28px;
     height: 28px;
     border-radius: 9999px;
-    background: var(--text-primary);
-    border: 3px solid var(--surface-color);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    background: #FFFFFF;
+    border: 0;
+    box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 3px 8px rgba(0, 0, 0, 0.15), 0 3px 1px rgba(0, 0, 0, 0.06);
     cursor: pointer;
     transition: transform 0.12s ease;
   }
 
   .ui-switch {
-    @apply w-11 h-6 rounded-full transition-colors relative shrink-0 cursor-pointer;
+    @apply w-[51px] h-[31px] rounded-full transition-colors duration-200 relative shrink-0 cursor-pointer;
   }
 
   .ui-switch-on {
@@ -2154,11 +2262,11 @@ b {
   }
 
   .ui-switch-off {
-    @apply bg-[var(--border-subtle)];
+    @apply bg-[var(--segment-track)];
   }
 
   .ui-switch-thumb {
-    @apply w-5 h-5 rounded-full bg-white shadow-sm absolute top-0.5 left-0.5 transition-transform;
+    @apply w-[27px] h-[27px] rounded-full bg-white absolute top-0.5 left-0.5 transition-transform duration-200 shadow-[0_3px_8px_rgba(0,0,0,0.15),0_3px_1px_rgba(0,0,0,0.06)];
   }
 
   .ui-switch-thumb-on {
@@ -2166,11 +2274,11 @@ b {
   }
 
   .ui-day-btn {
-    @apply h-10 sm:h-11 rounded-2xl font-display text-footnote sm:text-footnote tabular-nums transition-all cursor-pointer flex items-center justify-center bg-transparent text-[var(--text-primary)] hover:bg-[var(--surface-color)] font-medium;
+    @apply h-10 sm:h-11 rounded-xl font-display text-callout tabular-nums transition-all cursor-pointer flex items-center justify-center bg-transparent text-[var(--text-primary)] hover:bg-[var(--fill-grouped)] font-medium;
   }
 
   .ui-day-btn-active {
-    @apply h-10 sm:h-11 rounded-2xl font-display text-footnote sm:text-footnote tabular-nums transition-all cursor-pointer flex items-center justify-center bg-[var(--text-primary)] text-[var(--bg-color)] font-semibold shadow-sm scale-[1.04];
+    @apply h-10 sm:h-11 rounded-xl font-display text-callout tabular-nums transition-all cursor-pointer flex items-center justify-center bg-[var(--text-primary)] text-[var(--bg-color)] font-semibold;
   }
 
   /* 8. Empty States */
@@ -2187,83 +2295,133 @@ b {
   }
 
   .ui-empty-title {
-    @apply font-display font-semibold text-subhead sm:text-[16px] text-[var(--text-primary)] tracking-[-0.01em];
+    @apply font-display font-semibold text-[17px] text-[var(--text-primary)] tracking-[-0.015em];
   }
 
   .ui-empty-sub {
-    @apply text-footnote font-normal text-[var(--text-secondary)] mt-1 max-w-[260px] mx-auto leading-relaxed;
+    @apply text-callout font-normal text-[var(--text-secondary)] mt-1 max-w-[280px] mx-auto leading-relaxed;
   }
 
 
   /* --- Komponentklasser (ett ställe per mönster; byt utseende här) --- */
   .ui-step-title {
-    @apply font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)];
+    @apply font-display font-bold text-[28px] sm:text-3xl leading-[1.12] tracking-[-0.03em] text-[var(--text-primary)];
   }
+  /* Fältetikett ("Namn", "Belopp") – liten text i vanlig skiftläge, inte VERSALER */
   .ui-field-label {
-    @apply text-caption font-semibold uppercase tracking-wider text-[var(--text-muted)];
+    @apply text-footnote font-medium text-[var(--text-secondary)];
   }
   .ui-shortcut-tile {
-    @apply p-3.5 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-left flex items-center gap-2.5 transition-colors cursor-pointer;
+    @apply p-3.5 rounded-2xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-left flex items-center gap-2.5 transition-all active:scale-[0.97] cursor-pointer;
   }
   .ui-field-card {
-    @apply rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4;
+    @apply rounded-card-nested bg-[var(--fill-grouped)] p-4;
   }
   .ui-action-tile {
-    @apply p-2.5 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer text-center;
+    @apply p-2.5 min-h-[72px] rounded-card-nested bg-[var(--fill-grouped)] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-[0.96] cursor-pointer text-center;
   }
   .ui-action-tile-label {
-    @apply text-caption font-medium text-[var(--text-primary)] truncate max-w-full;
+    @apply text-meta font-medium text-[var(--text-primary)] truncate max-w-full;
   }
   .ui-field-input-lg {
-    @apply w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none;
+    @apply w-full bg-transparent border-0 p-0 font-display font-semibold text-xl text-[var(--text-primary)] tracking-[-0.02em] placeholder-[var(--text-muted)]/60 focus:outline-none;
   }
   .ui-field-input {
-    @apply w-full bg-transparent border-0 p-0 text-base font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/55 focus:outline-none;
+    @apply w-full bg-transparent border-0 p-0 text-base font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/70 focus:outline-none;
   }
   .ui-chip-sm {
-    @apply px-2.5 py-1 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 hover:bg-[var(--surface-hover)] cursor-pointer;
+    @apply h-7 px-2.5 rounded-full bg-[var(--surface-color)] text-meta font-medium text-[var(--text-primary)] flex items-center gap-1.5 shadow-[var(--card-shadow)] active:scale-[0.96] transition-all cursor-pointer;
   }
   .ui-dialog-btn-primary {
-    @apply w-full py-2.5 px-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer;
+    @apply w-full h-11 px-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] text-callout font-semibold hover:opacity-90 active:scale-[0.97] transition-all cursor-pointer;
   }
   .ui-dialog-btn-secondary {
-    @apply w-full py-2.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] transition-all cursor-pointer;
+    @apply w-full h-11 px-4 rounded-full bg-[var(--fill-grouped)] text-callout font-semibold text-[var(--text-primary)] hover:opacity-90 active:scale-[0.97] transition-all cursor-pointer;
   }
   .ui-btn-primary-flow {
-    @apply w-full py-3.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer;
+    @apply w-full h-[52px] rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-subhead flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.97] transition-all cursor-pointer;
   }
   .ui-pill-btn {
-    @apply h-8 px-3.5 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-footnote font-semibold text-[var(--text-primary)] inline-flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer;
+    @apply h-8 px-3.5 rounded-full bg-[var(--fill-grouped)] text-footnote font-semibold text-[var(--text-primary)] inline-flex items-center gap-1.5 active:scale-[0.96] transition-all cursor-pointer;
   }
   .ui-text-btn {
-    @apply w-16 h-8 text-left text-callout font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer;
+    @apply w-16 h-8 text-left text-subhead font-normal text-[var(--accent-color)] hover:opacity-80 cursor-pointer;
   }
   .ui-checkbox {
-    @apply w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors;
+    @apply w-[22px] h-[22px] rounded-full flex items-center justify-center border-[1.5px] shrink-0 transition-colors;
+  }
+  /* Vald / ej vald bockruta: lila fylld cirkel med vit bock, annars bara en ring */
+  .ui-checkbox-on {
+    @apply bg-[var(--cta-bg)] border-[var(--cta-bg)] text-[var(--cta-fg)];
+  }
+  .ui-checkbox-off {
+    @apply bg-transparent border-[var(--border-strong)];
   }
   .ui-input-icon {
     @apply absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none;
   }
   .ui-option-card {
-    @apply w-full p-4 rounded-2xl border flex items-center gap-3.5 text-left transition-all cursor-pointer;
+    @apply w-full p-4 rounded-card-nested border flex items-center gap-3.5 text-left transition-all active:scale-[0.98] cursor-pointer;
   }
   .ui-legal-heading {
-    @apply font-display font-bold text-footnote sm:text-sm text-[var(--text-primary)];
+    @apply font-display font-semibold text-callout sm:text-subhead text-[var(--text-primary)];
   }
   .ui-list-row-title {
-    @apply font-normal text-footnote sm:text-callout text-[var(--text-primary)] truncate;
+    @apply font-normal text-subhead text-[var(--text-primary)] truncate;
   }
   .ui-list-row-title-medium {
-    @apply font-medium text-footnote sm:text-callout text-[var(--text-primary)] truncate;
+    @apply font-medium text-subhead text-[var(--text-primary)] truncate;
   }
   .ui-tile-title {
-    @apply font-display font-medium text-xs text-[var(--text-primary)] block truncate;
+    @apply font-display font-medium text-footnote text-[var(--text-primary)] block truncate;
   }
   .ui-option-title {
-    @apply font-display font-semibold text-sm text-[var(--text-primary)] block truncate;
+    @apply font-display font-semibold text-subhead text-[var(--text-primary)] block truncate;
   }
   .ui-clear-btn {
     @apply text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0;
+  }
+
+  /* 9. Bottenmeny – iOS-glas (genomskinlig med oskärpa) och plusknapp i samma höjd */
+  .ui-tabbar {
+    @apply flex-1 h-16 rounded-full px-1.5 flex items-center justify-around;
+    background: var(--nav-glass-bg);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    backdrop-filter: saturate(180%) blur(24px);
+    box-shadow: inset 0 0 0 1px var(--nav-glass-border), var(--shadow-nav);
+  }
+  .ui-tabbar-item {
+    @apply flex-1 h-[52px] rounded-full flex flex-col items-center justify-center gap-[3px] transition-colors duration-200 cursor-pointer text-[var(--nav-inactive-color)] font-medium;
+  }
+  .ui-tabbar-item-active {
+    @apply flex-1 h-[52px] rounded-full flex flex-col items-center justify-center gap-[3px] transition-colors duration-200 cursor-pointer text-[var(--nav-active-color)] font-semibold bg-[var(--nav-active-bg)];
+  }
+  .ui-fab {
+    @apply shrink-0 w-16 h-16 rounded-full flex items-center justify-center transition-transform duration-200 active:scale-[0.94] cursor-pointer;
+    color: var(--cta-fg);
+    background:
+      radial-gradient(120% 120% at 30% 0%, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 55%),
+      var(--brand-gradient);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14), var(--fab-shadow);
+  }
+  /* Mjuk övergång i nederkant så att listan tonar bort bakom menyn */
+  .ui-tabbar-fade {
+    @apply fixed left-0 right-0 bottom-0 h-28 pointer-events-none z-30;
+    background: linear-gradient(to bottom, color-mix(in srgb, var(--bg-color) 0%, transparent), var(--bg-color) 78%);
+  }
+}
+
+/* Tryckkänsla och rörelse: respektera "Reducera rörelse" */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  :active {
+    scale: none !important;
   }
 }
 
@@ -2278,7 +2436,7 @@ b {
   --hero-from: #7356FF;
   --hero-mid: #5B3DF5;
   --hero-to: #3F22C9;
-  --hero-glow: rgba(91, 61, 245, 0.55);
+  --hero-glow: rgba(63, 34, 201, 0.5);
   --text-primary: #FFFFFF;
   --text-metric-label: #FFFFFF;
   --text-secondary: rgba(255, 255, 255, 0.78);
@@ -2293,11 +2451,20 @@ b {
   isolation: isolate;
   color: #FFFFFF;
   border-color: transparent !important;
+  --separator: rgba(255, 255, 255, 0.2);
   background:
-    radial-gradient(120% 90% at 100% 0%, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 55%),
-    radial-gradient(80% 70% at 0% 100%, rgba(255, 140, 210, 0.28) 0%, rgba(255, 140, 210, 0) 60%),
-    linear-gradient(150deg, var(--hero-from) 0%, var(--hero-mid) 48%, var(--hero-to) 100%) !important;
-  box-shadow: 0 18px 40px -18px var(--hero-glow) !important;
+    radial-gradient(90% 120% at 100% 0%, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 60%),
+    radial-gradient(70% 90% at 0% 100%, rgba(20, 0, 90, 0.22) 0%, rgba(20, 0, 90, 0) 70%),
+    linear-gradient(155deg, var(--hero-from) 0%, var(--hero-mid) 45%, var(--hero-to) 100%) !important;
+  /* Skarp, diskret lyft i stället för lila glöd + ljus kant upptill */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 1px 2px rgba(30, 10, 110, 0.18),
+    0 10px 24px -14px var(--hero-glow) !important;
+}
+/* "Batteriet": rundad, lugn bana med vit fyllning */
+.dejz-hero .dejz-hero-track {
+  background-color: rgba(255, 255, 255, 0.22);
 }
 .dark .dejz-hero {
   --hero-from: #6E55FF;

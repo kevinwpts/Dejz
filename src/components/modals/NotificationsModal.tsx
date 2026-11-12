@@ -1,9 +1,9 @@
 import React from 'react';
-import { X } from '@phosphor-icons/react';
 import { PeriodInfo } from '../../utils/periodEngine';
 import { FixedExpenseItem, IncomeItem, TransactionItem } from '../../app/models';
 import { BottomSheet } from '../ui/BottomSheet';
 import { EmptyClusterArtwork } from '../ui/VisualArtwork';
+import { SheetHeader } from '../ui/SheetHeader';
 
 interface NotificationsModalProps {
   isOpen: boolean;
@@ -32,17 +32,8 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
       disablePadding={true}
     >
       {/* Header */}
-      <div className="px-5 pt-1 pb-3.5 flex items-center justify-between border-b border-[var(--border-subtle)] shrink-0">
-        <span className="ui-sheet-title">
-          Notiser
-        </span>
-        <button
-          type="button" aria-label="Stäng"
-          onClick={onClose}
-          className="ui-icon-btn-surface"
-        >
-          <X size={16} />
-        </button>
+      <div className="px-5 shrink-0">
+        <SheetHeader title="Notiser" onClose={onClose} flush className="!static !bg-transparent" />
       </div>
 
       {/* Empty State */}

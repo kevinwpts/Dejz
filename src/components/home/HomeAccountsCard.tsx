@@ -39,7 +39,7 @@ export const HomeAccountsCard: React.FC<HomeAccountsCardProps> = ({
       {/* det ett förvirrande "0 kr"-kort för användare utan bank.       */}
       {/* ============================================================== */}
       {accounts.length > 0 && (
-      <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-2xl px-4 py-3.5 sm:px-5 sm:py-4">
+      <section className="bg-[var(--surface-color)] shadow-[var(--card-shadow)] rounded-card px-4 py-4 sm:px-5">
         <button
           type="button"
           onClick={() => {

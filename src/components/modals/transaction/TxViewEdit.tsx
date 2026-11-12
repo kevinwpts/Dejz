@@ -2,22 +2,14 @@ import type { RecurringMatchResult } from '../../../utils/recurring/checkRecurri
 import { ModalSubView } from './shared';
 import type { RefObject, SetStateAction } from 'react';
 import React from 'react';
-import {
-  X,
-  Paperclip,
-  Trash,
-  CaretRight,
-  Check,
-  ClockCounterClockwise,
-  CalendarBlank,
-  Plus,
-} from '@phosphor-icons/react';
+import { Paperclip, Trash, CaretRight, Check, ClockCounterClockwise, CalendarBlank, Plus } from '@phosphor-icons/react';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
 import { TransactionItem } from '../../../app/models';
 import { ItemLogo } from '../../ItemLogo';
 import { CategoryIcon, PaymentMethodIcon } from '../../CategoryIcon';
 import { formatSwedishFullDate, ReceiptAttachment } from '../../../utils/swedishDate';
 import { inferCategoryAndMethodFromName } from '../../../utils/bankAnalysis/existingBudget/manualCategory';
+import { SheetHeader } from '../../ui/SheetHeader';
 
 export interface TxViewEditProps {
   subView: "details" | "edit" | "category-picker" | "payment-picker" | "date-picker" | "link-fixed-picker" | "similar" | "swish" | "receipt-preview";
@@ -101,31 +93,15 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
   <>
     {subView === 'edit' && (
       <div className={slideAnimClass}>
-        <div className="ui-sheet-sub-header mb-5">
-          {!isCreateMode ? (
-            <button
-              type="button"
-              onClick={handleCancelEdit}
-              className="ui-text-btn"
-            >
-              Avbryt
-            </button>
-          ) : (
-            <div className="w-16" />
-          )}
-          <span className="ui-sheet-title">
-            {isCreateMode ? 'Lägg till händelse' : isIncome ? 'Redigera inkomst' : 'Redigera köp'}
-          </span>
-          {isCreateMode ? (
-            <div className="w-16 flex justify-end">
-              <button type="button" onClick={onClose} aria-label="Stäng" className="ui-icon-btn">
-                <X size={16} />
-              </button>
-            </div>
-          ) : (
-            <div className="w-16" />
-          )}
-        </div>
+        {isCreateMode ? (
+          <SheetHeader title="Lägg till händelse" onClose={onClose} />
+        ) : (
+          <SheetHeader
+            variant="edit"
+            title={isIncome ? 'Redigera inkomst' : 'Redigera köp'}
+            onCancel={handleCancelEdit}
+          />
+        )}
 
         {isCreateMode && (
           <div className="ui-segmented grid-cols-2 mb-5">

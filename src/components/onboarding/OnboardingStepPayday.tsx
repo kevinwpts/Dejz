@@ -50,11 +50,11 @@ export const OnboardingStepPayday: React.FC<OnboardingStepPaydayProps> = ({
                 onChange={(e) => setPayday(Number(e.target.value))}
                 aria-label="Välj lönedag"
                 style={{
-                  background: `linear-gradient(to right, var(--text-primary) 0%, var(--text-primary) ${
+                  background: `linear-gradient(to right, var(--cta-bg) 0%, var(--cta-bg) ${
                     ((payday - 1) / 30) * 100
-                  }%, var(--border-subtle) ${
+                  }%, var(--segment-track) ${
                     ((payday - 1) / 30) * 100
-                  }%, var(--border-subtle) 100%)`,
+                  }%, var(--segment-track) 100%)`,
                 }}
                 className="ui-payday-slider"
               />

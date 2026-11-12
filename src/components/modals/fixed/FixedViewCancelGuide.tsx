@@ -1,10 +1,11 @@
 import type { CancelGuideData, ModalSubView } from './shared';
 import type { SetStateAction } from 'react';
 import React from 'react';
-import { X, Trash, CaretLeft, ArrowSquareOut, Sparkle, Info } from '@phosphor-icons/react';
+import { Trash, ArrowSquareOut, Sparkle, Info } from '@phosphor-icons/react';
 import { FixedExpenseItem } from '../../../app/models';
 import { ItemLogo } from '../../ItemLogo';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
+import { SheetHeader } from '../../ui/SheetHeader';
 
 export interface FixedViewCancelGuideProps {
   subView: "details" | "edit" | "category-picker" | "day-picker" | "payment-picker" | "goal-picker" | "receipt-preview" | "similar" | "cancel-picker" | "cancel-guide";
@@ -46,30 +47,10 @@ export const FixedViewCancelGuide: React.FC<FixedViewCancelGuideProps> = ({
   <>
     {subView === 'cancel-guide' && (
       <div className={`${slideAnimClass} space-y-4`}>
-        <div className="ui-sheet-sub-header">
-          <button
-            type="button"
-            onClick={() => navigateSubView('details', 'back')}
-            title="Tillbaka"
-            aria-label="Tillbaka"
-            className="ui-icon-btn"
-          >
-            <CaretLeft size={15} weight="bold" />
-          </button>
-          <span className="ui-sheet-title truncate max-w-[220px]">
-            Säg upp {displayName}
-          </span>
-          <button
-            type="button" aria-label="Stäng"
-            onClick={onClose}
-            className="ui-icon-btn"
-          >
-            <X size={16} />
-          </button>
-        </div>
+        <SheetHeader title={<>Säg upp {displayName}</>} onBack={() => navigateSubView('details', 'back')} onClose={onClose} flush />
 
         {/* Sammanfattningskort med årlig besparing */}
-        <div className="px-4 py-3 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-3">
+        <div className="px-4 py-3 rounded-2xl bg-[var(--fill-grouped)] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <ItemLogo
               name={displayName}
@@ -96,7 +77,7 @@ export const FixedViewCancelGuide: React.FC<FixedViewCancelGuideProps> = ({
         </div>
 
         {isLoadingCancelGuide ? (
-          <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-5 space-y-3.5 animate-pulse">
+          <div className="rounded-2xl bg-[var(--fill-grouped)] p-5 space-y-3.5 animate-pulse">
             <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
               <Sparkle size={14} weight="fill" className="text-[var(--text-primary)] animate-spin" />
               <span>Tar fram uppsägningsguide för {displayName}...</span>
@@ -128,7 +109,7 @@ export const FixedViewCancelGuide: React.FC<FixedViewCancelGuideProps> = ({
             return (
               <div className="space-y-3.5">
                 {/* Uppsägningstid */}
-                <div className="px-3.5 py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-2 text-xs">
+                <div className="px-3.5 py-2.5 rounded-xl bg-[var(--fill-grouped)] flex items-center justify-between gap-2 text-xs">
                   <span className="text-[var(--text-secondary)] shrink-0">
                     Uppsägningstid
                   </span>
@@ -166,7 +147,7 @@ export const FixedViewCancelGuide: React.FC<FixedViewCancelGuideProps> = ({
 
                 {/* Smart tips */}
                 {guide.tip && (
-                  <div className="px-3.5 py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-start gap-2.5 text-meta leading-snug text-[var(--text-secondary)]">
+                  <div className="px-3.5 py-2.5 rounded-xl bg-[var(--fill-grouped)] flex items-start gap-2.5 text-meta leading-snug text-[var(--text-secondary)]">
                     <Info size={15} className="text-[var(--text-primary)] shrink-0 mt-0.5" />
                     <span>{guide.tip}</span>
                   </div>

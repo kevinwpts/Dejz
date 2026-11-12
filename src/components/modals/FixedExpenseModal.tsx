@@ -3,7 +3,6 @@ import { useRetainedValue } from './useRetainedValue';
 import { useExternalSnapshot } from '../../utils/hooks/useExternalSnapshot';
 import { useSavingsGoals } from '../../utils/hooks/useSavingsGoals';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { X, CaretLeft } from '@phosphor-icons/react';
 import { FixedExpenseItem, AccountItem, TransactionItem } from '../../app/models';
 import { BottomSheet } from '../ui/BottomSheet';
 import { DayOfMonthPicker } from '../ui/DayOfMonthPicker';
@@ -25,6 +24,7 @@ import { FixedViewCancelPicker } from './fixed/FixedViewCancelPicker';
 import { FixedViewSimilar } from './fixed/FixedViewSimilar';
 import type { CancelGuideData, ModalSubView } from './fixed/shared';
 import { describeAccount } from '../../utils/accountDisplay';
+import { SheetHeader } from '../ui/SheetHeader';
 
 interface FixedExpenseModalProps {
   isOpen: boolean;
@@ -466,27 +466,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
       {/* ============================================================== */}
       {subView === 'day-picker' && (
         <div className={`${slideAnimClass} space-y-4`}>
-          <div className="ui-sheet-sub-header">
-            <button
-              type="button"
-              onClick={() => navigateSubView(pickerReturnView, 'back')}
-              title="Tillbaka"
-              aria-label="Tillbaka"
-              className="ui-icon-btn"
-            >
-              <CaretLeft size={15} weight="bold" />
-            </button>
-            <span className="ui-sheet-title">
-              Välj dragningsdag
-            </span>
-            <button
-              type="button" aria-label="Stäng"
-              onClick={onClose}
-              className="ui-icon-btn"
-            >
-              <X size={16} />
-            </button>
-          </div>
+          <SheetHeader title="Välj dragningsdag" onBack={() => navigateSubView(pickerReturnView, 'back')} onClose={onClose} flush />
 
           <DayOfMonthPicker
             selectedDay={Number(dueDay) || 28}

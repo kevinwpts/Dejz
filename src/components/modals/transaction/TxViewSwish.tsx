@@ -1,11 +1,12 @@
 import { ModalSubView } from './shared';
 import type { SetStateAction } from 'react';
 import React from 'react';
-import { X, Trash, CaretLeft, Check } from '@phosphor-icons/react';
+import { Trash, Check } from '@phosphor-icons/react';
 import { TransactionItem } from '../../../app/models';
 import { ItemLogo } from '../../ItemLogo';
 import { saveTransactionMeta } from '../../../utils/cache/itemMeta';
 import { SwishLogo } from '../../SwishLogo';
+import { SheetHeader } from '../../ui/SheetHeader';
 
 export interface TxViewSwishProps {
   subView: "details" | "edit" | "category-picker" | "payment-picker" | "date-picker" | "link-fixed-picker" | "similar" | "swish" | "receipt-preview";
@@ -37,21 +38,7 @@ export const TxViewSwish: React.FC<TxViewSwishProps> = ({
   <>
     {subView === 'swish' && activeTx && (
       <div className={`${slideAnimClass} space-y-4`}>
-        <div className="ui-sheet-sub-header">
-          <button
-            type="button"
-            onClick={() => navigateSubView('details', 'back')}
-            title="Tillbaka"
-            aria-label="Tillbaka"
-            className="ui-icon-btn"
-          >
-            <CaretLeft size={15} weight="bold" />
-          </button>
-          <span className="ui-sheet-title">Dela utlägg</span>
-          <button type="button" aria-label="Stäng" onClick={onClose} className="ui-icon-btn">
-            <X size={16} />
-          </button>
-        </div>
+        <SheetHeader title="Dela utlägg" onBack={() => navigateSubView('details', 'back')} onClose={onClose} flush />
 
         {(() => {
           const baseFullAmt = Math.round(

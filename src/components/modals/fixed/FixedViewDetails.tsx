@@ -3,15 +3,7 @@ import type { SimilarTransactionsSummary } from '../../../utils/recurring/simila
 import type { ModalSubView } from './shared';
 import type { RefObject, SetStateAction } from 'react';
 import React from 'react';
-import {
-  X,
-  PencilSimple,
-  Trash,
-  CaretRight,
-  Paperclip,
-  ClockCounterClockwise,
-  Scissors,
-} from '@phosphor-icons/react';
+import { PencilSimple, Trash, CaretRight, Paperclip, ClockCounterClockwise, Scissors } from '@phosphor-icons/react';
 import { FixedExpenseItem, formatFixedCancellationBadge } from '../../../app/models';
 import { CategoryIcon, PaymentMethodIcon } from '../../CategoryIcon';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
@@ -21,6 +13,7 @@ import { ReceiptAttachment } from '../../../utils/swedishDate';
 import type { AccountDisplayInfo } from '../../../utils/accountDisplay';
 import { AccountInfoRow } from '../AccountInfoRow';
 import { DetailHeroLogo } from '../DetailHeroLogo';
+import { SheetHeader } from '../../ui/SheetHeader';
 
 export interface FixedViewDetailsProps {
   subView: "details" | "edit" | "category-picker" | "day-picker" | "payment-picker" | "goal-picker" | "receipt-preview" | "similar" | "cancel-picker" | "cancel-guide";
@@ -82,9 +75,11 @@ export const FixedViewDetails: React.FC<FixedViewDetailsProps> = ({
   <>
     {subView === 'details' && !isCreateMode && (
       <div className={navDirection === 'back' ? 'animate-slide-in-left' : ''}>
-        <div className="ui-sheet-header !mb-0">
-          <span className="ui-sheet-title">Fast utgift</span>
-          <div className="flex items-center gap-1.5">
+        <SheetHeader
+          title="Fast utgift"
+          flush
+          onClose={onClose}
+          actions={
             <button
               type="button"
               onClick={() => navigateSubView('edit', 'forward')}
@@ -93,11 +88,8 @@ export const FixedViewDetails: React.FC<FixedViewDetailsProps> = ({
               <PencilSimple size={14} weight="bold" />
               Redigera
             </button>
-            <button type="button" onClick={onClose} aria-label="Stäng" className="ui-icon-btn">
-              <X size={16} />
-            </button>
-          </div>
-        </div>
+          }
+        />
 
         {/* Kvitto-huvud: bara läsning. Ändringar görs via Redigera eller raderna nedan. */}
         <div className="ui-hero-header relative overflow-hidden pt-5 mb-5 pb-5">
@@ -117,7 +109,7 @@ export const FixedViewDetails: React.FC<FixedViewDetailsProps> = ({
             className="group flex items-center justify-center gap-1.5 px-3 max-w-md mx-auto cursor-pointer"
             aria-label={`Byt namn på ${name || displayName}`}
           >
-            <h2 className="font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] text-center truncate">
+            <h2 className="font-display font-semibold text-xl tracking-[-0.02em] text-[var(--text-primary)] text-center truncate">
               {name || displayName}
             </h2>
             <PencilSimple
@@ -127,7 +119,7 @@ export const FixedViewDetails: React.FC<FixedViewDetailsProps> = ({
             />
           </button>
 
-          <div className="mt-1 flex items-baseline justify-center font-display font-bold text-2xl sm:text-3xl text-[var(--text-primary)] tabular-nums">
+          <div className="mt-1.5 flex items-baseline justify-center font-display font-bold text-[34px] leading-tight tracking-[-0.04em] text-[var(--text-primary)] tabular-nums">
             −{new Intl.NumberFormat('sv-SE').format(Number(amount) || 0)} kr
             <span className="ml-1.5 font-display font-medium text-base text-[var(--text-secondary)]">/mån</span>
           </div>

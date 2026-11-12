@@ -421,7 +421,7 @@ export const RecurringDiscoveryView: React.FC<RecurringDiscoveryViewProps> = ({
               const isIncome = cand.kind === 'income';
               return (
                 <div key={cand.key} className="ui-tx-row">
-                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
                     <ItemLogo
                       name={cand.name}
                       category={cand.category}

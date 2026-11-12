@@ -53,7 +53,7 @@ export const OnboardingStepBalance: React.FC<OnboardingStepBalanceProps> = ({
         </div>
 
         <div className="my-auto py-4">
-          <label className="flex items-baseline gap-2 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] px-4 py-4 cursor-text">
+          <label className="flex items-baseline gap-2 rounded-2xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] px-4 py-4 cursor-text">
             <input
               type="text"
               inputMode="numeric"

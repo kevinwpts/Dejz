@@ -46,20 +46,18 @@ export const OnboardingStepFixedList: React.FC<OnboardingStepFixedListProps> = (
 
         <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pr-0.5 space-y-2.5 pb-2">
           {analyzingBank && (
-            <div className="p-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center gap-2.5 text-xs text-[var(--text-secondary)] animate-pulse">
+            <div className="p-3.5 rounded-2xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] flex items-center gap-2.5 text-xs text-[var(--text-secondary)] animate-pulse">
               <SpinnerGap size={18} className="animate-spin text-[var(--text-primary)] shrink-0" />
               <span>Letar efter dina räkningar …</span>
             </div>
           )}
 
-          <div className="space-y-2">
+          <div className={suggestedFixedExpenses.length > 0 ? 'ui-list-card ui-list-card-check' : ''}>
             {suggestedFixedExpenses.map((item) => (
               <div
                 key={item.id}
-                className={`p-3.5 rounded-2xl border transition-all flex items-center gap-2.5 ${
-                  item.checked
-                    ? 'bg-[var(--surface-color)] border-[var(--border-subtle)]'
-                    : 'bg-[var(--surface-color)]/50 border-[var(--border-subtle)] opacity-55'
+                className={`min-h-[64px] py-2.5 transition-opacity flex items-center gap-2.5 ${
+                  item.checked ? '' : 'opacity-55'
                 }`}
               >
                 {/* Checkbox med generös träffyta */}
@@ -74,13 +72,9 @@ export const OnboardingStepFixedList: React.FC<OnboardingStepFixedListProps> = (
                   className="w-9 h-9 -ml-1.5 rounded-xl flex items-center justify-center shrink-0 cursor-pointer"
                 >
                   <span
-                    className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors ${
-                      item.checked
-                        ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
-                        : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
-                    }`}
+                    className={`ui-checkbox ${item.checked ? 'ui-checkbox-on' : 'ui-checkbox-off'}`}
                   >
-                    {item.checked && <Check size={12} weight="bold" />}
+                    {item.checked && <Check size={13} weight="bold" />}
                   </span>
                 </button>
 

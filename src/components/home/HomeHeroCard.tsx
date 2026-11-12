@@ -93,15 +93,13 @@ export const HomeHeroCard: React.FC<HomeHeroCardProps> = ({
             >
               <div className="flex items-center justify-between gap-2">
                 <span
-                  className={`text-footnote font-normal ${
-                    isOverBudget
-                      ? 'text-negative font-medium'
-                      : 'text-[var(--text-secondary)]'
+                  className={`text-callout font-medium ${
+                    isOverBudget ? 'text-negative' : 'text-[var(--text-secondary)]'
                   }`}
                 >
                   {isOverBudget ? 'Över budget' : 'Kvar att spendera'}
                 </span>
-                <span className="text-footnote font-normal text-[var(--text-secondary)] tabular-nums text-right shrink-0">
+                <span className="h-6 px-2.5 rounded-full bg-[var(--surface-raised)] inline-flex items-center text-footnote font-medium text-[var(--text-primary)] tabular-nums shrink-0">
                   {daysLabel}
                 </span>
               </div>
@@ -112,7 +110,7 @@ export const HomeHeroCard: React.FC<HomeHeroCardProps> = ({
                 ) : (
                   <div className="min-w-0">
                     <div
-                      className={`font-display text-[44px] sm:text-[48px] font-[600] tracking-[-0.035em] leading-none tabular-nums mt-1.5 ${
+                      className={`font-display text-[46px] sm:text-[50px] font-bold tracking-[-0.045em] leading-none tabular-nums mt-2 ${
                         kvarAttSpendera >= 0
                           ? 'text-[var(--text-primary)]'
                           : 'text-negative'
@@ -122,7 +120,7 @@ export const HomeHeroCard: React.FC<HomeHeroCardProps> = ({
                     </div>
                     {/* Beloppet i bildform: fylld del = det som är kvar. Färgen visar takten. */}
                     <div
-                      className="mt-4 h-2 rounded-full bg-[var(--bg-color)] overflow-hidden"
+                      className="dejz-hero-track mt-5 h-1.5 rounded-full overflow-hidden"
                       role="meter"
                       aria-label="Kvar av löneperiodens pengar"
                       aria-valuemin={0}
@@ -130,7 +128,7 @@ export const HomeHeroCard: React.FC<HomeHeroCardProps> = ({
                       aria-valuenow={Math.round(remainingShare * 100)}
                     >
                       <div
-                        className={`h-full rounded-full transition-all duration-500 ${
+                        className={`h-full rounded-full transition-[width] duration-500 ${
                           pace === "fast" ? "bg-caution-solid" : "bg-[var(--text-primary)]"
                         }`}
                         style={{ width: `${remainingShare * 100}%` }}
@@ -173,7 +171,7 @@ export const HomeHeroCard: React.FC<HomeHeroCardProps> = ({
               }`}
             >
               <div className="overflow-hidden">
-                <div className="ui-stat-grid pt-4 border-t border-[var(--border-subtle)]">
+                <div className="ui-stat-grid pt-4 border-t border-[var(--separator)]">
                   <button
                     type="button"
                     onClick={() => setActiveHeroPopup('income')}

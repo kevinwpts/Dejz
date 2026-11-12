@@ -40,7 +40,7 @@ export const SavedTab: React.FC = () => {
                     }}
                     className="ui-tx-row"
                   >
-                    <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
                       <ItemLogo
                         name={tx.title}
                         category={tx.category}

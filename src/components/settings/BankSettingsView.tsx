@@ -170,7 +170,7 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
               type="button"
               onClick={onSyncBank}
               disabled={syncingBank}
-              className="py-3 px-4 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] flex items-center justify-center gap-1.5 hover:bg-[var(--surface-hover)] disabled:opacity-50 transition-colors cursor-pointer"
+              className="py-3 px-4 rounded-2xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-xs font-semibold text-[var(--text-primary)] flex items-center justify-center gap-1.5 hover:bg-[var(--surface-hover)] disabled:opacity-50 transition-colors cursor-pointer"
             >
               <ArrowClockwise size={14} className={syncingBank ? 'animate-spin' : ''} />
               <span>{syncingBank ? 'Synkar...' : 'Synka nu'}</span>

@@ -1,5 +1,4 @@
 import { ItemLogo } from '../ItemLogo';
-import { resolveCategoryColor } from '../CategoryIcon';
 import { isMerchantCategoryIconPreferred, setMerchantCategoryIconPreferred } from '../../utils/logo';
 import { useExternalSnapshot } from '../../utils/hooks/useExternalSnapshot';
 
@@ -14,17 +13,12 @@ interface DetailHeroLogoProps {
   onToggled: () => void;
 }
 
-/** Stora loggan överst i detaljvyer, med kategorins färg som glöd. Tryck växlar logga/kategoriikon. */
+/** Stora loggan överst i detaljvyer, Tryck växlar logga/kategoriikon. */
 export function DetailHeroLogo({ name, category, logoUrl, isRecurring, refreshKey, onToggled }: DetailHeroLogoProps) {
-  const accentColor = useExternalSnapshot(() => resolveCategoryColor(category), [category, refreshKey]);
   const prefersCatIcon = useExternalSnapshot(() => isMerchantCategoryIconPreferred(name), [name, refreshKey]);
 
   return (
     <>
-      <div
-        className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 w-44 h-32 rounded-full blur-2xl opacity-15 dark:opacity-20"
-        style={{ backgroundColor: accentColor }}
-      />
       <div className="relative flex justify-center mb-3.5">
         <button
           type="button"

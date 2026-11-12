@@ -3,13 +3,12 @@ import { CreateWizardStep, inferArtworkFromGoalName } from './goalHelpers';
 import type { GoalArtworkTheme } from '../ui/VisualArtwork';
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { CaretLeft } from '@phosphor-icons/react';
-
 import { AccountItem } from '../../app/models';
 import { StepName } from './wizard/StepName';
 import { StepArtwork } from './wizard/StepArtwork';
 import { StepAccountLink } from './wizard/StepAccountLink';
 import { StepTargetAmount, StepCurrentAmount, StepMonthlyAmount } from './wizard/AmountSteps';
+import { SheetHeader } from '../ui/SheetHeader';
 
 export interface GoalCreateWizardProps {
   isCreateWizardOpen: boolean;
@@ -130,36 +129,23 @@ export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
         aria-modal="true"
         aria-label="Nytt sparmål"
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md mx-auto h-[89dvh] max-h-[89dvh] rounded-t-3xl bg-[var(--bg-color)] text-[var(--text-primary)] border-t border-[var(--border-subtle)] shadow-[0_-16px_48px_rgba(0,0,0,0.45)] flex flex-col justify-between px-6 pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] font-sans overflow-hidden select-none animate-slide-up"
+        className="w-full max-w-md mx-auto h-[89dvh] max-h-[89dvh] rounded-t-sheet bg-[var(--bg-color)] text-[var(--text-primary)] shadow-modal flex flex-col justify-between px-6 pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] font-sans overflow-hidden select-none animate-slide-up"
       >
         {/* 1. TOP HEADER (Circular Back button + optional Hoppa över pill + Centered Question) */}
-        <header className="shrink-0 space-y-4">
-          <div className="flex items-center justify-between">
-            <button
-              type="button"
-              onClick={handleBackNavigation}
-              className="w-11 h-11 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] flex items-center justify-center hover:opacity-80 active:scale-95 transition-all cursor-pointer"
-              aria-label="Tillbaka"
-            >
-              <CaretLeft size={18} weight="bold" />
-            </button>
-
-            {wizardStep === 5 || wizardStep === 6 ? (
-              <button
-                type="button"
-                onClick={handleSkip}
-                className="px-4 py-2 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:opacity-80 active:scale-95 transition-all cursor-pointer"
-              >
-                Hoppa över
-              </button>
-            ) : (
-              <div className="w-11" />
-            )}
-          </div>
-
-          <h2 className="text-subhead sm:text-base font-medium text-center text-[var(--text-primary)] tracking-[-0.01em]">
-            {STEP_HEADINGS[wizardStep]}
-          </h2>
+        <header className="shrink-0">
+          <SheetHeader
+            title={STEP_HEADINGS[wizardStep]}
+            onBack={handleBackNavigation}
+            flush
+            className="!static !mx-0 !px-0 !bg-transparent"
+            actions={
+              wizardStep === 5 || wizardStep === 6 ? (
+                <button type="button" onClick={handleSkip} className="ui-pill-btn">
+                  Hoppa över
+                </button>
+              ) : undefined
+            }
+          />
         </header>
 
         {wizardStep === 1 && (

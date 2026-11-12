@@ -37,7 +37,7 @@ export const BankViewList: React.FC<BankViewListProps> = ({
     <div className="space-y-4">
       {connections.length > 0 && (
         <div className="space-y-1.5">
-          <span className="px-1 text-caption uppercase tracking-wider font-semibold text-[var(--text-muted)] block">
+          <span className="px-1 text-footnote font-medium text-[var(--text-secondary)] block">
             Anslutna banker
           </span>
           <div className="ui-sheet-group">
@@ -129,7 +129,7 @@ export const BankViewList: React.FC<BankViewListProps> = ({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Sök bank..."
-          className="w-full pl-10 pr-4 py-3 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-base font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+          className="w-full pl-10 pr-4 py-3 rounded-2xl bg-[var(--fill-grouped)] text-base font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
         />
       </div>
 

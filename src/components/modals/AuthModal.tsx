@@ -2,18 +2,10 @@ import { appOrigin } from '../../utils/platform';
 import { signInWithProvider } from '../../utils/nativeAuth';
 import { friendlyAuthError } from '../../utils/authErrors';
 import React, { useState, useEffect } from 'react';
-import {
-  X,
-  SpinnerGap,
-  Eye,
-  EyeSlash,
-  CaretLeft,
-  EnvelopeSimple,
-  WarningCircle,
-  PaperPlaneTilt,
-} from '@phosphor-icons/react';
+import { SpinnerGap, Eye, EyeSlash, EnvelopeSimple, WarningCircle, PaperPlaneTilt } from '@phosphor-icons/react';
 import { supabase, isSupabaseConfigured } from '../../supabaseClient';
 import { BottomSheet } from '../ui/BottomSheet';
+import { SheetHeader } from '../ui/SheetHeader';
 
 const APPLE_SIGNIN_ENABLED = import.meta.env.VITE_ENABLE_APPLE_SIGNIN === 'true';
 
@@ -204,38 +196,26 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       contentClassName="px-5 pt-1 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] overflow-y-auto"
     >
       {/* Top Header */}
-      <div className="ui-sheet-header">
-        {view === 'forgot_password' || resetEmailSent ? (
-          <>
-            <button
-              type="button"
-              onClick={() => {
+      <SheetHeader
+        title={
+          view === 'forgot_password' || resetEmailSent
+            ? resetEmailSent
+              ? 'Kolla inkorgen'
+              : 'Återställ lösenord'
+            : view === 'login'
+            ? 'Logga in'
+            : 'Skapa konto'
+        }
+        onBack={
+          view === 'forgot_password' || resetEmailSent
+            ? () => {
                 setView('login');
                 handleReset();
-              }}
-              title="Tillbaka"
-              aria-label="Tillbaka"
-              className="ui-icon-btn"
-            >
-              <CaretLeft size={15} weight="bold" />
-            </button>
-            <span className="ui-sheet-title">
-              {resetEmailSent ? 'Kolla inkorgen' : 'Återställ lösenord'}
-            </span>
-          </>
-        ) : (
-          <span className="ui-sheet-title">
-            {view === 'login' ? 'Logga in' : 'Skapa konto'}
-          </span>
-        )}
-        <button
-          type="button" aria-label="Stäng"
-          onClick={onClose}
-          className="ui-icon-btn"
-        >
-          <X size={16} />
-        </button>
-      </div>
+              }
+            : undefined
+        }
+        onClose={onClose}
+      />
 
       {resetEmailSent ? (
         /* Modern "Check your inbox" screen in modal */
@@ -249,7 +229,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <p className="text-xs text-[var(--text-secondary)]">
               Vi har skickat en återställningslänk till:
             </p>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] max-w-full">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-xs font-semibold text-[var(--text-primary)] max-w-full">
               <span className="truncate max-w-[240px]">{email.trim()}</span>
             </div>
             <p className="text-meta text-[var(--text-muted)] pt-1 leading-relaxed max-w-xs mx-auto">

@@ -2,8 +2,9 @@ import type { SavingsGoalItem } from '../../../utils/cache/itemMeta';
 import type { ModalSubView } from './shared';
 import type { SetStateAction } from 'react';
 import React from 'react';
-import { X, Check, CaretLeft } from '@phosphor-icons/react';
+import { Check } from '@phosphor-icons/react';
 import { FixedExpenseItem } from '../../../app/models';
+import { SheetHeader } from '../../ui/SheetHeader';
 
 export interface FixedViewGoalPickerProps {
   subView: "details" | "edit" | "category-picker" | "day-picker" | "payment-picker" | "goal-picker" | "receipt-preview" | "similar" | "cancel-picker" | "cancel-guide";
@@ -33,27 +34,7 @@ export const FixedViewGoalPicker: React.FC<FixedViewGoalPickerProps> = ({
   <>
     {subView === 'goal-picker' && (
       <div className={`${slideAnimClass} space-y-4`}>
-        <div className="ui-sheet-sub-header">
-          <button
-            type="button"
-            onClick={() => navigateSubView(pickerReturnView, 'back')}
-            title="Tillbaka"
-            aria-label="Tillbaka"
-            className="ui-icon-btn"
-          >
-            <CaretLeft size={15} weight="bold" />
-          </button>
-          <span className="ui-sheet-title">
-            Koppla till sparmål
-          </span>
-          <button
-            type="button" aria-label="Stäng"
-            onClick={onClose}
-            className="ui-icon-btn"
-          >
-            <X size={16} />
-          </button>
-        </div>
+        <SheetHeader title="Koppla till sparmål" onBack={() => navigateSubView(pickerReturnView, 'back')} onClose={onClose} flush />
 
         <div className="ui-sheet-group">
           <button

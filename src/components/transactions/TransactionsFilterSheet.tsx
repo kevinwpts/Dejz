@@ -225,7 +225,7 @@ export const TransactionsFilterSheet: React.FC<TransactionsFilterSheetProps> = (
                   className={`px-3 py-2.5 rounded-xl border text-xs text-left transition-all cursor-pointer flex items-center justify-between gap-1.5 ${
                     isSel
                       ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] font-medium'
-                      : 'bg-[var(--bg-color)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] font-normal'
+                      : 'bg-[var(--fill-grouped)] text-[var(--text-primary)] border-transparent hover:opacity-90 font-normal'
                   }`}
                 >
                   <span className="truncate">{opt.label}</span>
@@ -264,7 +264,7 @@ export const TransactionsFilterSheet: React.FC<TransactionsFilterSheetProps> = (
                   className={`px-2.5 py-2 rounded-xl border text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
                     isSel
                       ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] font-medium'
-                      : 'bg-[var(--bg-color)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] font-normal'
+                      : 'bg-[var(--fill-grouped)] text-[var(--text-primary)] border-transparent hover:opacity-90 font-normal'
                   }`}
                 >
                   <CategoryIcon
@@ -349,7 +349,7 @@ export const TransactionsFilterSheet: React.FC<TransactionsFilterSheetProps> = (
               className={`px-3 py-1.5 rounded-xl border text-xs transition-all cursor-pointer ${
                 !selectedPaymentMethod
                   ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] font-medium'
-                  : 'bg-[var(--bg-color)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] font-normal'
+                  : 'bg-[var(--fill-grouped)] text-[var(--text-primary)] border-transparent hover:opacity-90 font-normal'
               }`}
             >
               Alla
@@ -364,7 +364,7 @@ export const TransactionsFilterSheet: React.FC<TransactionsFilterSheetProps> = (
                   className={`px-3 py-1.5 rounded-xl border text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
                     isSel
                       ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] font-medium'
-                      : 'bg-[var(--bg-color)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] font-normal'
+                      : 'bg-[var(--fill-grouped)] text-[var(--text-primary)] border-transparent hover:opacity-90 font-normal'
                   }`}
                 >
                   <PaymentMethodIcon method={pm} size={14} />

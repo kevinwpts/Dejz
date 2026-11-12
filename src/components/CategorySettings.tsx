@@ -1,12 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import {
-  Plus,
-  Trash,
-  Check,
-  X,
-  ArrowCounterClockwise,
-  CaretRight,
-} from '@phosphor-icons/react';
+import { Plus, Trash, Check, ArrowCounterClockwise, CaretRight } from '@phosphor-icons/react';
 import { Category } from '../types';
 import { BottomSheet } from './ui/BottomSheet';
 import { ConfirmDialog } from './ui/ConfirmDialog';
@@ -14,6 +7,7 @@ import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../consta
 import { getStoredExpenseCategories, saveStoredExpenseCategories, getStoredIncomeCategories, saveStoredIncomeCategories, propagateCategoryChangeInCache, clearCategoryRemap } from '../utils/cache/categories';
 import { CategoryIcon, AVAILABLE_CATEGORY_ICONS } from './CategoryIcon';
 import { TransactionItem, FixedExpenseItem, IncomeItem } from '../app/models';
+import { SheetHeader } from './ui/SheetHeader';
 
 interface CategorySettingsProps {
   transactions?: TransactionItem[];
@@ -326,18 +320,10 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
       {/* ============================================================== */}
       <BottomSheet isOpen={sheetMode !== null} onClose={closeSheet}>
         {/* Top Header */}
-        <div className="ui-sheet-header mb-4">
-          <span className="ui-sheet-title">
-            {sheetMode === 'new' ? 'Ny kategori' : 'Redigera kategori'}
-          </span>
-          <button
-            type="button" aria-label="Stäng"
-            onClick={closeSheet}
-            className="ui-icon-btn"
-          >
-            <X size={16} />
-          </button>
-        </div>
+        <SheetHeader
+          title={sheetMode === 'new' ? 'Ny kategori' : 'Redigera kategori'}
+          onClose={closeSheet}
+        />
 
         <form onSubmit={handleSaveSheet} className="space-y-4">
           {/* Stort och tydligt inmatningskort med live-ikon */}

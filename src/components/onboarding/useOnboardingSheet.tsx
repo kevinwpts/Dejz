@@ -363,7 +363,7 @@ export function createOnboardingSheetActions({
         key={c.name}
         type="button"
         onClick={() => openAddSheet(type, c)}
-        className="h-10 pl-3 pr-4 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] active:scale-[0.97] text-sm font-semibold text-[var(--text-primary)] flex items-center gap-1.5 transition-all cursor-pointer"
+        className="h-10 pl-3 pr-4 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] hover:bg-[var(--surface-hover)] active:scale-[0.97] text-sm font-semibold text-[var(--text-primary)] flex items-center gap-1.5 transition-all cursor-pointer"
       >
         <Plus size={14} weight="bold" className="text-[var(--text-secondary)]" />
         <span>{c.name}</span>
@@ -400,7 +400,7 @@ export function createOnboardingSheetActions({
             key={c.name}
             type="button"
             onClick={() => openAddSheet(type, c)}
-            className="h-10 pl-3 pr-4 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] active:scale-[0.97] text-sm font-semibold text-[var(--text-primary)] flex items-center gap-1.5 transition-all cursor-pointer"
+            className="h-10 pl-3 pr-4 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] hover:bg-[var(--surface-hover)] active:scale-[0.97] text-sm font-semibold text-[var(--text-primary)] flex items-center gap-1.5 transition-all cursor-pointer"
           >
             <Plus size={14} weight="bold" className="text-[var(--text-secondary)]" />
             <span>{c.name}</span>

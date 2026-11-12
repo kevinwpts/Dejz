@@ -1,8 +1,9 @@
 import type { ModalSubView } from './shared';
 import type { RefObject } from 'react';
 import React from 'react';
-import { X, CaretLeft, FileText, Plus } from '@phosphor-icons/react';
+import { FileText, Plus } from '@phosphor-icons/react';
 import { ReceiptAttachment } from '../../../utils/swedishDate';
+import { SheetHeader } from '../../ui/SheetHeader';
 
 export interface FixedViewReceiptPreviewProps {
   subView: "details" | "edit" | "category-picker" | "day-picker" | "payment-picker" | "goal-picker" | "receipt-preview" | "similar" | "cancel-picker" | "cancel-guide";
@@ -28,29 +29,9 @@ export const FixedViewReceiptPreview: React.FC<FixedViewReceiptPreviewProps> = (
   <>
     {subView === 'receipt-preview' && previewReceipt && (
       <div className={`${slideAnimClass} space-y-4`}>
-        <div className="ui-sheet-sub-header">
-          <button
-            type="button"
-            onClick={() => navigateSubView(pickerReturnView, 'back')}
-            title="Tillbaka"
-            aria-label="Tillbaka"
-            className="ui-icon-btn"
-          >
-            <CaretLeft size={15} weight="bold" />
-          </button>
-          <span className="ui-sheet-title max-w-[180px]">
-            {previewReceipt.name || 'Kvitto'}
-          </span>
-          <button
-            type="button" aria-label="Stäng"
-            onClick={onClose}
-            className="ui-icon-btn"
-          >
-            <X size={16} />
-          </button>
-        </div>
+        <SheetHeader title={previewReceipt.name || 'Kvitto'} onBack={() => navigateSubView(pickerReturnView, 'back')} onClose={onClose} flush />
 
-        <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-2 overflow-hidden flex items-center justify-center max-h-[60dvh]">
+        <div className="rounded-2xl bg-[var(--fill-grouped)] p-2 overflow-hidden flex items-center justify-center max-h-[60dvh]">
           {previewReceipt.url.startsWith('data:image/') ||
           /\.(png|jpe?g|webp|gif)$/i.test(previewReceipt.url) ? (
             <img

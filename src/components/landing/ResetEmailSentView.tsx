@@ -27,7 +27,7 @@ export const ResetEmailSentView: React.FC<ResetEmailSentViewProps> = ({
       <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
         Vi har skickat en länk till din e-postadress:
       </p>
-      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] max-w-full">
+      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-xs font-semibold text-[var(--text-primary)] max-w-full">
         <span className="truncate max-w-[260px]">{email.trim()}</span>
       </div>
       <p className="text-meta text-[var(--text-muted)] pt-2 leading-relaxed max-w-xs mx-auto">

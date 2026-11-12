@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { X } from '@phosphor-icons/react';
+import { SheetHeader } from './ui/SheetHeader';
 
 /* ------------------------------------------------------------------ */
 /*  Integritetspolicy – visas som ett blad över startsidan.           */
@@ -142,12 +142,7 @@ export const PrivacyPolicySheet: React.FC<{ open: boolean; onClose: () => void }
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-label="Integritetspolicy">
       <div className="absolute inset-0 bg-[var(--scrim-color)] animate-fade-in" onClick={onClose} />
       <div className="relative w-full sm:max-w-lg max-h-[88dvh] overflow-y-auto bg-[var(--surface-color)] rounded-t-modal sm:rounded-modal px-5 sm:px-7 pt-5 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] shadow-[var(--shadow-modal)] animate-scale-in">
-        <div className="sticky top-0 -mx-5 sm:-mx-7 px-5 sm:px-7 pb-3 mb-4 bg-[var(--surface-color)] border-b border-[var(--border-subtle)] flex items-center justify-between">
-          <h2 className="font-display font-semibold text-lg text-[var(--text-primary)]">Integritetspolicy</h2>
-          <button type="button" onClick={onClose} aria-label="Stäng" className="ui-icon-btn">
-            <X size={16} />
-          </button>
-        </div>
+        <SheetHeader title="Integritetspolicy" onClose={onClose} className="sm:-mx-7 sm:px-7" />
         <PrivacyPolicyContent />
       </div>
     </div>

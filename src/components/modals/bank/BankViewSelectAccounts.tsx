@@ -42,8 +42,8 @@ export const BankViewSelectAccounts: React.FC<BankViewSelectAccountsProps> = ({
             key={acc.id}
             className={`rounded-2xl border overflow-hidden transition-all ${
               isChecked
-                ? 'bg-[var(--bg-color)] border-[var(--border-subtle)]'
-                : 'bg-[var(--bg-color)]/50 border-[var(--border-subtle)] opacity-60'
+                ? 'bg-[var(--fill-grouped)] border-transparent'
+                : 'bg-[var(--fill-grouped)] border-transparent opacity-60'
             }`}
           >
             <button
@@ -53,11 +53,7 @@ export const BankViewSelectAccounts: React.FC<BankViewSelectAccountsProps> = ({
             >
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <div
-                  className={`ui-checkbox ${
-                    isChecked
-                      ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
-                      : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
-                  }`}
+                  className={`ui-checkbox ${isChecked ? 'ui-checkbox-on' : 'ui-checkbox-off'}`}
                 >
                   {isChecked && <Check size={12} weight="bold" />}
                 </div>

@@ -1,19 +1,13 @@
 import type { SetStateAction } from 'react';
 import { PaymentMethodItem, saveStoredPaymentMethods } from '../../utils/cache/categories';
 import React, { useState } from 'react';
-import {
-  ArrowCounterClockwise,
-  CaretRight,
-  Plus,
-  Trash,
-  Check,
-  X,
-} from '@phosphor-icons/react';
+import { ArrowCounterClockwise, CaretRight, Plus, Trash, Check } from '@phosphor-icons/react';
 import { TransactionItem, FixedExpenseItem } from '../../app/models';
 import { DEFAULT_PAYMENT_METHODS } from '../../constants';
 import { BottomSheet } from '../ui/BottomSheet';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { PaymentMethodIcon, AVAILABLE_PAYMENT_METHOD_ICONS } from '../CategoryIcon';
+import { SheetHeader } from '../ui/SheetHeader';
 
 
 
@@ -175,18 +169,10 @@ export const PaymentMethodsSettingsView: React.FC<PaymentMethodsSettingsViewProp
         onClose={closePmSheet}
         contentClassName="px-5 pt-1 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] overflow-y-auto"
       >
-        <div className="ui-sheet-header mb-4">
-          <span className="ui-sheet-title">
-            {pmSheetMode === 'new' ? 'Nytt betalsätt' : 'Redigera betalsätt'}
-          </span>
-          <button
-            type="button" aria-label="Stäng"
-            onClick={closePmSheet}
-            className="ui-icon-btn"
-          >
-            <X size={16} />
-          </button>
-        </div>
+        <SheetHeader
+          title={pmSheetMode === 'new' ? 'Nytt betalsätt' : 'Redigera betalsätt'}
+          onClose={closePmSheet}
+        />
 
         <form onSubmit={handleSavePmSheet} className="space-y-4">
           <div className="ui-field-card">

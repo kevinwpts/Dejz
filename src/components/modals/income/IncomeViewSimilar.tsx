@@ -1,11 +1,12 @@
 // Inkomstfönstret: lista med banktransaktioner som matchar inkomsten.
 import React from 'react';
-import { X, CaretRight, CaretLeft } from '@phosphor-icons/react';
+import { CaretRight } from '@phosphor-icons/react';
 import { TransactionItem, getTransactionTime } from '../../../app/models';
 import { ItemLogo } from '../../ItemLogo';
 import { formatSwedishDateHeading } from '../../../utils/swedishDate';
 import type { SimilarTransactionsSummary } from '../../../utils/recurring/similarTransactions';
 import type { ModalSubView, NavigateSubView, SlideAnimClass } from './shared';
+import { SheetHeader } from '../../ui/SheetHeader';
 
 export interface IncomeViewSimilarProps {
   subView: ModalSubView;
@@ -31,27 +32,7 @@ export const IncomeViewSimilar: React.FC<IncomeViewSimilarProps> = ({
   if (subView !== 'similar') return null;
   return (
     <div className={`${slideAnimClass} space-y-5`}>
-      <div className="ui-sheet-sub-header">
-        <button
-          type="button"
-          onClick={() => navigateSubView('details', 'back')}
-          title="Tillbaka"
-          aria-label="Tillbaka"
-          className="ui-icon-btn"
-        >
-          <CaretLeft size={15} weight="bold" />
-        </button>
-        <span className="ui-sheet-title">
-          Liknande transaktioner
-        </span>
-        <button
-          type="button" aria-label="Stäng"
-          onClick={onClose}
-          className="ui-icon-btn"
-        >
-          <X size={16} />
-        </button>
-      </div>
+      <SheetHeader title="Liknande transaktioner" onBack={() => navigateSubView('details', 'back')} onClose={onClose} flush />
 
       <div className="ui-date-header px-1">
         <span className="font-medium text-[var(--text-secondary)]">

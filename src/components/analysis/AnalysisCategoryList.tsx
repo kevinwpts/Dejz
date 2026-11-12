@@ -2,7 +2,7 @@
 import React from 'react';
 import { CaretRight, CaretDown, Heart, Package, Paperclip } from '@phosphor-icons/react';
 import { type TransactionItem, type FixedExpenseItem, type IncomeItem, getTransactionTime } from '../../app/models';
-import { CategoryIcon } from '../CategoryIcon';
+import { CategoryIcon, categoryColorStyle } from '../CategoryIcon';
 import { ItemLogo } from '../ItemLogo';
 import { checkIsRecurringTransaction } from '../../utils/recurring/checkRecurring';
 import { formatSwedishDateHeading } from '../../utils/swedishDate';
@@ -75,7 +75,7 @@ const CategoryEntryRow: React.FC<CategoryEntryRowProps> = ({
           onSelectFixed(fixedExpenses.find((f) => f.id === subFixed.id) ?? subFixed);
         }
       }}
-      className="w-full pl-7 sm:pl-9 pr-4 sm:pr-5 py-3 flex items-center justify-between gap-3 text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer group"
+      className="w-full pl-7 sm:pl-9 pr-4 sm:pr-5 py-3 flex items-center justify-between gap-3 text-left active:bg-[var(--press-overlay)] transition-colors cursor-pointer group"
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <ItemLogo
@@ -175,7 +175,7 @@ export const AnalysisCategoryList: React.FC<AnalysisCategoryListProps> = ({
 }) => (
   <section className="ui-list-card px-0">
     {categoryBreakdown.length > 0 ? (
-      <div className="divide-y divide-[var(--border-subtle)]">
+      <div className="ui-inset-divide">
         {categoryBreakdown.map((item) => {
           const isExpanded = inspectedCategory === item.key;
 
@@ -191,14 +191,17 @@ export const AnalysisCategoryList: React.FC<AnalysisCategoryListProps> = ({
                     setSelectedSliceCategory(isExpanded ? null : item.category);
                   }
                 }}
-                className={`w-full px-4 sm:px-5 py-3.5 flex flex-col gap-2 text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer group ${
+                className={`w-full px-4 sm:px-5 py-3.5 flex flex-col gap-2 text-left active:bg-[var(--press-overlay)] transition-colors cursor-pointer group ${
                   isExpanded ? 'bg-[var(--bg-color)]/45' : ''
                 }`}
               >
                 <div className="w-full flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-10 h-10 rounded-xl bg-[var(--icon-tile-bg)] flex items-center justify-center shrink-0">
-                      <CategoryIcon category={item.category} size={22} />
+                    <div
+                      className="w-10 h-10 rounded-xl ui-cat-tile flex items-center justify-center shrink-0"
+                      style={categoryColorStyle(item.category)}
+                    >
+                      <CategoryIcon category={item.category} size={20} muted />
                     </div>
                     <div className="min-w-0 flex-1">
                       <span className="ui-row-title">

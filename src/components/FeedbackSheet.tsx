@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { CheckCircle, SpinnerGap, X } from '@phosphor-icons/react';
+import { CheckCircle, SpinnerGap } from '@phosphor-icons/react';
 import { FeedbackType, OPEN_FEEDBACK_EVENT, sendFeedback } from '../utils/sendFeedback';
+import { SheetHeader } from './ui/SheetHeader';
 
 const TYPES: { id: Exclude<FeedbackType, 'crash'>; label: string; placeholder: string }[] = [
   { id: 'idea', label: '💡 Idé', placeholder: 'Vad skulle göra Dejz bättre för dig?' },
@@ -54,19 +55,12 @@ export const FeedbackSheet: React.FC = () => {
     <div className="fixed inset-0 z-[260] flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-label="Skicka feedback">
       <div className="absolute inset-0 bg-[var(--scrim-color)] animate-fade-in" onClick={() => setOpen(false)} />
       <div className="relative w-full sm:max-w-md bg-[var(--surface-color)] rounded-t-modal sm:rounded-modal px-5 sm:px-6 pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] shadow-[var(--shadow-modal)] animate-scale-in">
-        <div className="flex items-start justify-between gap-3 mb-4">
-          <div>
-            <h2 className="font-display font-semibold text-lg text-[var(--text-primary)]">
-              {sent ? 'Tack! 💜' : 'Hjälp oss göra Dejz bättre'}
-            </h2>
-            {!sent && (
-              <p className="text-sm text-[var(--text-secondary)] mt-0.5">Allt du skriver läses av en riktig människa.</p>
-            )}
-          </div>
-          <button type="button" onClick={() => setOpen(false)} aria-label="Stäng" className="ui-icon-btn -mr-1">
-            <X size={16} />
-          </button>
-        </div>
+        <SheetHeader
+          title={sent ? 'Tack! 💜' : 'Hjälp oss göra Dejz bättre'}
+          subtitle={sent ? undefined : 'Allt du skriver läses av en riktig människa.'}
+          onClose={() => setOpen(false)}
+          className="!static !mx-0 !px-0 !bg-transparent"
+        />
 
         {sent ? (
           <div className="space-y-5">
@@ -97,7 +91,7 @@ export const FeedbackSheet: React.FC = () => {
                   className={`h-10 rounded-xl text-footnote font-medium border transition-all cursor-pointer active:scale-[0.97] ${
                     type === t.id
                       ? 'bg-[var(--accent-soft)] border-[var(--accent-color)] text-[var(--text-primary)]'
-                      : 'bg-[var(--bg-color)] border-[var(--border-subtle)] text-[var(--text-secondary)]'
+                      : 'bg-[var(--fill-grouped)] border-transparent text-[var(--text-secondary)]'
                   }`}
                 >
                   {t.label}
@@ -112,7 +106,7 @@ export const FeedbackSheet: React.FC = () => {
               rows={4}
               autoFocus
               maxLength={2000}
-              className="w-full rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] px-4 py-3 text-base text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-color)] resize-none"
+              className="w-full rounded-2xl bg-[var(--fill-grouped)] px-4 py-3 text-base text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-color)] resize-none"
             />
             <button
               type="submit"

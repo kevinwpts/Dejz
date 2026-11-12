@@ -47,7 +47,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 form.backToLanding();
               }
             }}
-            className="p-2 -ml-2 text-[var(--text-primary)] hover:opacity-70 active:scale-95 transition-all cursor-pointer flex items-center justify-center"
+            className="ui-header-btn"
             aria-label="Tillbaka"
             title="Tillbaka"
           >

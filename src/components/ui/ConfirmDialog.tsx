@@ -74,7 +74,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             type="button"
             disabled={loading}
             onClick={onCancel}
-            className="py-2.5 px-3 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold text-[var(--text-primary)] transition-colors cursor-pointer active:scale-[0.98]"
+            className="py-2.5 px-3 rounded-2xl bg-[var(--fill-grouped)] hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold text-[var(--text-primary)] transition-colors cursor-pointer active:scale-[0.98]"
           >
             {cancelLabel}
           </button>

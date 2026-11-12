@@ -1,9 +1,10 @@
 import type { RecurringMatchResult } from '../../../utils/recurring/checkRecurring';
 import { ModalSubView } from './shared';
 import React from 'react';
-import { X, CaretLeft, Check, Plus } from '@phosphor-icons/react';
+import { Check, Plus } from '@phosphor-icons/react';
 import { TransactionItem, FixedExpenseItem, IncomeItem } from '../../../app/models';
 import { ItemLogo } from '../../ItemLogo';
+import { SheetHeader } from '../../ui/SheetHeader';
 
 export interface TxViewLinkFixedPickerProps {
   subView: "details" | "edit" | "category-picker" | "payment-picker" | "date-picker" | "link-fixed-picker" | "similar" | "swish" | "receipt-preview";
@@ -39,27 +40,7 @@ export const TxViewLinkFixedPicker: React.FC<TxViewLinkFixedPickerProps> = ({
   <>
     {subView === 'link-fixed-picker' && activeTx && (
       <div className={`${slideAnimClass} space-y-4`}>
-        <div className="ui-sheet-sub-header">
-          <button
-            type="button"
-            onClick={() => navigateSubView(pickerReturnView, 'back')}
-            title="Tillbaka"
-            aria-label="Tillbaka"
-            className="ui-icon-btn"
-          >
-            <CaretLeft size={15} weight="bold" />
-          </button>
-          <span className="ui-sheet-title">
-            {isIncome ? 'Koppla till fast inkomst' : 'Koppla till fast utgift'}
-          </span>
-          <button
-            type="button" aria-label="Stäng"
-            onClick={onClose}
-            className="ui-icon-btn"
-          >
-            <X size={16} />
-          </button>
-        </div>
+        <SheetHeader title={isIncome ? 'Koppla till fast inkomst' : 'Koppla till fast utgift'} onBack={() => navigateSubView(pickerReturnView, 'back')} onClose={onClose} flush />
 
         <div className="ui-sheet-group">
           {(isIncome ? incomes : fixedExpenses).map((item) => {

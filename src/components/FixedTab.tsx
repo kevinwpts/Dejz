@@ -177,7 +177,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                   onClick={() => onSelectIncome(inc)}
                   className="ui-tx-row"
                 >
-                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
                     <ItemLogo
                       name={inc.name}
                       category={inc.category}
@@ -270,7 +270,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                     onClick={() => onSelectFixed(exp)}
                     className={`ui-tx-row ${!isActiveInPeriod && !matchedTx ? 'opacity-60' : ''}`}
                   >
-                    <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
                       <ItemLogo
                         name={exp.name}
                         category={exp.category}

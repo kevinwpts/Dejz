@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Microphone, Keyboard } from '@phosphor-icons/react';
 import { BottomSheet } from './ui/BottomSheet';
 import { parseQuickEntry } from '../utils/quickEntry';
+import { SheetHeader } from './ui/SheetHeader';
 
 /**
  * "Lägg till köp" från menyns plusknapp: prata in ("Ica 143 kronor") eller fyll i manuellt.
@@ -182,20 +183,14 @@ export const AddEntrySheet: React.FC<AddEntrySheetProps> = ({
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose}>
       <div className="space-y-6">
-        <div className="ui-sheet-sub-header">
-          <span className="ui-sheet-title">Lägg till köp</span>
-        </div>
+        <SheetHeader title="Lägg till köp" onClose={onClose} flush />
 
         <div className="flex flex-col items-center text-center gap-4">
           <button
             type="button"
             onClick={listening ? finishListening : startListening}
             aria-label={listening ? 'Sluta lyssna' : 'Prata in köpet'}
-            className="relative w-24 h-24 rounded-full flex items-center justify-center text-white active:scale-95 transition-transform cursor-pointer"
-            style={{
-              background: 'linear-gradient(135deg, #7356FF 0%, #5B3DF5 50%, #3F22C9 100%)',
-              boxShadow: '0 14px 30px -10px rgba(63, 34, 201, 0.55)',
-            }}
+            className="ui-fab relative w-24 h-24"
           >
             {listening && (
               <span className="absolute inset-0 rounded-full bg-brand/40 animate-ping" />
@@ -223,7 +218,7 @@ export const AddEntrySheet: React.FC<AddEntrySheetProps> = ({
             stopListening();
             onManual();
           }}
-          className="w-full py-3.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-sm font-semibold text-[var(--text-primary)] flex items-center justify-center gap-2 transition-colors cursor-pointer"
+          className="w-full py-3.5 rounded-2xl bg-[var(--fill-grouped)] hover:opacity-90 text-sm font-semibold text-[var(--text-primary)] flex items-center justify-center gap-2 transition-colors cursor-pointer"
         >
           <Keyboard size={18} />
           <span>Fyll i manuellt</span>

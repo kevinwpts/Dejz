@@ -49,7 +49,7 @@ export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
     <div className="space-y-2.5">
       <div className="flex items-center gap-2">
         <div className="ui-search-box flex-1 min-w-0">
-          <MagnifyingGlass size={16} className="text-[var(--text-muted)] shrink-0" />
+          <MagnifyingGlass size={18} className="text-[var(--text-muted)] shrink-0" />
           <input
             type="text"
             value={searchQuery}
@@ -78,13 +78,13 @@ export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
           aria-label={`Filtrera transaktioner${
             activeFilterCount > 0 ? ` (${activeFilterCount} aktiva)` : ''
           }`}
-          className={`w-[38px] h-[38px] rounded-xl border flex items-center justify-center relative transition-all cursor-pointer shrink-0 ${
+          className={`w-11 h-11 rounded-xl flex items-center justify-center relative transition-all active:scale-[0.96] cursor-pointer shrink-0 ${
             activeFilterCount > 0
-              ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
-              : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[var(--border-subtle)]'
+              ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
+              : 'bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-[var(--text-primary)]'
           }`}
         >
-          <SlidersHorizontal size={15} weight={activeFilterCount > 0 ? 'bold' : 'regular'} />
+          <SlidersHorizontal size={18} weight={activeFilterCount > 0 ? 'bold' : 'regular'} />
           {activeFilterCount > 0 && (
             <span className="absolute -top-1.5 -right-1.5 min-w-[17px] h-[17px] px-1 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] text-micro font-bold flex items-center justify-center ring-2 ring-[var(--bg-color)] pointer-events-none tabular-nums">
               {activeFilterCount}
@@ -97,9 +97,9 @@ export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
             type="button"
             onClick={onAddTransaction}
             title="Lägg till händelse"
-            className="h-[38px] px-3.5 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1 hover:bg-[var(--surface-hover)] active:scale-95 transition-all cursor-pointer shrink-0"
+            className="h-11 px-3.5 rounded-xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-callout font-semibold text-[var(--text-primary)] flex items-center gap-1.5 active:scale-[0.96] transition-all cursor-pointer shrink-0"
           >
-            <Plus size={13} weight="bold" />
+            <Plus size={15} weight="bold" />
             <span>Lägg till</span>
           </button>
         )}
@@ -204,7 +204,7 @@ export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
         activeFilterCount > 0 ||
         typeTab !== 'all' ||
         Boolean(activeAccount)) && (
-        <div className="rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] px-3.5 py-2 flex items-center justify-between gap-2 text-xs tabular-nums">
+        <div className="rounded-xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] px-3.5 py-2 flex items-center justify-between gap-2 text-xs tabular-nums">
           <span className="text-[var(--text-secondary)]">
             <span className="font-semibold text-[var(--text-primary)]">
               {filteredTransactions.length}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BottomSheet } from './ui/BottomSheet';
 import { ManualBalance } from '../utils/cache/manualBalance';
+import { SheetHeader } from './ui/SheetHeader';
 
 /**
  * "Vad har du på kontot just nu?" – utan bankkoppling är detta det säkraste sättet att få
@@ -41,9 +42,7 @@ export const BalanceSheet: React.FC<BalanceSheetProps> = ({
         }}
         className="space-y-5"
       >
-        <div className="ui-sheet-sub-header">
-          <span className="ui-sheet-title">Saldo just nu</span>
-        </div>
+        <SheetHeader title="Saldo just nu" onClose={onClose} flush />
 
         <div className="space-y-1.5">
           <p className="font-display font-semibold text-xl tracking-[-0.01em] text-[var(--text-primary)]">

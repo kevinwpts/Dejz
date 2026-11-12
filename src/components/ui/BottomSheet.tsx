@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useId } from 'react';
 import { createPortal } from 'react-dom';
-import { X } from '@phosphor-icons/react';
+import { SheetHeader } from './SheetHeader';
 
 interface BottomSheetProps {
   isOpen: boolean;
@@ -220,8 +220,8 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
         }}
         className={`relative z-10 w-full flex flex-col overflow-hidden ${maxWidthClass} ${
           fullScreen
-            ? 'h-[100dvh] max-h-[100dvh] rounded-none border-x border-[var(--border-subtle)]'
-            : `mt-auto rounded-t-sheet rounded-b-none border-t border-x border-[var(--border-subtle)] ${maxHeightClass}`
+            ? 'h-[100dvh] max-h-[100dvh] rounded-none'
+            : `mt-auto rounded-t-sheet rounded-b-none ${maxHeightClass}`
         } ${surfaceClass} shadow-modal ${
           !isClosing && dragOffsetY === 0 ? 'animate-sheet-up' : ''
         }`}
@@ -240,31 +240,19 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
             }
           >
             {!fullScreen && (
-              <div className="w-10 h-1.5 rounded-full bg-[var(--border-control)]" />
+              <div className="w-9 h-[5px] rounded-full bg-[var(--border-strong)]" />
             )}
           </div>
 
           {title && (
-            <div className="flex items-center justify-between pb-3.5 border-b border-[var(--border-subtle)]">
-              <div className="min-w-0">
-                <span id={titleId} className="ui-sheet-title block">
-                  {title}
-                </span>
-                {subtitle && (
-                  <span className="text-caption text-[var(--text-muted)] block truncate mt-0.5">
-                    {subtitle}
-                  </span>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={triggerAnimatedClose}
-                aria-label="Stäng"
-                className="ui-icon-btn"
-              >
-                <X size={16} />
-              </button>
-            </div>
+            <SheetHeader
+              title={title}
+              titleId={titleId}
+              subtitle={subtitle}
+              onClose={triggerAnimatedClose}
+              flush
+              className="!static !mx-0 !px-0 !bg-transparent"
+            />
           )}
         </div>
 
@@ -272,7 +260,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
         <div
           ref={scrollBodyRef}
           className={`flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${effectivePaddingClass} ${
-            title && !disablePadding ? 'pt-4' : ''
+            title && !disablePadding ? 'pt-2' : ''
           }`}
         >
           {bodyClassName ? <div className={bodyClassName}>{children}</div> : children}
@@ -281,7 +269,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
         {/* Sticky Bottom Footer */}
         {footer && (
           <div
-            className={`shrink-0 z-20 ${surfaceClass} border-t border-[var(--border-subtle)] ${
+            className={`shrink-0 z-20 ${surfaceClass} ${
               disablePadding
                 ? ''
                 : 'px-5 pt-3 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))]'

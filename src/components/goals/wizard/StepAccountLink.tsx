@@ -28,11 +28,7 @@ const cardClass = (selected: boolean) =>
   }`;
 
 const checkboxClass = (selected: boolean) =>
-  `ui-checkbox ${
-    selected
-      ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
-      : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
-  }`;
+  `ui-checkbox ${selected ? 'ui-checkbox-on' : 'ui-checkbox-off'}`;
 
 export const StepAccountLink: React.FC<StepAccountLinkProps> = ({
   animClass,
@@ -71,7 +67,7 @@ export const StepAccountLink: React.FC<StepAccountLinkProps> = ({
           <div className={checkboxClass(goalLinkedAccountId === '__TOTAL__')}>
             {goalLinkedAccountId === '__TOTAL__' && <Check size={12} weight="bold" />}
           </div>
-          <div className="w-8 h-8 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-[var(--fill-grouped)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
             <Bank size={15} weight="regular" />
           </div>
           <div className="min-w-0 flex-1">

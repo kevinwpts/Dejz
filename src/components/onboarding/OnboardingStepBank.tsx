@@ -106,11 +106,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                     }`}
                   >
                     <div
-                      className={`ui-checkbox ${
-                        isChecked
-                          ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
-                          : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
-                      }`}
+                      className={`ui-checkbox ${isChecked ? 'ui-checkbox-on' : 'ui-checkbox-off'}`}
                     >
                       {isChecked && <Check size={12} weight="bold" />}
                     </div>
@@ -183,7 +179,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
               )}
 
               {(bankCallbackStatusMsg || verifyingBankReturn) && (
-                <div className="shrink-0 p-4 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center gap-3 text-xs font-medium text-[var(--text-primary)] animate-scale-in">
+                <div className="shrink-0 p-4 rounded-2xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] flex items-center gap-3 text-xs font-medium text-[var(--text-primary)] animate-scale-in">
                   <SpinnerGap size={18} className="animate-spin text-[var(--text-primary)] shrink-0" />
                   <span>
                     {bankCallbackStatusMsg ||
@@ -193,7 +189,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
               )}
 
               {hasConnectedBank ? (
-                <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-5 space-y-4">
+                <div className="bg-[var(--surface-color)] shadow-[var(--card-shadow)] rounded-3xl p-5 space-y-4">
                   {connections.map((conn) => (
                     <div key={conn.id} className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0">
@@ -237,7 +233,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                       value={bankSearchQuery}
                       onChange={(e) => setBankSearchQuery(e.target.value)}
                       placeholder="Sök bank..."
-                      className="w-full pl-9 pr-8 py-2.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] transition-colors"
+                      className="w-full pl-9 pr-8 py-2.5 rounded-2xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-xs font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] transition-colors"
                     />
                     {bankSearchQuery.length > 0 && (
                       <button

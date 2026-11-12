@@ -1,6 +1,6 @@
 import type { FormEvent, SetStateAction } from 'react';
 import React from 'react';
-import { CaretLeft, CaretRight, Trash, Check, X } from '@phosphor-icons/react';
+import { CaretRight, Trash, Check } from '@phosphor-icons/react';
 import { inferCategoryAndMethodFromName } from '../../utils/bankAnalysis/existingBudget/manualCategory';
 
 
@@ -11,6 +11,7 @@ import { DayOfMonthPicker } from '../ui/DayOfMonthPicker';
 import {
   SheetEditorState,
 } from './onboardingConfig';
+import { SheetHeader } from '../ui/SheetHeader';
 
 export interface OnboardingItemSheetProps {
   sheetEditor: SheetEditorState | null;
@@ -50,30 +51,10 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
               key="sheet-day-picker"
               className="animate-page-forward space-y-4"
             >
-              <div className="ui-sheet-sub-header">
-                <button
-                  type="button"
-                  onClick={() => {
+              <SheetHeader title={sheetEditor.type === 'income' ? 'Välj utbetalningsdag' : 'Välj förfallodag'} onBack={() => {
                     setSheetNavDir('back');
                     setSheetSubView('main');
-                  }}
-                  title="Tillbaka"
-                  aria-label="Tillbaka"
-                  className="ui-icon-btn"
-                >
-                  <CaretLeft size={15} weight="bold" />
-                </button>
-                <span className="ui-sheet-title">
-                  {sheetEditor.type === 'income' ? 'Välj utbetalningsdag' : 'Välj förfallodag'}
-                </span>
-                <button
-                  type="button" aria-label="Stäng"
-                  onClick={() => setSheetEditor(null)}
-                  className="ui-icon-btn"
-                >
-                  <X size={16} />
-                </button>
-              </div>
+                  }} onClose={() => setSheetEditor(null)} flush />
 
               <DayOfMonthPicker
                 selectedDay={sheetEditor.day}
@@ -92,28 +73,10 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
               key="sheet-category-picker"
               className="animate-page-forward space-y-4"
             >
-              <div className="ui-sheet-sub-header">
-                <button
-                  type="button"
-                  onClick={() => {
+              <SheetHeader title="Välj kategori" onBack={() => {
                     setSheetNavDir('back');
                     setSheetSubView('main');
-                  }}
-                  title="Tillbaka"
-                  aria-label="Tillbaka"
-                  className="ui-icon-btn"
-                >
-                  <CaretLeft size={15} weight="bold" />
-                </button>
-                <span className="ui-sheet-title">Välj kategori</span>
-                <button
-                  type="button" aria-label="Stäng"
-                  onClick={() => setSheetEditor(null)}
-                  className="ui-icon-btn"
-                >
-                  <X size={16} />
-                </button>
-              </div>
+                  }} onClose={() => setSheetEditor(null)} flush />
 
               <div className="ui-sheet-group">
                 {(sheetEditor.type === 'income'
@@ -163,28 +126,10 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
               key="sheet-payment-picker"
               className="animate-page-forward space-y-4"
             >
-              <div className="ui-sheet-sub-header">
-                <button
-                  type="button"
-                  onClick={() => {
+              <SheetHeader title="Välj betalsätt" onBack={() => {
                     setSheetNavDir('back');
                     setSheetSubView('main');
-                  }}
-                  title="Tillbaka"
-                  aria-label="Tillbaka"
-                  className="ui-icon-btn"
-                >
-                  <CaretLeft size={15} weight="bold" />
-                </button>
-                <span className="ui-sheet-title">Välj betalsätt</span>
-                <button
-                  type="button" aria-label="Stäng"
-                  onClick={() => setSheetEditor(null)}
-                  className="ui-icon-btn"
-                >
-                  <X size={16} />
-                </button>
-              </div>
+                  }} onClose={() => setSheetEditor(null)} flush />
 
               <div className="ui-sheet-group">
                 {availablePaymentMethods.map((m) => {
@@ -234,24 +179,16 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
                 sheetNavDir === 'back' ? 'animate-page-back' : ''
               }`}
             >
-              <div className="ui-sheet-sub-header">
-                <span className="ui-sheet-title">
-                  {sheetEditor.mode === 'add'
+              <SheetHeader
+                title={sheetEditor.mode === 'add'
                     ? sheetEditor.type === 'income'
                       ? 'Lägg till inkomst'
                       : 'Lägg till fast utgift'
                     : sheetEditor.type === 'income'
                     ? 'Redigera inkomst'
                     : 'Redigera fast utgift'}
-                </span>
-                <button
-                  type="button" aria-label="Stäng"
-                  onClick={() => setSheetEditor(null)}
-                  className="ui-icon-btn"
-                >
-                  <X size={16} />
-                </button>
-              </div>
+                onClose={() => setSheetEditor(null)} flush
+              />
 
               {/* Stort och tydligt inmatningskort för Namn + Belopp med live-logga */}
               <div className="ui-field-card space-y-3.5">

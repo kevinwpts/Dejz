@@ -3,19 +3,7 @@ import type { SimilarTransactionsSummary } from '../../../utils/recurring/simila
 import { ModalSubView, getDefaultPaymentMethodForTx } from './shared';
 import type { RefObject, SetStateAction } from 'react';
 import React from 'react';
-import {
-  X,
-  Heart,
-  Package,
-  Paperclip,
-  Trash,
-  ArrowsClockwise,
-  CaretRight,
-  PencilSimple,
-  ClockCounterClockwise,
-  Sparkle,
-  Plus,
-} from '@phosphor-icons/react';
+import { Heart, Package, Paperclip, Trash, ArrowsClockwise, CaretRight, PencilSimple, ClockCounterClockwise, Plus } from '@phosphor-icons/react';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
 import { TransactionItem, FixedExpenseItem, IncomeItem } from '../../../app/models';
 import { CategoryIcon, PaymentMethodIcon } from '../../CategoryIcon';
@@ -26,6 +14,7 @@ import { getSavingsGoals, saveSavingsGoals, SavingsGoalItem } from '../../../uti
 import type { AccountDisplayInfo } from '../../../utils/accountDisplay';
 import { AccountInfoRow } from '../AccountInfoRow';
 import { DetailHeroLogo } from '../DetailHeroLogo';
+import { SheetHeader } from '../../ui/SheetHeader';
 
 export interface TxViewDetailsProps {
   subView: "details" | "edit" | "category-picker" | "payment-picker" | "date-picker" | "link-fixed-picker" | "similar" | "swish" | "receipt-preview";
@@ -118,8 +107,12 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
     {subView === 'details' && !isCreateMode && activeTx && (
       <div className={navDirection === 'back' ? 'animate-slide-in-left' : ''}>
         {/* Top Header */}
-        <div className="ui-sheet-header !mb-0">
-          <div className="flex items-center gap-1">
+        <SheetHeader
+          title={isIncome ? 'Inkomst' : 'Köp'}
+          flush
+          onClose={onClose}
+          actions={
+            <>
             {onToggleHeart && (
               <button
                 aria-label="Spara köp"
@@ -132,7 +125,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                 }`}
               >
                 <Heart
-                  size={18}
+                  size={16}
                   weight={activeTx.isHearted ? 'fill' : 'regular'}
                   className={activeTx.isHearted ? 'text-negative-solid' : ''}
                 />
@@ -152,33 +145,23 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                 }`}
               >
                 <Package
-                  size={18}
+                  size={16}
                   weight={activeTx.isWaitingForPackage ? 'fill' : 'regular'}
                   className={activeTx.isWaitingForPackage ? 'text-caution-solid' : ''}
                 />
               </button>
             )}
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => navigateSubView('edit', 'forward')}
-              className="ui-pill-btn"
-            >
-              <PencilSimple size={14} weight="bold" />
-              Redigera
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Stäng"
-              className="ui-icon-btn"
-            >
-              <X size={16} />
-            </button>
-          </div>
-        </div>
+              <button
+                type="button"
+                onClick={() => navigateSubView('edit', 'forward')}
+                className="ui-pill-btn"
+              >
+                <PencilSimple size={14} weight="bold" />
+                Redigera
+              </button>
+            </>
+          }
+        />
 
         {/* Kvitto-huvud: bara läsning. Ändringar görs via Redigera eller raderna nedan. */}
         <div className="ui-hero-header relative overflow-hidden pt-5 mb-5 pb-5">
@@ -198,7 +181,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
             className="group flex items-center justify-center gap-1.5 px-3 max-w-md mx-auto cursor-pointer"
             aria-label={`Byt namn på ${title || activeTx.title}`}
           >
-            <h2 className="font-display font-semibold text-base sm:text-lg text-[var(--text-primary)] text-center truncate">
+            <h2 className="font-display font-semibold text-xl tracking-[-0.02em] text-[var(--text-primary)] text-center truncate">
               {title || activeTx.title}
             </h2>
             <PencilSimple
@@ -209,7 +192,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
           </button>
 
           <div
-            className={`mt-1 font-display font-bold tabular-nums text-2xl sm:text-3xl ${
+            className={`mt-1.5 font-display font-bold tabular-nums text-[34px] leading-tight tracking-[-0.04em] ${
               isIncome ? 'text-positive-solid' : 'text-[var(--text-primary)]'
             }`}
           >
@@ -463,9 +446,8 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
               return (
                 <div className="ui-row flex-col items-stretch gap-2 py-3">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-medium text-[var(--text-secondary)] flex items-center gap-1.5">
-                      <Sparkle size={13} weight="fill" className="text-positive-solid shrink-0" />
-                      <span>
+                    <span className="ui-info-label text-[var(--text-primary)] flex items-center gap-1.5 min-w-0">
+                      <span className="truncate">
                         {linkedGoal
                           ? `Kopplad till sparmål: ${linkedGoal.name}`
                           : 'Räkna in mot sparmål'}
@@ -498,7 +480,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                           saveSavingsGoals(nextGoals);
                           setLogoPrefTick((t) => t + 1);
                         }}
-                        className="text-xs font-medium text-negative hover:underline cursor-pointer shrink-0"
+                        className="text-footnote font-medium text-negative hover:opacity-80 cursor-pointer shrink-0"
                       >
                         Koppla bort
                       </button>
@@ -534,9 +516,9 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                             saveSavingsGoals(nextGoals);
                             setLogoPrefTick((t) => t + 1);
                           }}
-                          className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1 cursor-pointer transition-colors"
+                          className="ui-chip-sm"
                         >
-                          <Plus size={11} weight="bold" className="text-positive-solid" />
+                          <Plus size={12} weight="bold" className="text-[var(--accent-color)]" />
                           <span>{g.name}</span>
                         </button>
                       ))}

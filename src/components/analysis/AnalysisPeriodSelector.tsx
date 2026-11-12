@@ -24,7 +24,7 @@ export const AnalysisPeriodNav: React.FC<AnalysisPeriodNavProps> = ({
       type="button"
       onClick={() => setPeriodOffset((prev) => Math.max(-5, prev - 1))}
       disabled={periodOffset <= -5}
-      className="w-9 h-9 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] flex items-center justify-center text-[var(--text-primary)] disabled:opacity-30 transition-all cursor-pointer shrink-0 active:scale-95"
+      className="w-9 h-9 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] flex items-center justify-center text-[var(--text-primary)] disabled:opacity-30 transition-all cursor-pointer shrink-0 active:scale-95"
       title="Föregående period"
     >
       <CaretLeft size={14} weight="bold" />
@@ -33,14 +33,14 @@ export const AnalysisPeriodNav: React.FC<AnalysisPeriodNavProps> = ({
     <button
       type="button"
       onClick={onOpenMenu}
-      className="py-1.5 px-4 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] active:scale-[0.98] transition-all cursor-pointer inline-flex items-center justify-center gap-2 shadow-2xs"
+      className="h-9 px-4 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] active:scale-[0.97] transition-all cursor-pointer inline-flex items-center justify-center gap-2"
     >
       <CalendarBlank
         size={14}
         weight="duotone"
         className="text-[var(--text-secondary)] shrink-0"
       />
-      <span className="font-display font-semibold text-xs sm:text-footnote text-[var(--text-primary)] tabular-nums">
+      <span className="font-display font-semibold text-callout text-[var(--text-primary)] tabular-nums">
         {period.startLabel} – {period.endLabel}
       </span>
       <CaretDown
@@ -55,7 +55,7 @@ export const AnalysisPeriodNav: React.FC<AnalysisPeriodNavProps> = ({
       type="button"
       onClick={() => setPeriodOffset((prev) => Math.min(0, prev + 1))}
       disabled={periodOffset >= 0}
-      className="w-9 h-9 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] flex items-center justify-center text-[var(--text-primary)] disabled:opacity-30 transition-all cursor-pointer shrink-0 active:scale-95"
+      className="w-9 h-9 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] flex items-center justify-center text-[var(--text-primary)] disabled:opacity-30 transition-all cursor-pointer shrink-0 active:scale-95"
       title="Nästa period"
     >
       <CaretRight size={14} weight="bold" />

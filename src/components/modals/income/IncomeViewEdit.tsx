@@ -1,11 +1,12 @@
 // Inkomstfönstret: lägg till ny inkomst eller redigera en befintlig.
 import React from 'react';
-import { X, Check, CaretRight } from '@phosphor-icons/react';
+import { Check, CaretRight } from '@phosphor-icons/react';
 import type { SetStateAction } from 'react';
 import { ItemLogo } from '../../ItemLogo';
 import { CategoryIcon } from '../../CategoryIcon';
 import { inferCategoryAndMethodFromName } from '../../../utils/bankAnalysis/existingBudget/manualCategory';
 import type { ModalSubView, NavigateSubView, SlideAnimClass } from './shared';
+import { SheetHeader } from '../../ui/SheetHeader';
 
 export interface IncomeViewEditProps {
   subView: ModalSubView;
@@ -46,24 +47,9 @@ export const IncomeViewEdit: React.FC<IncomeViewEditProps> = ({
   return (
     <div className={`${slideAnimClass} space-y-4`}>
       {isCreateMode ? (
-        <div className="ui-sheet-header">
-          <span className="ui-sheet-title">Lägg till inkomst</span>
-          <button type="button" aria-label="Stäng" onClick={onClose} className="ui-icon-btn">
-            <X size={16} />
-          </button>
-        </div>
+        <SheetHeader title="Lägg till inkomst" onClose={onClose} flush />
       ) : (
-        <div className="ui-sheet-sub-header">
-          <button
-            type="button"
-            onClick={handleCancelEdit}
-            className="ui-text-btn"
-          >
-            Avbryt
-          </button>
-          <span className="ui-sheet-title">Redigera inkomst</span>
-          <div className="w-16" />
-        </div>
+        <SheetHeader variant="edit" title="Redigera inkomst" onCancel={handleCancelEdit} flush />
       )}
 
       {/* Stort och tydligt inmatningskort för Namn + Belopp med live-logga */}

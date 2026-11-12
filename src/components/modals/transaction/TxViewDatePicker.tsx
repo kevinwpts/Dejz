@@ -1,9 +1,10 @@
 import { ModalSubView } from './shared';
 import type { SetStateAction } from 'react';
 import React from 'react';
-import { X, CaretRight, CaretLeft } from '@phosphor-icons/react';
+import { CaretRight, CaretLeft } from '@phosphor-icons/react';
 import { TransactionItem } from '../../../app/models';
 import { formatSwedishFullDate } from '../../../utils/swedishDate';
+import { SheetHeader } from '../../ui/SheetHeader';
 
 export interface TxViewDatePickerProps {
   subView: "details" | "edit" | "category-picker" | "payment-picker" | "date-picker" | "link-fixed-picker" | "similar" | "swish" | "receipt-preview";
@@ -35,27 +36,7 @@ export const TxViewDatePicker: React.FC<TxViewDatePickerProps> = ({
   <>
     {subView === 'date-picker' && (
       <div className={`${slideAnimClass} space-y-4`}>
-        <div className="ui-sheet-sub-header">
-          <button
-            type="button"
-            onClick={() => navigateSubView(pickerReturnView, 'back')}
-            title="Tillbaka"
-            aria-label="Tillbaka"
-            className="ui-icon-btn"
-          >
-            <CaretLeft size={15} weight="bold" />
-          </button>
-          <span className="ui-sheet-title">
-            Välj datum
-          </span>
-          <button
-            type="button" aria-label="Stäng"
-            onClick={onClose}
-            className="ui-icon-btn"
-          >
-            <X size={16} />
-          </button>
-        </div>
+        <SheetHeader title="Välj datum" onBack={() => navigateSubView(pickerReturnView, 'back')} onClose={onClose} flush />
 
         {(() => {
           const now = new Date();
@@ -126,7 +107,7 @@ export const TxViewDatePicker: React.FC<TxViewDatePickerProps> = ({
                       className={`p-2.5 rounded-2xl text-left transition-all cursor-pointer active:scale-[0.98] ${
                         isSel
                           ? 'bg-[var(--text-primary)] text-[var(--bg-color)] shadow-xs'
-                          : 'bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] text-[var(--text-primary)]'
+                          : 'bg-[var(--fill-grouped)] hover:opacity-90 text-[var(--text-primary)]'
                       }`}
                     >
                       <span className="font-display font-semibold text-xs block">
@@ -145,7 +126,7 @@ export const TxViewDatePicker: React.FC<TxViewDatePickerProps> = ({
               </div>
 
               {/* Kalender-matris */}
-              <div className="rounded-3xl bg-[var(--bg-color)] p-3.5 space-y-3">
+              <div className="rounded-3xl bg-[var(--fill-grouped)] p-3.5 space-y-3">
                 <div className="flex items-center justify-between px-1">
                   <button
                     type="button"

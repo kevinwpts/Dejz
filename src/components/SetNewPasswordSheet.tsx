@@ -67,7 +67,7 @@ export const SetNewPasswordSheet: React.FC<{
           </p>
         </div>
 
-        <label className="block rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] px-4 py-3.5 cursor-text">
+        <label className="block rounded-2xl bg-[var(--fill-grouped)] px-4 py-3.5 cursor-text">
           <span className="text-xs font-medium text-[var(--text-secondary)] block mb-1.5">Nytt lösenord</span>
           <span className="flex items-center gap-2">
             <input

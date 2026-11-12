@@ -1,11 +1,12 @@
 import type { ModalSubView } from './shared';
 import type { SimilarTransactionsSummary } from '../../../utils/recurring/similarTransactions';
 import React from 'react';
-import { X, CaretRight, CaretLeft, ArrowsClockwise } from '@phosphor-icons/react';
+import { CaretRight, ArrowsClockwise } from '@phosphor-icons/react';
 import { FixedExpenseItem, TransactionItem, getTransactionTime } from '../../../app/models';
 import { ItemLogo } from '../../ItemLogo';
 import { formatSwedishDateHeading } from '../../../utils/swedishDate';
 import { findAllMatchingFixedExpensesByMerchant, isFixedExpenseAmountMatch } from '../../../utils/recurring/matching';
+import { SheetHeader } from '../../ui/SheetHeader';
 
 export interface FixedViewSimilarProps {
   subView: "details" | "edit" | "category-picker" | "day-picker" | "payment-picker" | "goal-picker" | "receipt-preview" | "similar" | "cancel-picker" | "cancel-guide";
@@ -37,27 +38,7 @@ export const FixedViewSimilar: React.FC<FixedViewSimilarProps> = ({
   <>
     {subView === 'similar' && (
       <div className={`${slideAnimClass} space-y-5`}>
-        <div className="ui-sheet-sub-header">
-          <button
-            type="button"
-            onClick={() => navigateSubView('details', 'back')}
-            title="Tillbaka"
-            aria-label="Tillbaka"
-            className="ui-icon-btn"
-          >
-            <CaretLeft size={15} weight="bold" />
-          </button>
-          <span className="ui-sheet-title">
-            Liknande transaktioner
-          </span>
-          <button
-            type="button" aria-label="Stäng"
-            onClick={onClose}
-            className="ui-icon-btn"
-          >
-            <X size={16} />
-          </button>
-        </div>
+        <SheetHeader title="Liknande transaktioner" onBack={() => navigateSubView('details', 'back')} onClose={onClose} flush />
 
         <div className="ui-date-header px-1">
           <span className="font-medium text-[var(--text-secondary)]">
@@ -122,7 +103,7 @@ export const FixedViewSimilar: React.FC<FixedViewSimilarProps> = ({
                           onMarkAsFixed(tx, 'expense');
                         }}
                         title="Lägg till detta belopp som egen fast utgift"
-                        className="px-2 py-1 rounded-lg bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-caption font-medium text-[var(--text-primary)] flex items-center gap-1 transition-colors cursor-pointer"
+                        className="px-2 py-1 rounded-lg bg-[var(--fill-grouped)] hover:opacity-90 text-caption font-medium text-[var(--text-primary)] flex items-center gap-1 transition-colors cursor-pointer"
                       >
                         <ArrowsClockwise size={11} weight="bold" />
                         <span>+ Fast</span>

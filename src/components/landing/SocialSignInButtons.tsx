@@ -35,7 +35,7 @@ export const SocialSignInButtons: React.FC<SocialSignInButtonsProps> = ({
       type="button"
       onClick={() => onSignIn('google')}
       disabled={disabled}
-      className="w-full py-3.5 px-4 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-semibold text-sm flex items-center justify-center gap-3 hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer disabled:opacity-50"
+      className="w-full py-3.5 px-4 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-[var(--text-primary)] font-semibold text-sm flex items-center justify-center gap-3 active:scale-[0.97] transition-all cursor-pointer disabled:opacity-50"
     >
       {googleLoading ? (
         <SpinnerGap size={18} className="animate-spin" />

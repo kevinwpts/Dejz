@@ -61,7 +61,7 @@ export const DayOfMonthPicker: React.FC<DayOfMonthPickerProps> = ({
               className={`h-10 sm:h-11 rounded-2xl font-display text-footnote sm:text-sm tabular-nums transition-all cursor-pointer flex flex-col items-center justify-center relative select-none active:scale-95 ${
                 isSelected
                   ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-bold shadow-sm scale-[1.05] ring-2 ring-[var(--text-primary)]/15'
-                  : 'bg-transparent text-[var(--text-primary)] hover:bg-[var(--bg-color)] font-medium hover:scale-105'
+                  : 'bg-transparent text-[var(--text-primary)] hover:bg-[var(--fill-grouped)] font-medium hover:scale-105'
               }`}
             >
               <span>{day}</span>

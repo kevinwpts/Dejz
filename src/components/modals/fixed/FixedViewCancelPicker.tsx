@@ -1,9 +1,10 @@
 import type { ModalSubView } from './shared';
 import type { SetStateAction } from 'react';
 import React from 'react';
-import { X, Check, CaretRight, CaretLeft } from '@phosphor-icons/react';
+import { Check, CaretRight } from '@phosphor-icons/react';
 import { FixedExpenseItem } from '../../../app/models';
 import { getSwedishDateStr } from '../../../utils/swedishDate';
+import { SheetHeader } from '../../ui/SheetHeader';
 
 export interface FixedViewCancelPickerProps {
   subView: "details" | "edit" | "category-picker" | "day-picker" | "payment-picker" | "goal-picker" | "receipt-preview" | "similar" | "cancel-picker" | "cancel-guide";
@@ -33,27 +34,7 @@ export const FixedViewCancelPicker: React.FC<FixedViewCancelPickerProps> = ({
   <>
     {subView === 'cancel-picker' && (
       <div className={`${slideAnimClass} space-y-4`}>
-        <div className="ui-sheet-sub-header">
-          <button
-            type="button"
-            onClick={() => navigateSubView('details', 'back')}
-            title="Tillbaka"
-            aria-label="Tillbaka"
-            className="ui-icon-btn"
-          >
-            <CaretLeft size={15} weight="bold" />
-          </button>
-          <span className="ui-sheet-title truncate max-w-[220px]">
-            Uppsagd · {displayName}
-          </span>
-          <button
-            type="button" aria-label="Stäng"
-            onClick={onClose}
-            className="ui-icon-btn"
-          >
-            <X size={16} />
-          </button>
-        </div>
+        <SheetHeader title={<>Uppsagd · {displayName}</>} onBack={() => navigateSubView('details', 'back')} onClose={onClose} flush />
 
         {(() => {
           const SHORT_MONTHS = [
@@ -138,7 +119,7 @@ export const FixedViewCancelPicker: React.FC<FixedViewCancelPickerProps> = ({
                     });
                     navigateSubView('details', 'back');
                   }}
-                  className="w-full py-3 px-4 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center justify-between transition-colors cursor-pointer"
+                  className="w-full py-3 px-4 rounded-2xl bg-[var(--fill-grouped)] hover:opacity-90 text-xs font-medium text-[var(--text-primary)] flex items-center justify-between transition-colors cursor-pointer"
                 >
                   <span>Ångra uppsägning</span>
                   <span className="text-positive font-semibold">
@@ -191,7 +172,7 @@ export const FixedViewCancelPicker: React.FC<FixedViewCancelPickerProps> = ({
               </div>
 
               {showCustomMonthPicker && (
-                <div className="grid grid-cols-4 gap-2 p-3 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)]">
+                <div className="grid grid-cols-4 gap-2 p-3 rounded-2xl bg-[var(--fill-grouped)]">
                   {customMonths.map((cm) => {
                     const isSel = Boolean(
                       activeExpense?.isCancelled &&

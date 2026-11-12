@@ -1,12 +1,6 @@
 // Inkomstfönstret: detaljvy för en fast inkomst (kategori, dag, konto, historik, ta bort).
 import React from 'react';
-import {
-  X,
-  PencilSimple,
-  Trash,
-  CaretRight,
-  ClockCounterClockwise,
-} from '@phosphor-icons/react';
+import { PencilSimple, Trash, CaretRight, ClockCounterClockwise } from '@phosphor-icons/react';
 import type { SetStateAction } from 'react';
 import type { IncomeItem } from '../../../app/models';
 import { ItemLogo } from '../../ItemLogo';
@@ -20,6 +14,7 @@ import {
 import type { IncomeAccountInfo, ModalSubView, NavigateSubView } from './shared';
 import { AccountInfoRow } from '../AccountInfoRow';
 import { useExternalSnapshot } from '../../../utils/hooks/useExternalSnapshot';
+import { SheetHeader } from '../../ui/SheetHeader';
 
 export interface IncomeViewDetailsProps {
   subView: ModalSubView;
@@ -74,9 +69,11 @@ export const IncomeViewDetails: React.FC<IncomeViewDetailsProps> = ({
   if (subView !== 'details' || isCreateMode) return null;
   return (
     <div className={navDirection === 'back' ? 'animate-slide-in-left' : ''}>
-      <div className="ui-sheet-header !mb-0">
-        <span className="ui-sheet-title">Fast inkomst</span>
-        <div className="flex items-center gap-1.5">
+      <SheetHeader
+        title="Fast inkomst"
+        flush
+        onClose={onClose}
+        actions={
           <button
             type="button"
             onClick={() => navigateSubView('edit', 'forward')}
@@ -85,15 +82,11 @@ export const IncomeViewDetails: React.FC<IncomeViewDetailsProps> = ({
             <PencilSimple size={14} weight="bold" />
             Redigera
           </button>
-          <button type="button" onClick={onClose} aria-label="Stäng" className="ui-icon-btn">
-            <X size={16} />
-          </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Kvitto-huvud: bara läsning. Ändringar görs via Redigera eller raderna nedan. */}
       <div className="ui-hero-header relative overflow-hidden pt-5 mb-5 pb-5">
-        <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 w-44 h-32 rounded-full bg-positive-solid blur-2xl opacity-15 dark:opacity-20" />
         <div className="relative flex justify-center mb-3.5">
           <button
             type="button"
@@ -127,7 +120,7 @@ export const IncomeViewDetails: React.FC<IncomeViewDetailsProps> = ({
           className="group flex items-center justify-center gap-1.5 px-3 max-w-md mx-auto cursor-pointer"
           aria-label={`Byt namn på ${name || displayName}`}
         >
-          <h2 className="font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] text-center truncate">
+          <h2 className="font-display font-semibold text-xl tracking-[-0.02em] text-[var(--text-primary)] text-center truncate">
             {name || displayName}
           </h2>
           <PencilSimple
@@ -137,7 +130,7 @@ export const IncomeViewDetails: React.FC<IncomeViewDetailsProps> = ({
           />
         </button>
 
-        <div className="mt-1 flex items-baseline justify-center font-display font-bold text-2xl sm:text-3xl text-positive tabular-nums">
+        <div className="mt-1.5 flex items-baseline justify-center font-display font-bold text-[34px] leading-tight tracking-[-0.04em] text-positive tabular-nums">
           +{formatKr(Number(amount) || 0)}
           <span className="ml-1.5 font-display font-medium text-base text-positive/70">/mån</span>
         </div>

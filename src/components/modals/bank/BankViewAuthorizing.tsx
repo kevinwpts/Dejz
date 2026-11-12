@@ -75,7 +75,7 @@ export const BankViewAuthorizing: React.FC<BankViewAuthorizingProps> = ({
             value={manualCallbackUrl}
             onChange={(e) => setManualCallbackUrl(e.target.value)}
             placeholder="Klistra in återkopplingslänk..."
-            className="flex-1 px-3.5 py-3 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-base font-normal text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
+            className="flex-1 px-3.5 py-3 rounded-xl bg-[var(--fill-grouped)] text-base font-normal text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
           />
           <button
             type="submit"

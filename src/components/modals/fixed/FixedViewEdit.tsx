@@ -2,14 +2,7 @@ import type { SavingsGoalItem } from '../../../utils/cache/itemMeta';
 import type { ModalSubView } from './shared';
 import type { RefObject, SetStateAction } from 'react';
 import React from 'react';
-import {
-  X,
-  Trash,
-  Check,
-  CaretRight,
-  Paperclip,
-  ClockCounterClockwise,
-} from '@phosphor-icons/react';
+import { Trash, Check, CaretRight, Paperclip, ClockCounterClockwise } from '@phosphor-icons/react';
 import { FixedExpenseItem } from '../../../app/models';
 import { ItemLogo } from '../../ItemLogo';
 import { CategoryIcon, PaymentMethodIcon } from '../../CategoryIcon';
@@ -18,6 +11,7 @@ import { getItemReceipts, ReceiptAttachment } from '../../../utils/swedishDate';
 import { normalizeCategoryToValid } from '../../../utils/cache/categories';
 import { inferCategoryAndMethodFromName } from '../../../utils/bankAnalysis/existingBudget/manualCategory';
 import { cleanDisplayMerchantName } from '../../../utils/bankAnalysis/merchantRules';
+import { SheetHeader } from '../../ui/SheetHeader';
 
 export interface FixedViewEditProps {
   subView: "details" | "edit" | "category-picker" | "day-picker" | "payment-picker" | "goal-picker" | "receipt-preview" | "similar" | "cancel-picker" | "cancel-guide";
@@ -88,17 +82,13 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
     {subView === 'edit' && (
       <div className={`${slideAnimClass} space-y-4`}>
         {isCreateMode ? (
-          <div className="ui-sheet-header">
-            <span className="ui-sheet-title">Lägg till fast utgift</span>
-            <button type="button" aria-label="Stäng" onClick={onClose} className="ui-icon-btn">
-              <X size={16} />
-            </button>
-          </div>
+          <SheetHeader title="Lägg till fast utgift" onClose={onClose} flush />
         ) : (
-          <div className="ui-sheet-sub-header">
-            <button
-              type="button"
-              onClick={() => {
+          <SheetHeader
+            variant="edit"
+            title="Redigera fast utgift"
+            flush
+            onCancel={() => {
                 if (activeExpense) {
                   setName(activeExpense.name);
                   setAmount(activeExpense.amount);
@@ -111,13 +101,7 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
                 }
                 navigateSubView('details', 'back');
               }}
-              className="ui-text-btn"
-            >
-              Avbryt
-            </button>
-            <span className="ui-sheet-title">Redigera fast utgift</span>
-            <div className="w-16" />
-          </div>
+          />
         )}
 
         {/* Stort och tydligt inmatningskort för Namn + Belopp med live-logga */}
@@ -289,7 +273,7 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
             {draftReceipts.map((rcpt, idx) => (
               <div
                 key={rcpt.url}
-                className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] px-3.5 py-2.5 flex items-center justify-between gap-2"
+                className="rounded-2xl bg-[var(--fill-grouped)] px-3.5 py-2.5 flex items-center justify-between gap-2"
               >
                 <button
                   type="button"

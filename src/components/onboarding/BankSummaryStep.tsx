@@ -44,7 +44,7 @@ export const BankSummaryStep: React.FC<{
     </div>
 
     <div className="flex-1 min-h-0 flex flex-col justify-center pb-8">
-      <div className="rounded-3xl bg-[var(--surface-color)] border border-[var(--border-subtle)] px-6 py-8 text-center">
+      <div className="rounded-3xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] px-6 py-8 text-center">
         {loading ? (
           <div className="flex flex-col items-center gap-3 py-3 text-sm text-[var(--text-secondary)]">
             <SpinnerGap size={26} className="animate-spin text-[var(--text-primary)]" />

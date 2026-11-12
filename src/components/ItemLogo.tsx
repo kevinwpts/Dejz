@@ -7,7 +7,7 @@ import {
   fetchLogoForName,
   isMerchantCategoryIconPreferred,
 } from '../utils/logo';
-import { CategoryIcon } from './CategoryIcon';
+import { CategoryIcon, categoryColorStyle } from './CategoryIcon';
 import { SwishLogo } from './SwishLogo';
 
 interface ItemLogoProps {
@@ -142,7 +142,7 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
     if (isSwish) {
       return (
         <div
-          className={`${sizeClasses} bg-white flex items-center justify-center overflow-hidden shrink-0`}
+          className={`${sizeClasses} ui-logo-tile flex items-center justify-center overflow-hidden shrink-0`}
           title="Swish"
         >
           <SwishLogo className="w-[66%] h-[66%] object-contain" />
@@ -158,7 +158,7 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
         (currentSrc.startsWith('data:image/svg+xml') && currentSrc.includes("viewBox='0 0 120 120'"));
       return (
         <div
-          className={`${sizeClasses} bg-white flex items-center justify-center overflow-hidden shrink-0`}
+          className={`${sizeClasses} ui-logo-tile flex items-center justify-center overflow-hidden shrink-0`}
         >
           <img
             src={currentSrc}
@@ -177,8 +177,11 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
     }
 
     return (
-      <div className={`${sizeClasses} bg-[var(--icon-tile-bg)] flex items-center justify-center shrink-0`}>
-        <CategoryIcon category={category || name} size={Math.round(iconSize * 0.72)} />
+      <div
+        className={`${sizeClasses} ui-cat-tile flex items-center justify-center shrink-0`}
+        style={categoryColorStyle(category || name)}
+      >
+        <CategoryIcon category={category || name} size={Math.round(iconSize * 0.62)} muted />
       </div>
     );
   };

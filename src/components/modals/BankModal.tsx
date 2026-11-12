@@ -1,11 +1,12 @@
 import React from 'react';
-import { X, WarningCircle, LockKey, CaretLeft } from '@phosphor-icons/react';
+import { WarningCircle, LockKey } from '@phosphor-icons/react';
 import { BankAccount, BankConnection } from '../../services/bank/types';
 import { BottomSheet } from '../ui/BottomSheet';
 import { useBankConnection } from './bank/useBankConnection';
 import { BankViewList } from './bank/BankViewList';
 import { BankViewAuthorizing } from './bank/BankViewAuthorizing';
 import { BankViewSelectAccounts } from './bank/BankViewSelectAccounts';
+import { SheetHeader } from '../ui/SheetHeader';
 
 interface BankModalProps {
   isOpen: boolean;
@@ -78,42 +79,27 @@ export const BankModal: React.FC<BankModalProps> = ({
       contentClassName="px-5 pt-1 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] overflow-y-auto"
     >
       {/* Symmetrical Header */}
-      <div className="ui-sheet-header">
-        {step !== 'list' ? (
-          <>
-            <button
-              type="button"
-              onClick={() => {
+      <SheetHeader
+        title={
+          step === 'list'
+            ? 'Anslut bank'
+            : step === 'authorizing'
+            ? selectedBank?.name || 'Anslut bank'
+            : 'Välj konton'
+        }
+        onBack={
+          step !== 'list'
+            ? () => {
                 setErrorMsg(null);
                 setStep('list');
-              }}
-              title="Tillbaka"
-              aria-label="Tillbaka"
-              className="ui-icon-btn"
-            >
-              <CaretLeft size={15} weight="bold" />
-            </button>
-            <span className="ui-sheet-title">
-              {step === 'authorizing' ? selectedBank?.name || 'Anslut bank' : 'Välj konton'}
-            </span>
-          </>
-        ) : (
-          <span className="ui-sheet-title">
-            Anslut bank
-          </span>
-        )}
-
-        <button
-          type="button" aria-label="Stäng"
-          onClick={() => {
-            setStep('list');
-            onClose();
-          }}
-          className="ui-icon-btn"
-        >
-          <X size={16} />
-        </button>
-      </div>
+              }
+            : undefined
+        }
+        onClose={() => {
+          setStep('list');
+          onClose();
+        }}
+      />
 
       {/* Body */}
       <div className="space-y-4">

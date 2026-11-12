@@ -414,7 +414,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 onBackToLanding();
               }
             }}
-            className="p-1.5 -ml-1.5 text-[var(--text-primary)] flex items-center justify-center hover:opacity-70 active:scale-95 transition-all cursor-pointer"
+            className="ui-header-btn"
             aria-label="Tillbaka"
           >
             <CaretLeft size={18} weight="bold" />
@@ -422,9 +422,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
         </div>
 
         {/* En enda lång sammanhängande progress-bar utan stegtext */}
-        <div className="w-full h-1 rounded-full bg-[var(--border-subtle)] overflow-hidden">
+        <div className="w-full h-1 rounded-full bg-[var(--segment-track)] overflow-hidden">
           <div
-            className="h-full rounded-full bg-[var(--text-primary)] transition-all duration-300 ease-out"
+            className="h-full rounded-full bg-[var(--cta-bg)] transition-all duration-300 ease-out"
             style={{ width: `${((stepIndex + 1) / stepOrder.length) * 100}%` }}
           />
         </div>

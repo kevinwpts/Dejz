@@ -64,16 +64,12 @@ export const BankSelectAccountsSheet: React.FC<BankSelectAccountsSheetProps> = (
                 onClick={() => onToggleAccount(ba.id)}
                 className={`w-full p-3.5 rounded-2xl border flex items-center gap-3.5 text-left transition-all cursor-pointer ${
                   isChecked
-                    ? 'bg-[var(--bg-color)] border-[var(--border-subtle)]'
-                    : 'bg-[var(--bg-color)]/50 border-[var(--border-subtle)] opacity-60'
+                    ? 'bg-[var(--fill-grouped)] border-transparent'
+                    : 'bg-[var(--fill-grouped)] border-transparent opacity-60'
                 }`}
               >
                 <div
-                  className={`ui-checkbox ${
-                    isChecked
-                      ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
-                      : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
-                  }`}
+                  className={`ui-checkbox ${isChecked ? 'ui-checkbox-on' : 'ui-checkbox-off'}`}
                 >
                   {isChecked && <Check size={12} weight="bold" />}
                 </div>
@@ -110,7 +106,7 @@ export const BankSelectAccountsSheet: React.FC<BankSelectAccountsSheetProps> = (
             type="button"
             disabled={reconnectingBankId === selectingAccountsConn.id}
             onClick={() => onReconnect(selectingAccountsConn)}
-            className="w-full py-2.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+            className="w-full py-2.5 px-4 rounded-2xl bg-[var(--fill-grouped)] text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
           >
             {reconnectingBankId === selectingAccountsConn.id
               ? `Öppnar ${selectingAccountsConn.aspsp_name}...`

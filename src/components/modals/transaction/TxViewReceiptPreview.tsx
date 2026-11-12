@@ -1,9 +1,10 @@
 import { ModalSubView } from './shared';
 import type { RefObject } from 'react';
 import React from 'react';
-import { X, FileText, CaretLeft, Plus } from '@phosphor-icons/react';
+import { FileText, Plus } from '@phosphor-icons/react';
 import { TransactionItem } from '../../../app/models';
 import { ReceiptAttachment } from '../../../utils/swedishDate';
+import { SheetHeader } from '../../ui/SheetHeader';
 
 export interface TxViewReceiptPreviewProps {
   subView: "details" | "edit" | "category-picker" | "payment-picker" | "date-picker" | "link-fixed-picker" | "similar" | "swish" | "receipt-preview";
@@ -29,29 +30,9 @@ export const TxViewReceiptPreview: React.FC<TxViewReceiptPreviewProps> = ({
   <>
     {subView === 'receipt-preview' && previewReceipt && (
       <div className={`${slideAnimClass} space-y-4`}>
-        <div className="ui-sheet-sub-header">
-          <button
-            type="button"
-            onClick={() => navigateSubView(pickerReturnView, 'back')}
-            title="Tillbaka"
-            aria-label="Tillbaka"
-            className="ui-icon-btn"
-          >
-            <CaretLeft size={15} weight="bold" />
-          </button>
-          <span className="ui-sheet-title truncate max-w-[180px]">
-            {previewReceipt.name || 'Kvitto'}
-          </span>
-          <button
-            type="button" aria-label="Stäng"
-            onClick={onClose}
-            className="ui-icon-btn"
-          >
-            <X size={16} />
-          </button>
-        </div>
+        <SheetHeader title={previewReceipt.name || 'Kvitto'} onBack={() => navigateSubView(pickerReturnView, 'back')} onClose={onClose} flush />
 
-        <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-2 overflow-hidden flex items-center justify-center max-h-[60dvh]">
+        <div className="rounded-2xl bg-[var(--fill-grouped)] p-2 overflow-hidden flex items-center justify-center max-h-[60dvh]">
           {previewReceipt.url.startsWith('data:image/') ||
           /\.(png|jpe?g|webp|gif)$/i.test(previewReceipt.url) ? (
             <img
