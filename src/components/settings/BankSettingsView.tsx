@@ -1,14 +1,17 @@
 import { stripRawAccountDigits } from './accountText';
 import type { SetStateAction } from 'react';
 import React from 'react';
-import { Bank, ArrowClockwise, CaretRight, Plus, Check } from '@phosphor-icons/react';
-import { bankService, BankConnection, BankAccount } from '../../services/bankService';
+import { Bank, ArrowClockwise, Plus } from '@phosphor-icons/react';
+import { BankConnection, BankAccount } from '../../services/bankService';
 import { AccountItem } from '../HomeTab';
-import { getAccountMetaMap, saveAccountMeta } from '../../utils/appCache';
-import { BottomSheet } from '../ui/BottomSheet';
+import { getAccountMetaMap } from '../../utils/appCache';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
-import { ItemLogo } from '../ItemLogo';
-import { appOrigin } from '../../utils/platform';
+import { createBankAccountActions } from './bank/bankAccountActions';
+import { BankConnectionsSection } from './bank/BankConnectionsSection';
+import { BankAccountsSection } from './bank/BankAccountsSection';
+import { BankAccountDetailSheet } from './bank/BankAccountDetailSheet';
+import { BankSelectAccountsSheet } from './bank/BankSelectAccountsSheet';
+
 
 export interface BankSettingsViewProps {
   bankAccounts: BankAccount[];
@@ -75,9 +78,6 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
   disconnectConfirmConnId,
   onDisconnectBank,
 }) => {
-  const formatKr = (amount: number) =>
-    `${new Intl.NumberFormat('sv-SE').format(Math.round(amount))} kr`;
-
   const accountMetaMap = getAccountMetaMap();
 
   const displayAccountItems: AccountItem[] =
@@ -103,431 +103,65 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
         })
       : accounts;
 
-  const handleOpenAccountDetail = (acc: AccountItem) => {
-    const rawBa = bankAccounts.find((b) => b.id === acc.id);
-    const meta = accountMetaMap[acc.id];
-    setEditingAccount(acc);
-    setAccountNameInput(
-      meta?.customName?.trim() ||
-        rawBa?.custom_name?.trim() ||
-        stripRawAccountDigits(acc.name) ||
-        'Bankkonto'
-    );
-    setAccountIncludedInput(rawBa ? rawBa.is_selected !== false : true);
-  };
-
-  const handleActivateAndSyncAccount = async (accId: string, customNameOverride?: string) => {
-    const rawBa = bankAccounts.find((b) => b.id === accId);
-    const cleanName = customNameOverride?.trim();
-
-    bankService.saveAccountOverlay(accId, {
-      ...(cleanName ? { custom_name: cleanName } : {}),
-      is_selected: true,
-      include_in_budget: true,
-    });
-    saveAccountMeta(accId, {
-      ...(cleanName ? { customName: cleanName } : {}),
-      excludeFromTotalBalance: false,
-    });
-
-    await bankService
-      .updateAccountSettings({
-        bankAccountId: accId,
-        ...(cleanName ? { customName: cleanName } : {}),
-        isSelected: true,
-        includeInBudget: true,
-      })
-      .catch(() => {});
-
-    if (rawBa?.connection_id) {
-      const connAccs = bankAccounts.filter((b) => b.connection_id === rawBa.connection_id);
-      const nextSelectedIds = Array.from(
-        new Set([
-          ...connAccs.filter((b) => b.is_selected !== false).map((b) => b.id),
-          accId,
-        ])
-      );
-      await bankService
-        .selectAccounts({
-          connectionId: rawBa.connection_id,
-          selectedAccountIds: nextSelectedIds,
-        })
-        .catch(() => {});
-
-      await bankService
-        .sync({
-          connectionId: rawBa.connection_id,
-          bankAccountId: accId,
-          fullSync: true,
-        })
-        .catch(() => {});
-    }
-
-    if (onRefreshBankStatus) {
-      await Promise.resolve(onRefreshBankStatus());
-    }
-  };
-
-  const handleQuickSyncAccount = async (e: React.MouseEvent, acc: AccountItem) => {
-    e.stopPropagation();
-    if (syncingAccountId) return;
-    setSyncingAccountId(acc.id);
-    try {
-      await handleActivateAndSyncAccount(acc.id);
-    } finally {
-      setSyncingAccountId(null);
-    }
-  };
-
-  const handleOpenSelectConnAccounts = (conn?: BankConnection) => {
-    const targetConn = conn || connections[0] || null;
-    if (!targetConn) {
-      onOpenBank();
-      return;
-    }
-    const connAccs = bankAccounts.filter((b) => b.connection_id === targetConn.id);
-    const listToUse = connAccs.length > 0 ? connAccs : bankAccounts;
-    setSelectingAccountsConn(targetConn);
-    setSelectedConnAccountIds(
-      listToUse.filter((b) => b.is_selected !== false).map((b) => b.id)
-    );
-  };
-
-  const handleToggleConnAccountSelection = (accId: string) => {
-    setSelectedConnAccountIds((prev) =>
-      prev.includes(accId) ? prev.filter((id) => id !== accId) : [...prev, accId]
-    );
-  };
-
-  const handleSaveConnAccountSelection = async () => {
-    if (!selectingAccountsConn) return;
-    setSavingConnAccounts(true);
-    try {
-      const connAccs = bankAccounts.filter((b) => b.connection_id === selectingAccountsConn.id);
-      const listToUse = connAccs.length > 0 ? connAccs : bankAccounts;
-      const selectedSet = new Set(selectedConnAccountIds);
-      const newlySelectedIds = listToUse
-        .filter((b) => selectedSet.has(b.id) && (b.is_selected === false || !b.last_synced_at))
-        .map((b) => b.id);
-
-      for (const ba of listToUse) {
-        const isSel = selectedSet.has(ba.id);
-        bankService.saveAccountOverlay(ba.id, {
-          is_selected: isSel,
-          include_in_budget: isSel,
-        });
-        saveAccountMeta(ba.id, {
-          excludeFromTotalBalance: !isSel,
-        });
-      }
-
-      await bankService
-        .selectAccounts({
-          connectionId: selectingAccountsConn.id,
-          selectedAccountIds: selectedConnAccountIds,
-        })
-        .catch(() => {});
-
-      for (const accId of newlySelectedIds) {
-        await bankService
-          .sync({
-            connectionId: selectingAccountsConn.id,
-            bankAccountId: accId,
-            fullSync: true,
-          })
-          .catch(() => {});
-      }
-
-      if (onRefreshBankStatus) {
-        await Promise.resolve(onRefreshBankStatus());
-      }
-      setSelectingAccountsConn(null);
-    } finally {
-      setSavingConnAccounts(false);
-    }
-  };
-
-  const handleReconnectBankForMoreAccounts = async (conn: BankConnection) => {
-    if (reconnectingBankId) return;
-    setReconnectingBankId(conn.id);
-    try {
-      const redirectUrl = `${appOrigin()}/bank/callback`;
-      const res = await bankService.startAuth({
-        aspspName: conn.aspsp_name,
-        aspspCountry: conn.aspsp_country || 'SE',
-        aspspLogo: conn.aspsp_logo || null,
-        originContext: 'settings',
-        environment: 'production',
-        reconnectConnectionId: conn.id,
-        redirectUrl,
-      });
-      if (res?.url) {
-        window.location.assign(res.url);
-      }
-    } catch {
-      setSelectingAccountsConn(null);
-      onOpenBank();
-    } finally {
-      setReconnectingBankId(null);
-    }
-  };
-
-  const handleSaveAccountDetail = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingAccount) return;
-    setSavingAccountEdit(true);
-    try {
-      const cleanName = accountNameInput.trim() || 'Bankkonto';
-      const rawBa = bankAccounts.find((b) => b.id === editingAccount.id);
-      const wasUnselected = rawBa ? rawBa.is_selected === false : false;
-
-      if (accountIncludedInput) {
-        if (wasUnselected || !rawBa?.last_synced_at) {
-          await handleActivateAndSyncAccount(editingAccount.id, cleanName);
-        } else {
-          bankService.saveAccountOverlay(editingAccount.id, {
-            custom_name: cleanName,
-            is_selected: true,
-            include_in_budget: true,
-          });
-          saveAccountMeta(editingAccount.id, {
-            customName: cleanName,
-            excludeFromTotalBalance: false,
-          });
-          await bankService
-            .updateAccountSettings({
-              bankAccountId: editingAccount.id,
-              customName: cleanName,
-              isSelected: true,
-              includeInBudget: true,
-            })
-            .catch(() => {});
-          if (onRefreshBankStatus) {
-            await Promise.resolve(onRefreshBankStatus());
-          }
-        }
-      } else {
-        bankService.saveAccountOverlay(editingAccount.id, {
-          custom_name: cleanName,
-          is_selected: false,
-          include_in_budget: false,
-        });
-        saveAccountMeta(editingAccount.id, {
-          customName: cleanName,
-          excludeFromTotalBalance: true,
-        });
-        await bankService
-          .updateAccountSettings({
-            bankAccountId: editingAccount.id,
-            customName: cleanName,
-            isSelected: false,
-            includeInBudget: false,
-          })
-          .catch(() => {});
-
-        if (rawBa?.connection_id) {
-          const connAccs = bankAccounts.filter((b) => b.connection_id === rawBa.connection_id);
-          const nextSelectedIds = connAccs
-            .filter((b) => (b.id === editingAccount.id ? false : b.is_selected !== false))
-            .map((b) => b.id);
-          await bankService
-            .selectAccounts({
-              connectionId: rawBa.connection_id,
-              selectedAccountIds: nextSelectedIds,
-            })
-            .catch(() => {});
-        }
-        if (onRefreshBankStatus) {
-          await Promise.resolve(onRefreshBankStatus());
-        }
-      }
-    } finally {
-      setSavingAccountEdit(false);
-      setEditingAccount(null);
-    }
-  };
+  // Alla knapphandlingar (välja/synka konton, spara, förnya) – se bank/bankAccountActions.ts
+  const {
+    handleOpenAccountDetail,
+    handleQuickSyncAccount,
+    handleOpenSelectConnAccounts,
+    handleToggleConnAccountSelection,
+    handleSaveConnAccountSelection,
+    handleReconnectBankForMoreAccounts,
+    handleSaveAccountDetail,
+    handleSyncEditingAccountNow,
+  } = createBankAccountActions({
+    bankAccounts,
+    connections,
+    accountMetaMap,
+    setEditingAccount,
+    setAccountNameInput,
+    setAccountIncludedInput,
+    onRefreshBankStatus,
+    syncingAccountId,
+    setSyncingAccountId,
+    onOpenBank,
+    setSelectingAccountsConn,
+    setSelectedConnAccountIds,
+    selectingAccountsConn,
+    setSavingConnAccounts,
+    selectedConnAccountIds,
+    reconnectingBankId,
+    setReconnectingBankId,
+    editingAccount,
+    setSavingAccountEdit,
+    accountNameInput,
+    accountIncludedInput,
+  });
 
   return (
     <div className="ui-page animate-slide-in-right">
       {hasActiveBank ? (
         <>
           {/* Anslutna banker */}
-          <div className="space-y-1.5">
-            <span className="px-2 ui-field-label block">
-              Ansluten bank
-            </span>
-            <div className="ui-group-card">
-              {connections.length > 0 ? (
-                connections.map((conn) => {
-                  const validMs = conn.valid_until ? new Date(conn.valid_until).getTime() : NaN;
-                  const computedDaysLeft =
-                    conn.days_until_expiry !== undefined && conn.days_until_expiry !== null
-                      ? conn.days_until_expiry
-                      : !Number.isNaN(validMs)
-                      ? Math.ceil((validMs - Date.now()) / (24 * 60 * 60 * 1000))
-                      : null;
-                  const isExpired =
-                    conn.status === 'expired' ||
-                    (computedDaysLeft !== null && computedDaysLeft <= 0);
-                  const isExpiringSoon =
-                    !isExpired &&
-                    (Boolean(conn.expiring_soon) ||
-                      (computedDaysLeft !== null && computedDaysLeft <= 14));
-
-                  return (
-                    <div key={conn.id} className="ui-row">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <ItemLogo
-                          name={conn.aspsp_name}
-                          logoUrl={conn.aspsp_logo || undefined}
-                          size="md"
-                        />
-                        <div className="min-w-0">
-                          <span className="ui-row-title">{conn.aspsp_name}</span>
-                          {isExpired ? (
-                            <span className="text-xs text-negative font-medium block">
-                              Samtycket har gått ut · Förnya åtkomst
-                            </span>
-                          ) : isExpiringSoon ? (
-                            <span className="text-xs text-caution font-medium block">
-                              Samtycke går ut om {computedDaysLeft}{' '}
-                              {computedDaysLeft === 1 ? 'dag' : 'dagar'}
-                            </span>
-                          ) : (
-                            <span className="text-xs text-positive font-medium block">
-                              Ansluten
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        {(isExpired || isExpiringSoon) ? (
-                          <button
-                            type="button"
-                            onClick={() => handleReconnectBankForMoreAccounts(conn)}
-                            className="px-2.5 py-1.5 rounded-xl bg-[var(--accent-primary)] text-white text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer"
-                          >
-                            Förnya
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => handleOpenSelectConnAccounts(conn)}
-                            className="px-2.5 py-1.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer shrink-0"
-                          >
-                            Välj konton
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => setDisconnectConfirmConnId(conn.id)}
-                          className="px-3 py-1.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer shrink-0"
-                        >
-                          Koppla från
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="ui-row">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <ItemLogo name={connectedBank || 'Bank'} size="md" />
-                    <div className="min-w-0">
-                      <span className="ui-row-title">{connectedBank}</span>
-                      <span className="text-xs text-positive font-medium block">
-                        Ansluten
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setDisconnectConfirmConnId('__default__')}
-                    className="px-3 py-1.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer shrink-0"
-                  >
-                    Koppla från
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
+          <BankConnectionsSection
+            connections={connections}
+            connectedBank={connectedBank}
+            onReconnect={handleReconnectBankForMoreAccounts}
+            onSelectAccounts={handleOpenSelectConnAccounts}
+            onDisconnect={setDisconnectConfirmConnId}
+          />
 
           {/* Kontolista där varje konto öppnar kontoinställningar/detaljer */}
           {displayAccountItems.length > 0 && (
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between px-2">
-                <span className="ui-field-label">
-                  Konton
-                </span>
-                {connections.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => handleOpenSelectConnAccounts(connections[0])}
-                    className="text-xs font-semibold text-[var(--accent-primary)] hover:opacity-80 transition-opacity cursor-pointer"
-                  >
-                    Välj konton att synka
-                  </button>
-                )}
-              </div>
-              <div className="ui-group-card">
-                {displayAccountItems.map((acc) => {
-                  const cleanName = stripRawAccountDigits(acc.name) || 'Bankkonto';
-                  const cleanBank = stripRawAccountDigits(
-                    acc.bankName || acc.bank || connectedBank || 'Bank'
-                  );
-                  const rawBa = bankAccounts.find((b) => b.id === acc.id);
-                  const isHidden = Boolean(rawBa && rawBa.is_selected === false);
-                  const isSyncingThis = syncingAccountId === acc.id;
-
-                  return (
-                    <div key={acc.id} className="ui-row">
-                      <button
-                        type="button"
-                        onClick={() => handleOpenAccountDetail(acc)}
-                        className={`flex items-center gap-3 min-w-0 flex-1 text-left cursor-pointer ${
-                          isHidden ? 'opacity-65' : ''
-                        }`}
-                      >
-                        <ItemLogo name={cleanBank} logoUrl={acc.logo} size="md" />
-                        <div className="min-w-0 flex-1">
-                          <span className="ui-row-title">{cleanName}</span>
-                          <span className="ui-row-subtitle">
-                            {cleanBank}
-                            {isHidden ? ' · Ej synkat' : ''}
-                          </span>
-                        </div>
-                      </button>
-                      <div className="flex items-center gap-2 shrink-0">
-                        {isHidden ? (
-                          <button
-                            type="button"
-                            onClick={(e) => handleQuickSyncAccount(e, acc)}
-                            disabled={isSyncingThis}
-                            className="px-3 py-1.5 rounded-xl bg-[var(--accent-primary)] text-white text-xs font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity cursor-pointer flex items-center gap-1.5"
-                          >
-                            <ArrowClockwise
-                              size={13}
-                              weight="bold"
-                              className={isSyncingThis ? 'animate-spin' : ''}
-                            />
-                            <span>{isSyncingThis ? 'Synkar...' : 'Synka'}</span>
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => handleOpenAccountDetail(acc)}
-                            className="flex items-center gap-2 cursor-pointer"
-                          >
-                            <span className="ui-row-amount">{formatKr(acc.balance)}</span>
-                            <CaretRight size={14} className="text-[var(--text-muted)]" />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            <BankAccountsSection
+              displayAccountItems={displayAccountItems}
+              bankAccounts={bankAccounts}
+              connectedBank={connectedBank}
+              hasConnections={connections.length > 0}
+              syncingAccountId={syncingAccountId}
+              onOpenSelectAccounts={() => handleOpenSelectConnAccounts(connections[0])}
+              onOpenAccountDetail={handleOpenAccountDetail}
+              onQuickSyncAccount={handleQuickSyncAccount}
+            />
           )}
 
           {/* Action buttons */}
@@ -553,214 +187,32 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
           </div>
 
           {/* Kontodetaljer / Redigera konto */}
-          <BottomSheet
-            isOpen={editingAccount !== null}
+          <BankAccountDetailSheet
+            editingAccount={editingAccount}
+            connectedBank={connectedBank}
+            accountNameInput={accountNameInput}
+            setAccountNameInput={setAccountNameInput}
+            accountIncludedInput={accountIncludedInput}
+            setAccountIncludedInput={setAccountIncludedInput}
+            savingAccountEdit={savingAccountEdit}
             onClose={() => setEditingAccount(null)}
-            title="Kontoinställningar"
-          >
-            {editingAccount && (
-              <form onSubmit={handleSaveAccountDetail} className="space-y-4">
-                <div className="ui-field-card space-y-3.5">
-                  <label className="flex items-center gap-3.5 cursor-text">
-                    <ItemLogo
-                      name={editingAccount.bankName || editingAccount.bank || connectedBank || 'Bank'}
-                      logoUrl={editingAccount.logo}
-                      size="lg"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <span className="ui-field-label block mb-0.5">
-                        Kontonamn
-                      </span>
-                      <input
-                        type="text"
-                        value={accountNameInput}
-                        onChange={(e) => setAccountNameInput(e.target.value)}
-                        placeholder="Kontonamn"
-                        required
-                        className="ui-field-input-lg"
-                      />
-                    </div>
-                  </label>
-
-                  <div className="border-t border-[var(--border-subtle)] pt-3.5 flex items-baseline justify-between gap-2">
-                    <span className="ui-field-label">
-                      Saldo
-                    </span>
-                    <span className="font-display font-bold text-xl text-[var(--text-primary)] tabular-nums">
-                      {formatKr(editingAccount.balance)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="ui-sheet-group">
-
-                  <div className="ui-row">
-                    <span className="text-[var(--text-muted)] shrink-0">Bank</span>
-                    <span className="font-medium text-[var(--text-primary)]">
-                      {editingAccount.bankName || editingAccount.bank || connectedBank || 'Bank'}
-                    </span>
-                  </div>
-
-                  {editingAccount.accountNumber && (
-                    <div className="ui-row">
-                      <span className="text-[var(--text-muted)] shrink-0">Kontonummer</span>
-                      <span className="font-display font-medium text-xs text-[var(--text-secondary)] tabular-nums">
-                        {editingAccount.accountNumber}
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="ui-row">
-                    <div className="min-w-0 pr-3">
-                      <span className="text-[var(--text-primary)] font-medium block">
-                        Synka och visa i översikten
-                      </span>
-                      <span className="text-xs text-[var(--text-muted)] block mt-0.5">
-                        Räkna med saldo och händelser från detta konto
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked={accountIncludedInput}
-                      onClick={() => setAccountIncludedInput((prev) => !prev)}
-                      className={`ui-switch ${
-                        accountIncludedInput ? 'ui-switch-on' : 'ui-switch-off'
-                      }`}
-                    >
-                      <span
-                        className={`ui-switch-thumb ${
-                          accountIncludedInput ? 'ui-switch-thumb-on' : 'translate-x-0'
-                        }`}
-                      />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <button
-                    type="button"
-                    disabled={savingAccountEdit}
-                    onClick={async () => {
-                      if (!editingAccount) return;
-                      setSavingAccountEdit(true);
-                      try {
-                        const cleanName = accountNameInput.trim() || 'Bankkonto';
-                        setAccountIncludedInput(true);
-                        await handleActivateAndSyncAccount(editingAccount.id, cleanName);
-                      } finally {
-                        setSavingAccountEdit(false);
-                        setEditingAccount(null);
-                      }
-                    }}
-                    className="w-full py-3 px-4 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] flex items-center justify-center gap-1.5 hover:bg-[var(--surface-hover)] disabled:opacity-50 transition-colors cursor-pointer"
-                  >
-                    <ArrowClockwise size={14} className={savingAccountEdit ? 'animate-spin' : ''} />
-                    <span>{savingAccountEdit ? 'Synkar konto...' : 'Synka detta konto nu'}</span>
-                  </button>
-
-                  <button
-                    type="submit"
-                    disabled={savingAccountEdit || !accountNameInput.trim()}
-                    className="ui-btn-primary"
-                  >
-                    <Check size={14} weight="bold" />
-                    <span>{savingAccountEdit ? 'Sparar...' : 'Spara'}</span>
-                  </button>
-                </div>
-              </form>
-            )}
-          </BottomSheet>
+            onSubmit={handleSaveAccountDetail}
+            onSyncNow={handleSyncEditingAccountNow}
+          />
 
           {/* Välj vilka konton som ska synkas */}
-          <BottomSheet
-            isOpen={selectingAccountsConn !== null}
+          <BankSelectAccountsSheet
+            selectingAccountsConn={selectingAccountsConn}
+            bankAccounts={bankAccounts}
+            accountMetaMap={accountMetaMap}
+            selectedConnAccountIds={selectedConnAccountIds}
+            savingConnAccounts={savingConnAccounts}
+            reconnectingBankId={reconnectingBankId}
             onClose={() => setSelectingAccountsConn(null)}
-            title="Välj konton att synka"
-          >
-            {selectingAccountsConn && (
-              <div className="space-y-4">
-                <div className="space-y-2 max-h-80 overflow-y-auto pr-0.5">
-                  {(bankAccounts.filter((b) => b.connection_id === selectingAccountsConn.id).length > 0
-                    ? bankAccounts.filter((b) => b.connection_id === selectingAccountsConn.id)
-                    : bankAccounts
-                  ).map((ba, idx) => {
-                    const isChecked = selectedConnAccountIds.includes(ba.id);
-                    const meta = accountMetaMap[ba.id];
-                    const accTitle =
-                      meta?.customName?.trim() ||
-                      ba.custom_name?.trim() ||
-                      stripRawAccountDigits(ba.product || ba.name || '') ||
-                      (idx === 0 ? 'Lönekonto' : 'Sparkonto');
-                    const rawNum = (ba.bban || ba.iban || '').trim();
-                    const formattedNum =
-                      rawNum.length === 11 && /^\d+$/.test(rawNum)
-                        ? `${rawNum.slice(0, 4)}-${rawNum.slice(4)}`
-                        : rawNum || selectingAccountsConn.aspsp_name;
-
-                    return (
-                      <button
-                        key={ba.id}
-                        type="button"
-                        onClick={() => handleToggleConnAccountSelection(ba.id)}
-                        className={`w-full p-3.5 rounded-2xl border flex items-center gap-3.5 text-left transition-all cursor-pointer ${
-                          isChecked
-                            ? 'bg-[var(--bg-color)] border-[var(--border-subtle)]'
-                            : 'bg-[var(--bg-color)]/50 border-[var(--border-subtle)] opacity-60'
-                        }`}
-                      >
-                        <div
-                          className={`ui-checkbox ${
-                            isChecked
-                              ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
-                              : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
-                          }`}
-                        >
-                          {isChecked && <Check size={12} weight="bold" />}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <span className="ui-option-title">
-                            {accTitle}
-                          </span>
-                          <span className="text-xs text-[var(--text-muted)] block tabular-nums mt-0.5">
-                            {formattedNum}
-                          </span>
-                        </div>
-                        {ba.balance_amount !== null && ba.balance_amount !== undefined && (
-                          <span className="text-sm font-semibold tabular-nums text-[var(--text-primary)] shrink-0">
-                            {formatKr(Number(ba.balance_amount) || 0)}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div className="space-y-2 pt-1">
-                  <button
-                    type="button"
-                    disabled={savingConnAccounts || selectedConnAccountIds.length === 0}
-                    onClick={handleSaveConnAccountSelection}
-                    className="ui-btn-primary"
-                  >
-                    <Check size={14} weight="bold" />
-                    <span>{savingConnAccounts ? 'Synkar valda konton...' : 'Spara och synka'}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={reconnectingBankId === selectingAccountsConn.id}
-                    onClick={() => handleReconnectBankForMoreAccounts(selectingAccountsConn)}
-                    className="w-full py-2.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
-                  >
-                    {reconnectingBankId === selectingAccountsConn.id
-                      ? `Öppnar ${selectingAccountsConn.aspsp_name}...`
-                      : `Saknas ett konto? Välj fler hos ${selectingAccountsConn.aspsp_name}`}
-                  </button>
-                </div>
-              </div>
-            )}
-          </BottomSheet>
+            onToggleAccount={handleToggleConnAccountSelection}
+            onSave={handleSaveConnAccountSelection}
+            onReconnect={handleReconnectBankForMoreAccounts}
+          />
 
           <ConfirmDialog
             isOpen={disconnectConfirmConnId !== null}

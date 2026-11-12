@@ -1,4 +1,4 @@
-import { test } from 'node:test';
+import { test } from 'vitest';
 import assert from 'node:assert/strict';
 
 // supabaseClient behöver inte startas för att testa tolkningen av länken

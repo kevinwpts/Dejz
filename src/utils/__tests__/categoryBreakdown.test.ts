@@ -1,4 +1,4 @@
-import { test } from 'node:test';
+import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import { buildCategoryBreakdown, incomeLabelFor } from '../categoryBreakdown';
 import type { TransactionItem, IncomeItem, FixedExpenseItem } from '../../app/models';

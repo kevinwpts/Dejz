@@ -1,4 +1,4 @@
-import { test } from 'node:test';
+import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import { emptyMeta, findDirtyKeys, hashValue, planHydrate, type PrefSyncMeta } from '../cache/prefsMerge';
 

@@ -1,0 +1,152 @@
+// Steg 4 i "Nytt sparmål": hur vill du följa sparandet? (eget belopp, totalsaldo eller ett konto).
+import React from 'react';
+import { Check, Bank } from '@phosphor-icons/react';
+import type { AccountItem } from '../../../app/models';
+import { ItemLogo } from '../../ItemLogo';
+
+interface StepAccountLinkProps {
+  animClass: string;
+  goalLinkedAccountId: string | undefined;
+  accounts: AccountItem[];
+  effectiveTotalBalance: number;
+  formatKr: (amount: number) => string;
+  /** Kopplar målet till ett konto (eller '__TOTAL__') och sätter startbeloppet till saldot. */
+  onLinkAccount: (accountId: string, balance: number) => void;
+  /** Eget valt belopp – ingen koppling. */
+  onUnlink: () => void;
+  /** Får målet sparas direkt? (namn och målbelopp ifyllda) */
+  canSave: boolean;
+  onContinue: () => void;
+  onSave: () => void;
+}
+
+const cardClass = (selected: boolean) =>
+  `ui-option-card ${
+    selected
+      ? 'bg-[var(--surface-color)] border-[var(--text-primary)]/40'
+      : 'bg-[var(--surface-color)]/50 border-[var(--border-subtle)] opacity-65'
+  }`;
+
+const checkboxClass = (selected: boolean) =>
+  `ui-checkbox ${
+    selected
+      ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
+      : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
+  }`;
+
+export const StepAccountLink: React.FC<StepAccountLinkProps> = ({
+  animClass,
+  goalLinkedAccountId,
+  accounts,
+  effectiveTotalBalance,
+  formatKr,
+  onLinkAccount,
+  onUnlink,
+  canSave,
+  onContinue,
+  onSave,
+}) => (
+  <div
+    className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden pt-4 ${animClass}`}
+  >
+    <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-2.5 pr-0.5">
+      <button type="button" onClick={onUnlink} className={cardClass(!goalLinkedAccountId)}>
+        <div className={checkboxClass(!goalLinkedAccountId)}>
+          {!goalLinkedAccountId && <Check size={12} weight="bold" />}
+        </div>
+        <div className="min-w-0 flex-1">
+          <span className="ui-option-title">Eget valt belopp</span>
+          <span className="text-xs text-[var(--text-muted)] block mt-0.5">
+            Välj startbelopp i nästa steg och uppdatera själv
+          </span>
+        </div>
+      </button>
+
+      {(accounts.length > 0 || effectiveTotalBalance > 0) && (
+        <button
+          type="button"
+          onClick={() => onLinkAccount('__TOTAL__', effectiveTotalBalance)}
+          className={cardClass(goalLinkedAccountId === '__TOTAL__')}
+        >
+          <div className={checkboxClass(goalLinkedAccountId === '__TOTAL__')}>
+            {goalLinkedAccountId === '__TOTAL__' && <Check size={12} weight="bold" />}
+          </div>
+          <div className="w-8 h-8 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
+            <Bank size={15} weight="regular" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <span className="ui-option-title">Totalsaldo</span>
+            <span className="text-xs text-[var(--text-muted)] block mt-0.5">
+              Alla konton · Synkas automatiskt
+            </span>
+          </div>
+          <span className="text-sm font-semibold tabular-nums text-[var(--text-primary)] shrink-0">
+            {formatKr(effectiveTotalBalance)}
+          </span>
+        </button>
+      )}
+
+      {accounts.map((acc) => {
+        const isSelected = goalLinkedAccountId === acc.id;
+        const accBal = Math.max(0, Math.round(Number(acc.balance) || 0));
+        const hasDuplicateName =
+          accounts.filter(
+            (other) => other.name.trim().toLowerCase() === acc.name.trim().toLowerCase()
+          ).length > 1;
+        const cleanDigits = (acc.accountNumber || '').replace(/\D/g, '');
+        const last4 = cleanDigits.length >= 4 ? cleanDigits.slice(-4) : '';
+        const showBankSub =
+          Boolean(acc.bankName) &&
+          !acc.name.toLowerCase().includes((acc.bankName || '').toLowerCase());
+
+        return (
+          <button
+            key={acc.id}
+            type="button"
+            onClick={() => onLinkAccount(acc.id, accBal)}
+            className={cardClass(isSelected)}
+          >
+            <div className={checkboxClass(isSelected)}>
+              {isSelected && <Check size={12} weight="bold" />}
+            </div>
+            <ItemLogo name={acc.bankName || acc.name} category="Bank" logoUrl={acc.logo} size="sm" />
+            <div className="min-w-0 flex-1">
+              <span className="ui-option-title">{acc.name}</span>
+              {(showBankSub || (hasDuplicateName && last4)) && (
+                <span className="text-xs text-[var(--text-muted)] block tabular-nums mt-0.5 truncate">
+                  {showBankSub ? acc.bankName : ''}
+                  {showBankSub && hasDuplicateName && last4 ? ' · ' : ''}
+                  {hasDuplicateName && last4 ? `•••• ${last4}` : ''}
+                </span>
+              )}
+            </div>
+            <span className="text-sm font-semibold tabular-nums text-[var(--text-primary)] shrink-0">
+              {formatKr(accBal)}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+
+    <div className="shrink-0 pt-3">
+      {!goalLinkedAccountId ? (
+        <button
+          type="button"
+          onClick={onContinue}
+          className="w-full py-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-display font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+        >
+          <span>Fortsätt</span>
+        </button>
+      ) : (
+        <button
+          type="button"
+          disabled={!canSave}
+          onClick={onSave}
+          className="w-full py-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-display font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer"
+        >
+          <span>Skapa sparmål</span>
+        </button>
+      )}
+    </div>
+  </div>
+);

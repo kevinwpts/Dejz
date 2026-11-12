@@ -1,0 +1,109 @@
+// "Anslut bank" steg 3: välj vilka konton som ska synkas och ge dem egna namn.
+import React from 'react';
+import { SpinnerGap, Check } from '@phosphor-icons/react';
+import type { SetStateAction } from 'react';
+import type { BankAccount, BankConnection } from '../../../services/bankService';
+import { formatBankKr, getCleanAccountTypeLabel } from './shared';
+
+export interface BankViewSelectAccountsProps {
+  fetchedAccounts: BankAccount[];
+  selectedAccountIds: string[];
+  accountCustomNames: Record<string, string>;
+  setAccountCustomNames: (value: SetStateAction<Record<string, string>>) => void;
+  activeConnection: BankConnection | null;
+  toggleAccountSelection: (id: string) => void;
+  savingAccounts: boolean;
+  onSave: () => void;
+}
+
+export const BankViewSelectAccounts: React.FC<BankViewSelectAccountsProps> = ({
+  fetchedAccounts,
+  selectedAccountIds,
+  accountCustomNames,
+  setAccountCustomNames,
+  activeConnection,
+  toggleAccountSelection,
+  savingAccounts,
+  onSave,
+}) => (
+  <div className="space-y-4">
+    <div className="space-y-2.5 max-h-80 overflow-y-auto pr-0.5">
+      {fetchedAccounts.map((acc, idx) => {
+        const isChecked = selectedAccountIds.includes(acc.id);
+        const fallbackLabel = getCleanAccountTypeLabel(acc, idx);
+        const currentCustomName =
+          accountCustomNames[acc.id] !== undefined
+            ? accountCustomNames[acc.id]
+            : acc.custom_name || fallbackLabel;
+        const bankLabel = acc.bankName || activeConnection?.aspsp_name || 'Bank';
+
+        return (
+          <div
+            key={acc.id}
+            className={`rounded-2xl border overflow-hidden transition-all ${
+              isChecked
+                ? 'bg-[var(--bg-color)] border-[var(--border-subtle)]'
+                : 'bg-[var(--bg-color)]/50 border-[var(--border-subtle)] opacity-60'
+            }`}
+          >
+            <button
+              type="button"
+              onClick={() => toggleAccountSelection(acc.id)}
+              className="ui-row cursor-pointer"
+            >
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div
+                  className={`ui-checkbox ${
+                    isChecked
+                      ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
+                      : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
+                  }`}
+                >
+                  {isChecked && <Check size={12} weight="bold" />}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="ui-row-title">
+                    {currentCustomName || fallbackLabel}
+                  </span>
+                  <span className="ui-row-subtitle">
+                    {bankLabel}
+                  </span>
+                </div>
+              </div>
+              <span className="ui-row-amount text-sm shrink-0">
+                {formatBankKr(acc.balance_amount, acc.balance_currency || acc.currency)}
+              </span>
+            </button>
+
+            {isChecked && (
+              <label className="ui-input-row border-t border-[var(--border-subtle)]">
+                <span className="text-[var(--text-muted)] shrink-0">Kontonamn</span>
+                <input
+                  type="text"
+                  value={currentCustomName}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setAccountCustomNames((prev) => ({ ...prev, [acc.id]: val }));
+                  }}
+                  placeholder={fallbackLabel}
+                  className="ui-inline-input"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </label>
+            )}
+          </div>
+        );
+      })}
+    </div>
+
+    <button
+      type="button"
+      onClick={onSave}
+      disabled={savingAccounts || selectedAccountIds.length === 0}
+      className="ui-btn-primary"
+    >
+      {savingAccounts && <SpinnerGap size={15} className="animate-spin" />}
+      <span>Spara</span>
+    </button>
+  </div>
+);
