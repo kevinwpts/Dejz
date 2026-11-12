@@ -21,7 +21,7 @@ export const LegalMenuView: React.FC<LegalMenuViewProps> = ({
             <span className="ui-admin-icon-slot">
               <LockKey size={18} weight="regular" />
             </span>
-            <span className="font-normal text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
+            <span className="ui-list-row-title">
               Integritetspolicy
             </span>
           </div>
@@ -39,7 +39,7 @@ export const LegalMenuView: React.FC<LegalMenuViewProps> = ({
             <span className="ui-admin-icon-slot">
               <FileText size={18} weight="regular" />
             </span>
-            <span className="font-normal text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
+            <span className="ui-list-row-title">
               Användarvillkor
             </span>
           </div>
@@ -57,7 +57,7 @@ export const LegalMenuView: React.FC<LegalMenuViewProps> = ({
             <span className="ui-admin-icon-slot">
               <Scales size={18} weight="regular" />
             </span>
-            <span className="font-normal text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
+            <span className="ui-list-row-title">
               Open Banking (PSD2)
             </span>
           </div>
@@ -75,7 +75,7 @@ export const LegalMenuView: React.FC<LegalMenuViewProps> = ({
             <span className="ui-admin-icon-slot">
               <Cookie size={18} weight="regular" />
             </span>
-            <span className="font-normal text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
+            <span className="ui-list-row-title">
               Cookies & lagring
             </span>
           </div>

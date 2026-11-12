@@ -410,7 +410,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
           >
             <SlidersHorizontal size={15} weight={activeFilterCount > 0 ? 'bold' : 'regular'} />
             {activeFilterCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 min-w-[17px] h-[17px] px-1 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] text-[10px] font-bold flex items-center justify-center ring-2 ring-[var(--bg-color)] pointer-events-none tabular-nums">
+              <span className="absolute -top-1.5 -right-1.5 min-w-[17px] h-[17px] px-1 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] text-micro font-bold flex items-center justify-center ring-2 ring-[var(--bg-color)] pointer-events-none tabular-nums">
                 {activeFilterCount}
               </span>
             )}
@@ -457,7 +457,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
               <button
                 type="button"
                 onClick={() => handleSetAccount(null)}
-                className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 hover:bg-[var(--surface-hover)] cursor-pointer"
+                className="ui-chip-sm"
               >
                 <span>{formatAccountShortLabel(activeAccount)}</span>
                 <X size={11} weight="bold" className="text-[var(--text-muted)]" />
@@ -468,7 +468,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
               <button
                 type="button"
                 onClick={() => setDateRange('all')}
-                className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 hover:bg-[var(--surface-hover)] cursor-pointer"
+                className="ui-chip-sm"
               >
                 <span>
                   {dateRange === 'period'
@@ -486,7 +486,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                 key={cat}
                 type="button"
                 onClick={() => toggleCategory(cat)}
-                className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 hover:bg-[var(--surface-hover)] cursor-pointer"
+                className="ui-chip-sm"
               >
                 <CategoryIcon category={cat} size={11} />
                 <span>{cat}</span>
@@ -510,7 +510,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                   key={attr}
                   type="button"
                   onClick={() => toggleAttribute(attr)}
-                  className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 hover:bg-[var(--surface-hover)] cursor-pointer"
+                  className="ui-chip-sm"
                 >
                   <span>{label}</span>
                   <X size={11} weight="bold" className="text-[var(--text-muted)]" />
@@ -522,7 +522,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedPaymentMethod(null)}
-                className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 hover:bg-[var(--surface-hover)] cursor-pointer"
+                className="ui-chip-sm"
               >
                 <span>{selectedPaymentMethod}</span>
                 <X size={11} weight="bold" className="text-[var(--text-muted)]" />
@@ -564,7 +564,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                 <span
                   className={`font-display font-semibold ${
                     netSum > 0
-                      ? 'text-emerald-600 dark:text-emerald-400'
+                      ? 'text-positive'
                       : 'text-[var(--text-primary)]'
                   }`}
                 >
@@ -669,7 +669,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                           >
                             {acc.name}
                           </span>
-                          <span className="text-[11px] text-[var(--text-secondary)] block truncate tabular-nums">
+                          <span className="text-caption text-[var(--text-secondary)] block truncate tabular-nums">
                             {acc.bankName}
                             {last4 ? ` · •••• ${last4}` : ''} · {accTxCount} händelser
                           </span>
@@ -740,7 +740,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                 <button
                   type="button"
                   onClick={() => setSelectedCategories([])}
-                  className="text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+                  className="text-caption font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
                 >
                   Rensa
                 </button>
@@ -769,7 +769,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                     <span>{catName}</span>
                     {count > 0 && (
                       <span
-                        className={`text-[11px] tabular-nums ${
+                        className={`text-caption tabular-nums ${
                           isSel ? 'opacity-80' : 'text-[var(--text-muted)]'
                         }`}
                       >
@@ -794,14 +794,14 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                   id: 'saved' as SpecialAttributeFilter,
                   label: 'Sparade köp',
                   icon: Heart,
-                  iconColor: 'text-rose-500',
+                  iconColor: 'text-negative-solid',
                   count: savedCount,
                 },
                 {
                   id: 'packages' as SpecialAttributeFilter,
                   label: 'Väntar på paket',
                   icon: Package,
-                  iconColor: 'text-amber-500',
+                  iconColor: 'text-caution-solid',
                   count: packagesCount,
                 },
                 {
@@ -922,7 +922,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                 <span
                   className={`font-display font-medium tabular-nums ${
                     group.net > 0
-                      ? 'text-emerald-600 dark:text-emerald-400'
+                      ? 'text-positive'
                       : 'text-[var(--text-secondary)]'
                   }`}
                 >
@@ -992,14 +992,14 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                                 <Heart
                                   size={11}
                                   weight="fill"
-                                  className="text-rose-500 shrink-0 ml-0.5"
+                                  className="text-negative-solid shrink-0 ml-0.5"
                                 />
                               )}
                               {tx.isWaitingForPackage && (
                                 <Package
                                   size={11}
                                   weight="fill"
-                                  className="text-amber-500 shrink-0 ml-0.5"
+                                  className="text-caution-solid shrink-0 ml-0.5"
                                 />
                               )}
                               {hasReceipts && (

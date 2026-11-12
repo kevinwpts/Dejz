@@ -353,7 +353,7 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
         <>
           {/* Anslutna banker */}
           <div className="space-y-1.5">
-            <span className="px-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
+            <span className="px-2 ui-field-label block">
               Ansluten bank
             </span>
             <div className="ui-group-card">
@@ -385,16 +385,16 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
                         <div className="min-w-0">
                           <span className="ui-row-title">{conn.aspsp_name}</span>
                           {isExpired ? (
-                            <span className="text-xs text-rose-600 dark:text-rose-400 font-medium block">
+                            <span className="text-xs text-negative font-medium block">
                               Samtycket har gått ut · Förnya åtkomst
                             </span>
                           ) : isExpiringSoon ? (
-                            <span className="text-xs text-amber-600 dark:text-amber-400 font-medium block">
+                            <span className="text-xs text-caution font-medium block">
                               Samtycke går ut om {computedDaysLeft}{' '}
                               {computedDaysLeft === 1 ? 'dag' : 'dagar'}
                             </span>
                           ) : (
-                            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium block">
+                            <span className="text-xs text-positive font-medium block">
                               Ansluten
                             </span>
                           )}
@@ -435,7 +435,7 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
                     <ItemLogo name={connectedBank || 'Bank'} size="md" />
                     <div className="min-w-0">
                       <span className="ui-row-title">{connectedBank}</span>
-                      <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium block">
+                      <span className="text-xs text-positive font-medium block">
                         Ansluten
                       </span>
                     </div>
@@ -456,7 +456,7 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
           {displayAccountItems.length > 0 && (
             <div className="space-y-1.5">
               <div className="flex items-center justify-between px-2">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                <span className="ui-field-label">
                   Konton
                 </span>
                 {connections.length > 0 && (
@@ -560,7 +560,7 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
           >
             {editingAccount && (
               <form onSubmit={handleSaveAccountDetail} className="space-y-4">
-                <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-3.5">
+                <div className="ui-field-card space-y-3.5">
                   <label className="flex items-center gap-3.5 cursor-text">
                     <ItemLogo
                       name={editingAccount.bankName || editingAccount.bank || connectedBank || 'Bank'}
@@ -568,7 +568,7 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
                       size="lg"
                     />
                     <div className="flex-1 min-w-0">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
+                      <span className="ui-field-label block mb-0.5">
                         Kontonamn
                       </span>
                       <input
@@ -577,13 +577,13 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
                         onChange={(e) => setAccountNameInput(e.target.value)}
                         placeholder="Kontonamn"
                         required
-                        className="w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none"
+                        className="ui-field-input-lg"
                       />
                     </div>
                   </label>
 
                   <div className="border-t border-[var(--border-subtle)] pt-3.5 flex items-baseline justify-between gap-2">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                    <span className="ui-field-label">
                       Saldo
                     </span>
                     <span className="font-display font-bold text-xl text-[var(--text-primary)] tabular-nums">
@@ -710,7 +710,7 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
                         }`}
                       >
                         <div
-                          className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors ${
+                          className={`ui-checkbox ${
                             isChecked
                               ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
                               : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
@@ -719,7 +719,7 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
                           {isChecked && <Check size={12} weight="bold" />}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <span className="font-display font-semibold text-sm text-[var(--text-primary)] block truncate">
+                          <span className="ui-option-title">
                             {accTitle}
                           </span>
                           <span className="text-xs text-[var(--text-muted)] block tabular-nums mt-0.5">

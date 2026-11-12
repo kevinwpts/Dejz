@@ -256,7 +256,7 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
               </div>
 
               {/* Stort och tydligt inmatningskort för Namn + Belopp med live-logga */}
-              <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-3.5">
+              <div className="ui-field-card space-y-3.5">
                 <label className="flex items-center gap-3.5 cursor-text">
                   <ItemLogo
                     name={
@@ -269,7 +269,7 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
                     isRecurring={true}
                   />
                   <div className="flex-1 min-w-0">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
+                    <span className="ui-field-label block mb-0.5">
                       Namn
                     </span>
                     <input
@@ -302,14 +302,14 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
                             : prev
                         );
                       }}
-                      className="w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none"
+                      className="ui-field-input-lg"
                     />
                   </div>
                 </label>
 
                 <div className="border-t border-[var(--border-subtle)] pt-3.5">
                   <label className="block cursor-text">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
+                    <span className="ui-field-label block mb-0.5">
                       Belopp per månad
                     </span>
                     <div className="flex items-baseline justify-between gap-2">
@@ -332,7 +332,7 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
                         }
                         className={`w-full bg-transparent border-0 p-0 font-display font-bold text-2xl sm:text-3xl tabular-nums focus:outline-none placeholder-[var(--text-muted)]/40 ${
                           sheetEditor.type === 'income'
-                            ? 'text-emerald-600 dark:text-emerald-400'
+                            ? 'text-positive'
                             : 'text-[var(--text-primary)]'
                         }`}
                       />
@@ -345,7 +345,7 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
               </div>
 
               {/* Valbara rader för Kategori, Betalsätt och Dag */}
-              <div className="ui-sheet-group text-[14px] sm:text-sm">
+              <div className="ui-sheet-group text-callout sm:text-sm">
 
                 <button
                   type="button"

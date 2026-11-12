@@ -281,7 +281,7 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
                 <span className="ui-admin-icon-slot">
                   <CategoryIcon category={cat.name} iconId={cat.icon} size={20} badge={false} />
                 </span>
-                <span className="font-medium text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
+                <span className="ui-list-row-title-medium">
                   {cat.name}
                 </span>
               </div>
@@ -351,7 +351,7 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
 
         <form onSubmit={handleSaveSheet} className="space-y-4">
           {/* Stort och tydligt inmatningskort med live-ikon */}
-          <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4">
+          <div className="ui-field-card">
             <label className="flex items-center gap-3.5 cursor-text">
               <div className="w-11 h-11 flex items-center justify-center shrink-0">
                 <CategoryIcon
@@ -362,7 +362,7 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
+                <span className="ui-field-label block mb-0.5">
                   Namn på kategori
                 </span>
                 {isProtectedOvrigt ? (
@@ -377,7 +377,7 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
                     onChange={(e) => setFormName(e.target.value)}
                     placeholder="t.ex. Uteliv eller Husdjur"
                     required
-                    className="w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none"
+                    className="ui-field-input-lg"
                   />
                 )}
               </div>
@@ -386,7 +386,7 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
 
           {/* Ikonväljare */}
           <div className="space-y-1.5">
-            <span className="px-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
+            <span className="px-1 ui-field-label block">
               Välj ikon
             </span>
             <div className="grid grid-cols-6 gap-2 p-3 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] max-h-56 overflow-y-auto">

@@ -36,7 +36,7 @@ const Support: React.FC = () => (
       {PRIVACY_CONTACT}
     </a>
     <section className="space-y-2">
-      <h3 className="font-display font-semibold text-[15px] text-[var(--text-primary)]">Vanliga frågor</h3>
+      <h3 className="font-display font-semibold text-subhead text-[var(--text-primary)]">Vanliga frågor</h3>
       <p>
         <strong className="text-[var(--text-primary)]">Hur raderar jag mitt konto?</strong> I appen under
         Inställningar → Data &amp; säkerhet → Radera konto. Allt raderas direkt och kan inte återställas.

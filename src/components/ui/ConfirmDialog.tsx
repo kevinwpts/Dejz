@@ -50,7 +50,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       <div
         role="alertdialog"
         aria-modal="true"
-        className="w-full max-w-[310px] rounded-[26px] bg-[var(--surface-color)] border border-[var(--border-subtle)] p-5 shadow-2xl text-center space-y-4 animate-scale-in"
+        className="w-full max-w-[310px] rounded-modal bg-[var(--surface-color)] border border-[var(--border-subtle)] p-5 shadow-2xl text-center space-y-4 animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="space-y-1.5 px-1">
@@ -79,7 +79,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             onClick={onConfirm}
             className={`py-2.5 px-3 rounded-2xl text-xs font-semibold text-white transition-all cursor-pointer active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 ${
               variant === 'danger'
-                ? 'bg-rose-600 hover:bg-rose-500'
+                ? 'bg-negative-solid hover:bg-negative-solid'
                 : 'bg-[var(--cta-bg)] text-[var(--cta-fg)] hover:opacity-90'
             }`}
           >

@@ -78,7 +78,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
         {step2View === 'select-accounts' && (
           <div className="flex-1 min-h-0 flex flex-col justify-between">
             <div className="shrink-0 pt-6 pb-4">
-              <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+              <h1 className="ui-step-title">
                 Välj konton att synka
               </h1>
             </div>
@@ -99,14 +99,14 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                     key={acc.id}
                     type="button"
                     onClick={() => toggleAccountSelection(acc.id)}
-                    className={`w-full p-4 rounded-2xl border flex items-center gap-3.5 text-left transition-all cursor-pointer ${
+                    className={`ui-option-card ${
                       isChecked
                         ? 'bg-[var(--surface-color)] border-[var(--border-subtle)]'
                         : 'bg-[var(--surface-color)]/50 border-[var(--border-subtle)] opacity-55'
                     }`}
                   >
                     <div
-                      className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors ${
+                      className={`ui-checkbox ${
                         isChecked
                           ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
                           : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
@@ -115,7 +115,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                       {isChecked && <Check size={12} weight="bold" />}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <span className="font-display font-semibold text-sm text-[var(--text-primary)] block truncate">
+                      <span className="ui-option-title">
                         {currentName}
                       </span>
                       <span className="text-xs text-[var(--text-muted)] block tabular-nums mt-0.5">
@@ -160,14 +160,14 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
         {step2View === 'grid' && (
           <div className="flex-1 min-h-0 flex flex-col justify-between">
             <div className="shrink-0 pt-6 pb-4">
-              <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+              <h1 className="ui-step-title">
                 Koppla din bank
               </h1>
             </div>
 
             <div className="flex-1 min-h-0 flex flex-col justify-center py-1 space-y-4">
               {authError && (
-                <div className="shrink-0 p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-center justify-between gap-2.5 animate-scale-in">
+                <div className="shrink-0 p-3.5 rounded-2xl bg-negative-solid/10 border border-negative-solid/20 text-negative text-xs flex items-center justify-between gap-2.5 animate-scale-in">
                   <div className="flex items-center gap-2">
                     <WarningCircle size={16} weight="fill" className="shrink-0" />
                     <span>{authError}</span>
@@ -199,13 +199,13 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="relative shrink-0">
                           <ItemLogo name={conn.aspsp_name} logoUrl={conn.aspsp_logo || undefined} size="md" />
-                          <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-[var(--surface-color)]" />
+                          <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-positive-solid border-2 border-[var(--surface-color)]" />
                         </div>
                         <div className="min-w-0">
-                          <span className="font-display font-semibold text-sm text-[var(--text-primary)] block truncate">
+                          <span className="ui-option-title">
                             {conn.aspsp_name}
                           </span>
-                          <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                          <span className="text-xs text-positive font-medium">
                             Ansluten
                           </span>
                         </div>
@@ -229,7 +229,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                   <div className="relative shrink-0">
                     <MagnifyingGlass
                       size={15}
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
+                      className="ui-input-icon"
                     />
                     <input
                       type="text"
@@ -279,7 +279,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                                   <ItemLogo name={b.name} logoUrl={b.logo || undefined} size="lg" />
                                 )}
                               </div>
-                              <span className="font-display font-semibold text-[11px] sm:text-[12px] text-center truncate max-w-full leading-tight">
+                              <span className="font-display font-semibold text-caption sm:text-meta text-center truncate max-w-full leading-tight">
                                 {isConnecting ? 'Ansluter...' : b.name}
                               </span>
                             </button>
@@ -321,7 +321,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                                 <ItemLogo name={b.displayName} size="lg" />
                               )}
                             </div>
-                            <span className="font-display font-semibold text-[11px] sm:text-[12px] text-center truncate max-w-full leading-tight">
+                            <span className="font-display font-semibold text-caption sm:text-meta text-center truncate max-w-full leading-tight">
                               {isConnecting ? 'Ansluter...' : b.displayName}
                             </span>
                           </button>
@@ -331,7 +331,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                   )}
 
                   {/* Trygghetsrad */}
-                  <div className="flex items-center justify-center gap-1.5 text-[11px] text-[var(--text-muted)] pt-1 shrink-0">
+                  <div className="flex items-center justify-center gap-1.5 text-caption text-[var(--text-muted)] pt-1 shrink-0">
                     <ShieldCheck size={14} weight="regular" />
                     <span>Säker koppling via Mobilt BankID</span>
                   </div>
@@ -354,7 +354,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                     }
                     goNext(2);
                   }}
-                  className="w-full py-3.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+                  className="ui-btn-primary-flow"
                 >
                   <span>Fortsätt</span>
                   <ArrowRight size={16} weight="bold" />

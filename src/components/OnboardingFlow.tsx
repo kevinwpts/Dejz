@@ -1073,7 +1073,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           loadingText="Letar efter din lön …"
           amountText={incomeSummaryAmount}
           detailText={incomeSummaryDetail}
-          amountClassName="text-emerald-600 dark:text-emerald-400"
+          amountClassName="text-positive"
           confirmLabel="Stämmer"
           onConfirm={handleSaveSuggestedIncomes}
           onShowList={() => setShowIncomeList(true)}

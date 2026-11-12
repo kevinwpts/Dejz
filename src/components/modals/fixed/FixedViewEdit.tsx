@@ -113,7 +113,7 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
                 }
                 navigateSubView('details', 'back');
               }}
-              className="w-16 h-8 text-left text-[14px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+              className="ui-text-btn"
             >
               Avbryt
             </button>
@@ -123,7 +123,7 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
         )}
 
         {/* Stort och tydligt inmatningskort för Namn + Belopp med live-logga */}
-        <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-3.5">
+        <div className="ui-field-card space-y-3.5">
           {(() => {
             const rawOrig = (activeExpense?.originalName || '').trim();
             const cleanedOrig = rawOrig ? cleanDisplayMerchantName(rawOrig) : '';
@@ -145,7 +145,7 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
                     isRecurring={true}
                   />
                   <div className="flex-1 min-w-0">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
+                    <span className="ui-field-label block mb-0.5">
                       Namn
                     </span>
                     <input
@@ -166,7 +166,7 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
                           setPaymentMethod(inferred.paymentMethod);
                         }
                       }}
-                      className="w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none focus:ring-0"
+                      className="ui-field-input-lg focus:ring-0"
                     />
                   </div>
                 </label>
@@ -196,7 +196,7 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
 
           <div className="border-t border-[var(--border-subtle)] pt-3.5">
             <label className="block cursor-text">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
+              <span className="ui-field-label block mb-0.5">
                 Belopp per månad
               </span>
               <div className="flex items-baseline justify-between gap-2">
@@ -309,7 +309,7 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
                 <button
                   type="button"
                   onClick={() => handleRemoveReceiptAt(idx)}
-                  className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer shrink-0"
+                  className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-negative-solid transition-colors cursor-pointer shrink-0"
                   title="Ta bort kvitto"
                 >
                   <Trash size={13} />

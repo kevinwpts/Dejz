@@ -382,7 +382,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <EnvelopeSimple size={48} weight="light" className="ui-empty-icon" />
 
             <div className="space-y-2 text-center px-2">
-              <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+              <h1 className="ui-step-title">
                 Kolla din inkorg
               </h1>
               <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
@@ -391,7 +391,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] max-w-full">
                 <span className="truncate max-w-[260px]">{email.trim()}</span>
               </div>
-              <p className="text-[12px] text-[var(--text-muted)] pt-2 leading-relaxed max-w-xs mx-auto">
+              <p className="text-meta text-[var(--text-muted)] pt-2 leading-relaxed max-w-xs mx-auto">
                 {sentKind === 'signup'
                   ? 'Klicka på länken i mejlet för att bekräfta ditt konto – sen är du igång. Hittar du det inte? Kika i skräpposten.'
                   : 'Klicka på länken i mejlet för att välja ett nytt lösenord. Hittar du det inte? Kika i skräpposten.'}
@@ -422,7 +422,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           /* Main Auth Form */
           <main key={`auth-${view}`} className={`my-auto py-8 space-y-6 ${pageAnimClass}`}>
             <div className="space-y-1.5">
-              <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+              <h1 className="ui-step-title">
                 {title}
               </h1>
               <p className="text-sm text-[var(--text-secondary)]">
@@ -488,7 +488,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             {/* General Non-Password Error Notice (if any) */}
             {errorMsg && !hasPasswordError && (
-              <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-start gap-2.5 text-rose-600 dark:text-rose-400 text-xs font-medium animate-scale-in">
+              <div className="p-3.5 rounded-2xl bg-negative-solid/10 border border-negative-solid/20 flex items-start gap-2.5 text-negative text-xs font-medium animate-scale-in">
                 <WarningCircle size={16} weight="bold" className="shrink-0 mt-0.5" />
                 <div className="min-w-0 flex-1">
                   <span>{errorMsg}</span>
@@ -514,7 +514,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         setResetEmailSent(true);
                         setResendCooldown(45);
                       }}
-                      className="mt-2.5 w-full py-2.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] text-[13px] font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60"
+                      className="mt-2.5 w-full py-2.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] text-footnote font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60"
                     >
                       {resendingConfirm && <SpinnerGap size={14} className="animate-spin" />}
                       Skicka nytt mejl
@@ -530,7 +530,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 key={shakeTrigger}
                 className={`rounded-3xl bg-[var(--surface-color)] border transition-all overflow-hidden ${
                   hasPasswordError
-                    ? 'border-rose-500/50 ring-1 ring-rose-500/20 animate-shake'
+                    ? 'border-negative-solid/50 ring-1 ring-negative-solid/20 animate-shake'
                     : 'border-[var(--border-subtle)]'
                 }`}
               >
@@ -547,7 +547,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       if (hasPasswordError || errorMsg) clearErrors();
                     }}
                     placeholder="namn@exempel.se"
-                    className="w-full bg-transparent border-0 p-0 text-base font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/55 focus:outline-none"
+                    className="ui-field-input"
                   />
                 </label>
 
@@ -578,12 +578,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                           if (hasPasswordError || errorMsg) clearErrors();
                         }}
                         placeholder="Minst 6 tecken"
-                        className="w-full bg-transparent border-0 p-0 text-base font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/55 focus:outline-none"
+                        className="ui-field-input"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword((prev) => !prev)}
-                        className="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0"
+                        className="ui-clear-btn"
                         aria-label={showPassword ? 'Dölj lösenord' : 'Visa lösenord'}
                       >
                         {showPassword ? <EyeSlash size={18} /> : <Eye size={18} />}
@@ -594,7 +594,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
                 {/* Modern Inline Error Micro-banner (Replaces big clumsy red rectangle) */}
                 {hasPasswordError && (
-                  <div className="px-4 py-2.5 bg-rose-500/5 border-t border-rose-500/15 flex items-center justify-between text-[12px] text-rose-600 dark:text-rose-400 font-medium animate-scale-in">
+                  <div className="px-4 py-2.5 bg-negative-solid/5 border-t border-negative-solid/15 flex items-center justify-between text-meta text-negative font-medium animate-scale-in">
                     <div className="flex items-center gap-1.5">
                       <WarningCircle size={14} weight="bold" className="shrink-0" />
                       <span>Fel lösenord. Kontrollera och försök igen.</span>
@@ -602,7 +602,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <button
                       type="button"
                       onClick={() => switchView('forgot_password', 'forward')}
-                      className="font-semibold underline hover:opacity-80 cursor-pointer shrink-0 ml-2 text-[11px]"
+                      className="font-semibold underline hover:opacity-80 cursor-pointer shrink-0 ml-2 text-caption"
                     >
                       Glömt?
                     </button>
@@ -619,7 +619,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     onChange={(e) => setMarketingOptIn(e.target.checked)}
                     className="mt-0.5 w-5 h-5 shrink-0 rounded-md accent-[var(--accent-color)] cursor-pointer"
                   />
-                  <span className="text-[13px] leading-[1.45] text-[var(--text-secondary)]">
+                  <span className="text-footnote leading-[1.45] text-[var(--text-secondary)]">
                     Ja, skicka mig tips och nyheter från Dejz. Du kan avsluta när du vill.
                   </span>
                 </label>

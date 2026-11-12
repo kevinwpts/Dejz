@@ -47,13 +47,13 @@ export const FeedbackToast: React.FC<{ toast: FeedbackToastState | null; onClose
   return (
     <div className="fixed bottom-[calc(5.6rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-[220] w-[calc(100%-2rem)] max-w-sm animate-fade-in pointer-events-auto">
       {/* Mörk notis i iOS-/Revolut-stil: en rad text + Ångra */}
-      <div className="pl-3.5 pr-2 py-2 min-h-[48px] rounded-2xl bg-[#16141F] text-white shadow-[0_16px_40px_-12px_rgba(22,20,31,0.45)] flex items-center justify-between gap-3">
+      <div className="pl-3.5 pr-2 py-2 min-h-[48px] rounded-2xl bg-toast text-on-toast shadow-[var(--toast-shadow)] flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
-          <CheckCircle size={20} weight="fill" className="text-emerald-400 shrink-0" />
+          <CheckCircle size={20} weight="fill" className="text-positive shrink-0" />
           <div className="min-w-0">
-            <p className="text-[14px] font-medium truncate">{toast.title}</p>
+            <p className="text-callout font-medium truncate">{toast.title}</p>
             {toast.subtitle && (
-              <p className="text-[12px] text-white/60 truncate">{toast.subtitle}</p>
+              <p className="text-meta text-white/60 truncate">{toast.subtitle}</p>
             )}
           </div>
         </div>
@@ -67,7 +67,7 @@ export const FeedbackToast: React.FC<{ toast: FeedbackToastState | null; onClose
                 onClose();
                 action?.();
               }}
-              className="px-3 py-2 rounded-xl text-[14px] font-semibold text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
+              className="px-3 py-2 rounded-xl text-callout font-semibold text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
             >
               {toast.actionLabel}
             </button>
@@ -81,7 +81,7 @@ export const FeedbackToast: React.FC<{ toast: FeedbackToastState | null; onClose
                 onClose();
                 undo?.();
               }}
-              className="px-3 py-2 rounded-xl text-[14px] font-semibold text-[#B4A8FF] hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
+              className="px-3 py-2 rounded-xl text-callout font-semibold text-toast-action hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
             >
               {toast.undoLabel}
             </button>

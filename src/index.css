@@ -68,6 +68,30 @@
   --color-on-accent-container: var(--on-accent-container);
   --color-accent-secondary: var(--accent-secondary-color);
 
+  /* Betydelsefärger (samma betydelse överallt): pengar in / fel–ta bort / varning.
+     positive/negative/caution = text och ikoner (anpassas till ljust/mörkt),
+     *-solid = fyllda prickar, märken och kanter. Byt värdena i :root och .dark. */
+  --color-positive: var(--positive-color);
+  --color-positive-solid: var(--positive-solid);
+  --color-negative: var(--negative-color);
+  --color-negative-solid: var(--negative-solid);
+  --color-caution: var(--caution-color);
+  --color-caution-solid: var(--caution-solid);
+  --color-on-positive: var(--on-positive);
+  --color-brand: var(--brand);
+  --color-brand-deep: var(--brand-deep);
+  --color-toast: var(--toast-bg);
+  --color-on-toast: var(--toast-fg);
+  --color-toast-action: var(--toast-action);
+
+  /* Textskala (utan egen radhöjd, så att layouten inte flyttar sig) */
+  --text-micro: 10px;
+  --text-caption: 11px;
+  --text-meta: 12px;
+  --text-footnote: 13px;
+  --text-callout: 14px;
+  --text-subhead: 15px;
+
   --color-success: var(--success-color);
   --color-success-container: var(--success-container);
   --color-warning: var(--warning-color);
@@ -88,28 +112,29 @@
   --radius-xs: 8px;
 
   /* Central Semantic Radii */
-  --radius-card: var(--radius-card);
-  --radius-card-nested: var(--radius-card-nested);
+  --radius-sheet: 28px; /* bottenark (överkant) */
+  --radius-card: 26px;
+  --radius-card-nested: 16px;
   --radius-btn: var(--radius-button);
-  --radius-button: var(--radius-button);
-  --radius-button-sm: var(--radius-button-sm);
-  --radius-button-lg: var(--radius-button-lg);
-  --radius-input: var(--radius-input);
-  --radius-modal: var(--radius-modal);
-  --radius-chip: var(--radius-chip);
-  --radius-badge: var(--radius-badge);
-  --radius-icon-button: var(--radius-icon-button);
-  --radius-pill: var(--radius-pill);
-  --radius-container: var(--radius-container);
+  --radius-button: 14px;
+  --radius-button-sm: 10px;
+  --radius-button-lg: 16px;
+  --radius-input: 14px;
+  --radius-modal: 26px;
+  --radius-chip: 9999px;
+  --radius-badge: 9999px;
+  --radius-icon-button: 9999px;
+  --radius-pill: 9999px;
+  --radius-container: 18px;
 
   /* Component Heights */
-  --height-input: var(--height-input);
+  --height-input: 46px;
   --height-btn: var(--height-button);
-  --height-button: var(--height-button);
+  --height-button: 46px;
   --height-btn-sm: var(--height-button-sm);
   --height-btn-lg: var(--height-button-lg);
-  --height-header: var(--height-header);
-  --height-bottom-nav: var(--height-bottom-nav);
+  --height-header: 64px;
+  --height-bottom-nav: 64px;
 
   --shadow-2xs: none;
   --shadow-xs: none;
@@ -447,14 +472,6 @@ h6 {
   color: var(--text-secondary);
 }
 
-@utility text-label {
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 1.38;
-  letter-spacing: 0em;
-  font-family: var(--font-sans);
-  color: var(--text-secondary);
-}
 
 @utility text-metric-label {
   font-size: 12px;
@@ -693,11 +710,16 @@ h6 {
   --orange-900: #713800;
 
   /* Warm Stone / Alabaster Brand Scale */
-  --brand-peach: #F6F6F4;
-  --brand-pink: #F6F6F4;
-  --brand-lavender: #F6F6F4;
-  --brand-cream: #F6F6F4;
-  --brand-gradient: none;
+  /* Varumärket (logga, hemkort, startsida). Byt här för att byta märkesfärg. */
+  --brand: #5B3DF5;
+  --brand-deep: #3F22C9;
+  --brand-gradient: linear-gradient(150deg, #7356FF 0%, #5B3DF5 48%, #3F22C9 100%);
+
+  /* Notiser (mörka även i ljust tema) */
+  --toast-bg: #16141F;
+  --toast-fg: #FFFFFF;
+  --toast-action: #B4A8FF;
+  --toast-shadow: 0 16px 40px -12px rgba(22, 20, 31, 0.45);
 
   /* Dejz Official Brand Logo Color */
   --logo-color: #5B3DF5;
@@ -793,6 +815,15 @@ h6 {
   --card-shadow: var(--shadow-subtle);
   --card-inner-stroke: none;
 
+  /* Betydelsefärger – ljust tema */
+  --positive-color: #059669;
+  --positive-solid: #10B981;
+  --negative-color: #E11D48;
+  --negative-solid: #F43F5E;
+  --caution-color: #D97706;
+  --caution-solid: #F59E0B;
+  --on-positive: #022C22;
+
   --success-color: #10B981;
   --success-container: rgba(16, 185, 129, 0.10);
   --danger-color: #EF4444;
@@ -832,27 +863,11 @@ h6 {
      Single source of truth for component radii, dimensions, spacing & motion
      ========================================================================== */
   /* Corner Radii */
-  --radius-card: 26px;
-  --radius-card-nested: 16px;
-  --radius-button: 14px;
-  --radius-button-sm: 10px;
-  --radius-button-lg: 16px;
-  --radius-input: 14px;
-  --radius-modal: 26px;
-  --radius-chip: 9999px;
-  --radius-badge: 9999px;
-  --radius-icon-button: 9999px;
-  --radius-pill: 9999px;
-  --radius-container: 18px;
 
   /* Component Dimensions / Heights */
-  --height-input: 46px;
-  --height-button: 46px;
   --height-button-sm: 32px;
   --height-button-lg: 48px;
   --height-search: 46px;
-  --height-header: 64px;
-  --height-bottom-nav: 64px;
   --size-icon-button-xs: 24px;
   --size-icon-button-sm: 28px;
   --size-icon-button-md: 32px;
@@ -1038,6 +1053,14 @@ h6 {
   --card-inner-stroke: none;
 
   /* Status Colors */
+  /* Betydelsefärger – mörkt tema */
+  --positive-color: #34D399;
+  --positive-solid: #10B981;
+  --negative-color: #FB7185;
+  --negative-solid: #F43F5E;
+  --caution-color: #FBBF24;
+  --caution-solid: #F59E0B;
+
   --success-color: #34D399;
   --success-container: rgba(52, 211, 153, 0.15);
   --warning-color: #FBBF24;
@@ -1813,15 +1836,15 @@ b {
   }
 
   .ui-section-meta {
-    @apply text-[12px] font-normal text-[var(--text-secondary)] tabular-nums;
+    @apply text-meta font-normal text-[var(--text-secondary)] tabular-nums;
   }
 
   .ui-section-action {
-    @apply py-1.5 px-3 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[12px] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 transition-all flex items-center gap-1 cursor-pointer;
+    @apply py-1.5 px-3 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-meta font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 transition-all flex items-center gap-1 cursor-pointer;
   }
 
   .ui-date-header {
-    @apply flex items-center justify-between gap-2 px-1.5 pb-1.5 pt-1 text-[13px];
+    @apply flex items-center justify-between gap-2 px-1.5 pb-1.5 pt-1 text-footnote;
   }
 
   /* 2. Cards & Grouped Containers */
@@ -1847,11 +1870,11 @@ b {
   }
 
   .ui-admin-row {
-    @apply relative w-full px-4 py-3 sm:py-3.5 min-h-[48px] flex items-center justify-between gap-3 text-[13px] sm:text-[14px] font-normal text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer;
+    @apply relative w-full px-4 py-3 sm:py-3.5 min-h-[48px] flex items-center justify-between gap-3 text-footnote sm:text-callout font-normal text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer;
   }
 
   .ui-admin-row-static {
-    @apply relative w-full px-4 py-3 sm:py-3.5 min-h-[48px] flex items-center justify-between gap-3 text-[13px] sm:text-[14px] font-normal text-left;
+    @apply relative w-full px-4 py-3 sm:py-3.5 min-h-[48px] flex items-center justify-between gap-3 text-footnote sm:text-callout font-normal text-left;
   }
 
   .ui-admin-row:not(:last-child)::after,
@@ -1875,7 +1898,7 @@ b {
   }
 
   .ui-admin-value {
-    @apply min-w-[2.25rem] text-right text-[12px] font-normal text-[var(--text-secondary)] tabular-nums;
+    @apply min-w-[2.25rem] text-right text-meta font-normal text-[var(--text-secondary)] tabular-nums;
   }
 
   .ui-admin-chevron {
@@ -1887,7 +1910,7 @@ b {
   }
 
   .ui-sheet-group {
-    @apply rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] text-[13px] overflow-hidden;
+    @apply rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] text-footnote overflow-hidden;
   }
 
   .ui-sheet-box {
@@ -1896,55 +1919,55 @@ b {
 
   /* 3. List Rows & Transaction Rows */
   .ui-tx-row {
-    @apply w-full py-2.5 sm:py-3 flex items-center justify-between gap-3 text-[13px] sm:text-[14px] text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer;
+    @apply w-full py-2.5 sm:py-3 flex items-center justify-between gap-3 text-footnote sm:text-callout text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer;
   }
 
   .ui-tx-row-static {
-    @apply w-full py-2.5 sm:py-3 flex items-center justify-between gap-3 text-[13px] sm:text-[14px] text-left;
+    @apply w-full py-2.5 sm:py-3 flex items-center justify-between gap-3 text-footnote sm:text-callout text-left;
   }
 
   .ui-row {
-    @apply w-full px-4 py-3 min-h-[46px] flex items-center justify-between gap-3 text-[13px] sm:text-[14px] text-left;
+    @apply w-full px-4 py-3 min-h-[46px] flex items-center justify-between gap-3 text-footnote sm:text-callout text-left;
   }
 
   .ui-locked-row {
-    @apply w-full px-4 py-3 min-h-[46px] flex items-center justify-between gap-3 text-[13px] sm:text-[14px] text-left bg-[var(--surface-hover)]/45 text-[var(--text-secondary)] select-none;
+    @apply w-full px-4 py-3 min-h-[46px] flex items-center justify-between gap-3 text-footnote sm:text-callout text-left bg-[var(--surface-hover)]/45 text-[var(--text-secondary)] select-none;
   }
 
   .ui-row-btn {
-    @apply w-full px-4 py-3 min-h-[46px] flex items-center justify-between gap-3 text-[13px] sm:text-[14px] text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer;
+    @apply w-full px-4 py-3 min-h-[46px] flex items-center justify-between gap-3 text-footnote sm:text-callout text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer;
   }
 
   .ui-input-row {
-    @apply w-full px-4 py-3 min-h-[48px] flex items-center justify-between gap-3 text-[13px] sm:text-[14px] cursor-text hover:bg-[var(--surface-color)]/60 focus-within:bg-[var(--surface-color)] transition-colors;
+    @apply w-full px-4 py-3 min-h-[48px] flex items-center justify-between gap-3 text-footnote sm:text-callout cursor-text hover:bg-[var(--surface-color)]/60 focus-within:bg-[var(--surface-color)] transition-colors;
   }
 
   .ui-row-title {
-    @apply font-normal text-[13px] sm:text-[14px] tracking-[-0.005em] leading-snug text-[var(--text-primary)] block truncate;
+    @apply font-normal text-footnote sm:text-callout tracking-[-0.005em] leading-snug text-[var(--text-primary)] block truncate;
   }
 
   .ui-row-subtitle {
-    @apply text-[12px] font-normal text-[var(--text-muted)] flex items-center gap-1.5 mt-0.5 truncate;
+    @apply text-meta font-normal text-[var(--text-muted)] flex items-center gap-1.5 mt-0.5 truncate;
   }
 
   .ui-info-label {
-    @apply text-[13px] font-normal text-[var(--text-secondary)] shrink-0;
+    @apply text-footnote font-normal text-[var(--text-secondary)] shrink-0;
   }
 
   .ui-info-value {
-    @apply text-[13px] font-normal text-[var(--text-primary)];
+    @apply text-footnote font-normal text-[var(--text-primary)];
   }
 
   .ui-row-amount {
-    @apply font-display font-semibold text-[14px] tracking-[-0.01em] text-[var(--text-primary)] tabular-nums block;
+    @apply font-display font-semibold text-callout tracking-[-0.01em] text-[var(--text-primary)] tabular-nums block;
   }
 
   .ui-row-amount-income {
-    @apply font-display font-semibold text-[14px] tracking-[-0.01em] text-emerald-600 dark:text-emerald-400 tabular-nums block;
+    @apply font-display font-semibold text-callout tracking-[-0.01em] text-positive tabular-nums block;
   }
 
   .ui-row-meta {
-    @apply text-[11px] font-normal text-[var(--text-muted)] tabular-nums block mt-0.5;
+    @apply text-caption font-normal text-[var(--text-muted)] tabular-nums block mt-0.5;
   }
 
   /* 4. 3-Column Summary & Stat Grids */
@@ -1953,15 +1976,15 @@ b {
   }
 
   .ui-stat-label {
-    @apply text-[12px] font-normal text-[var(--text-secondary)] block truncate;
+    @apply text-meta font-normal text-[var(--text-secondary)] block truncate;
   }
 
   .ui-stat-value {
-    @apply font-display font-semibold text-[14px] sm:text-[14px] tracking-[-0.01em] text-[var(--text-primary)] tabular-nums block mt-0.5 truncate;
+    @apply font-display font-semibold text-callout sm:text-callout tracking-[-0.01em] text-[var(--text-primary)] tabular-nums block mt-0.5 truncate;
   }
 
   .ui-stat-sub {
-    @apply text-[11px] font-normal text-[var(--text-muted)] tabular-nums block mt-0.5 truncate;
+    @apply text-caption font-normal text-[var(--text-muted)] tabular-nums block mt-0.5 truncate;
   }
 
   /* 5. BottomSheet Headers, Heroes & Icon Badges */
@@ -1974,7 +1997,7 @@ b {
   }
 
   .ui-sheet-title {
-    @apply font-display font-semibold text-[15px] tracking-[-0.01em] leading-snug text-[var(--text-primary)] truncate;
+    @apply font-display font-semibold text-subhead tracking-[-0.01em] leading-snug text-[var(--text-primary)] truncate;
   }
 
   .ui-icon-btn {
@@ -1998,7 +2021,7 @@ b {
   }
 
   .ui-hero-amount-income {
-    @apply font-display font-semibold text-2xl sm:text-[28px] text-emerald-600 dark:text-emerald-400 tabular-nums tracking-[-0.02em];
+    @apply font-display font-semibold text-2xl sm:text-[28px] text-positive tabular-nums tracking-[-0.02em];
   }
 
   .ui-icon-badge {
@@ -2007,27 +2030,27 @@ b {
 
   /* 6. Buttons & Confirmation Bars (Compact 48px Capsule CTAs & Unified Pill Actions) */
   .ui-btn-primary {
-    @apply w-full h-[48px] px-5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-[14px] sm:text-[14px] tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] disabled:opacity-40 transition-all cursor-pointer;
+    @apply w-full h-[48px] px-5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-callout sm:text-callout tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] disabled:opacity-40 transition-all cursor-pointer;
   }
 
   .ui-btn-primary-lg {
-    @apply w-full h-[48px] px-5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-[14px] sm:text-[14px] tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] disabled:opacity-40 transition-all cursor-pointer;
+    @apply w-full h-[48px] px-5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-callout sm:text-callout tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] disabled:opacity-40 transition-all cursor-pointer;
   }
 
   .ui-btn-secondary {
-    @apply w-full h-[48px] px-5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[14px] sm:text-[14px] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
+    @apply w-full h-[48px] px-5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] text-callout sm:text-callout font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
   }
 
   .ui-btn-danger {
-    @apply w-full h-[48px] px-5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[14px] sm:text-[14px] font-semibold text-rose-600 dark:text-rose-400 hover:opacity-80 active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
+    @apply w-full h-[48px] px-5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] text-callout sm:text-callout font-semibold text-negative hover:opacity-80 active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
   }
 
   .ui-btn-sm {
-    @apply px-3 py-1.5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[12px] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0;
+    @apply px-3 py-1.5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] text-meta font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0;
   }
 
   .ui-btn-sm-primary {
-    @apply px-3 py-1.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] text-[12px] font-semibold hover:opacity-90 active:scale-95 flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0;
+    @apply px-3 py-1.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] text-meta font-semibold hover:opacity-90 active:scale-95 flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0;
   }
 
   .ui-confirm-danger {
@@ -2048,19 +2071,19 @@ b {
   }
 
   .ui-segmented-tab {
-    @apply py-1.5 px-3 rounded-lg text-[12px] sm:text-[13px] font-normal transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)];
+    @apply py-1.5 px-3 rounded-lg text-meta sm:text-footnote font-normal transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)];
   }
 
   .ui-segmented-tab-active {
-    @apply py-1.5 px-3 rounded-lg text-[12px] sm:text-[13px] font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 bg-[var(--text-primary)] text-[var(--bg-color)];
+    @apply py-1.5 px-3 rounded-lg text-meta sm:text-footnote font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 bg-[var(--text-primary)] text-[var(--bg-color)];
   }
 
   .ui-chip {
-    @apply px-3 py-1.5 rounded-full text-[12px] font-normal transition-all cursor-pointer shrink-0 border flex items-center gap-1.5 bg-[var(--surface-color)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)];
+    @apply px-3 py-1.5 rounded-full text-meta font-normal transition-all cursor-pointer shrink-0 border flex items-center gap-1.5 bg-[var(--surface-color)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)];
   }
 
   .ui-chip-active {
-    @apply px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all cursor-pointer shrink-0 border flex items-center gap-1.5 bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)];
+    @apply px-3 py-1.5 rounded-full text-meta font-semibold transition-all cursor-pointer shrink-0 border flex items-center gap-1.5 bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)];
   }
 
   .ui-search-box {
@@ -2068,19 +2091,19 @@ b {
   }
 
   .ui-search-input {
-    @apply w-full bg-transparent border-0 p-0 pl-2 pr-6 text-[14px] font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none;
+    @apply w-full bg-transparent border-0 p-0 pl-2 pr-6 text-callout font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none;
   }
 
   .ui-box-input {
-    @apply w-full p-3.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[14px] font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/60 focus:outline-none focus:border-[var(--text-primary)] transition-colors;
+    @apply w-full p-3.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-callout font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/60 focus:outline-none focus:border-[var(--text-primary)] transition-colors;
   }
 
   .ui-inline-input {
-    @apply flex-1 min-w-0 bg-transparent border-0 p-0 text-[14px] font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/70 text-right focus:outline-none transition-colors;
+    @apply flex-1 min-w-0 bg-transparent border-0 p-0 text-callout font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/70 text-right focus:outline-none transition-colors;
   }
 
   .ui-inline-amount-input {
-    @apply w-36 bg-transparent border-0 p-0 text-[14px] font-display font-semibold text-[var(--text-primary)] placeholder-[var(--text-muted)]/70 text-right tabular-nums focus:outline-none transition-colors;
+    @apply w-36 bg-transparent border-0 p-0 text-callout font-display font-semibold text-[var(--text-primary)] placeholder-[var(--text-muted)]/70 text-right tabular-nums focus:outline-none transition-colors;
   }
 
   .ui-payday-slider {
@@ -2143,11 +2166,11 @@ b {
   }
 
   .ui-day-btn {
-    @apply h-10 sm:h-11 rounded-2xl font-display text-[13px] sm:text-[13px] tabular-nums transition-all cursor-pointer flex items-center justify-center bg-transparent text-[var(--text-primary)] hover:bg-[var(--surface-color)] font-medium;
+    @apply h-10 sm:h-11 rounded-2xl font-display text-footnote sm:text-footnote tabular-nums transition-all cursor-pointer flex items-center justify-center bg-transparent text-[var(--text-primary)] hover:bg-[var(--surface-color)] font-medium;
   }
 
   .ui-day-btn-active {
-    @apply h-10 sm:h-11 rounded-2xl font-display text-[13px] sm:text-[13px] tabular-nums transition-all cursor-pointer flex items-center justify-center bg-[var(--text-primary)] text-[var(--bg-color)] font-semibold shadow-sm scale-[1.04];
+    @apply h-10 sm:h-11 rounded-2xl font-display text-footnote sm:text-footnote tabular-nums transition-all cursor-pointer flex items-center justify-center bg-[var(--text-primary)] text-[var(--bg-color)] font-semibold shadow-sm scale-[1.04];
   }
 
   /* 8. Empty States */
@@ -2164,11 +2187,83 @@ b {
   }
 
   .ui-empty-title {
-    @apply font-display font-semibold text-[15px] sm:text-[16px] text-[var(--text-primary)] tracking-[-0.01em];
+    @apply font-display font-semibold text-subhead sm:text-[16px] text-[var(--text-primary)] tracking-[-0.01em];
   }
 
   .ui-empty-sub {
-    @apply text-[13px] font-normal text-[var(--text-secondary)] mt-1 max-w-[260px] mx-auto leading-relaxed;
+    @apply text-footnote font-normal text-[var(--text-secondary)] mt-1 max-w-[260px] mx-auto leading-relaxed;
+  }
+
+
+  /* --- Komponentklasser (ett ställe per mönster; byt utseende här) --- */
+  .ui-step-title {
+    @apply font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)];
+  }
+  .ui-field-label {
+    @apply text-caption font-semibold uppercase tracking-wider text-[var(--text-muted)];
+  }
+  .ui-shortcut-tile {
+    @apply p-3.5 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-left flex items-center gap-2.5 transition-colors cursor-pointer;
+  }
+  .ui-field-card {
+    @apply rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4;
+  }
+  .ui-action-tile {
+    @apply p-2.5 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer text-center;
+  }
+  .ui-action-tile-label {
+    @apply text-caption font-medium text-[var(--text-primary)] truncate max-w-full;
+  }
+  .ui-field-input-lg {
+    @apply w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none;
+  }
+  .ui-field-input {
+    @apply w-full bg-transparent border-0 p-0 text-base font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/55 focus:outline-none;
+  }
+  .ui-chip-sm {
+    @apply px-2.5 py-1 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 hover:bg-[var(--surface-hover)] cursor-pointer;
+  }
+  .ui-dialog-btn-primary {
+    @apply w-full py-2.5 px-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer;
+  }
+  .ui-dialog-btn-secondary {
+    @apply w-full py-2.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] transition-all cursor-pointer;
+  }
+  .ui-btn-primary-flow {
+    @apply w-full py-3.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer;
+  }
+  .ui-pill-btn {
+    @apply h-8 px-3.5 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-footnote font-semibold text-[var(--text-primary)] inline-flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer;
+  }
+  .ui-text-btn {
+    @apply w-16 h-8 text-left text-callout font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer;
+  }
+  .ui-checkbox {
+    @apply w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors;
+  }
+  .ui-input-icon {
+    @apply absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none;
+  }
+  .ui-option-card {
+    @apply w-full p-4 rounded-2xl border flex items-center gap-3.5 text-left transition-all cursor-pointer;
+  }
+  .ui-legal-heading {
+    @apply font-display font-bold text-footnote sm:text-sm text-[var(--text-primary)];
+  }
+  .ui-list-row-title {
+    @apply font-normal text-footnote sm:text-callout text-[var(--text-primary)] truncate;
+  }
+  .ui-list-row-title-medium {
+    @apply font-medium text-footnote sm:text-callout text-[var(--text-primary)] truncate;
+  }
+  .ui-tile-title {
+    @apply font-display font-medium text-xs text-[var(--text-primary)] block truncate;
+  }
+  .ui-option-title {
+    @apply font-display font-semibold text-sm text-[var(--text-primary)] block truncate;
+  }
+  .ui-clear-btn {
+    @apply text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0;
   }
 }
 
@@ -2217,11 +2312,11 @@ b {
   --hero-glow: rgba(225, 29, 72, 0.5);
 }
 /* Statusfärger som behöver ljusare toner mot den mörka gradienten */
-.dejz-hero .text-emerald-600,
-.dejz-hero .dark\:text-emerald-400 { color: #B9F8D9 !important; }
-.dejz-hero .text-rose-600,
-.dejz-hero .dark\:text-rose-400 { color: #FFFFFF !important; }
-.dejz-hero .text-amber-600,
-.dejz-hero .dark\:text-amber-400 { color: #FFE7A3 !important; }
-.dejz-hero .bg-rose-500 { background-color: #FFFFFF !important; }
-.dejz-hero .border-rose-500 { border-color: #FFFFFF !important; }
+.dejz-hero .text-positive,
+.dejz-hero .dark\:text-positive { color: #B9F8D9 !important; }
+.dejz-hero .text-negative,
+.dejz-hero .dark\:text-negative { color: #FFFFFF !important; }
+.dejz-hero .text-caution,
+.dejz-hero .dark\:text-caution { color: #FFE7A3 !important; }
+.dejz-hero .bg-negative-solid { background-color: #FFFFFF !important; }
+.dejz-hero .border-negative-solid { border-color: #FFFFFF !important; }

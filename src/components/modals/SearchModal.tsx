@@ -282,7 +282,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                     <h2 className="ui-section-title">
                       Inkomster
                     </h2>
-                    <span className="ui-row-amount-income text-[13px] sm:text-sm">
+                    <span className="ui-row-amount-income text-footnote sm:text-sm">
                       +{formatKr(totalMatchedIncomes)}
                     </span>
                   </div>
@@ -341,7 +341,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                     <h2 className="ui-section-title">
                       Fasta utgifter
                     </h2>
-                    <span className="ui-row-amount text-[13px] sm:text-sm">
+                    <span className="ui-row-amount text-footnote sm:text-sm">
                       −{formatKr(totalMatchedFixed)}
                     </span>
                   </div>
@@ -406,7 +406,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                         <span
                           className={`text-xs font-display font-medium tabular-nums ${
                             group.net > 0
-                              ? 'text-emerald-600 dark:text-emerald-400'
+                              ? 'text-positive'
                               : 'text-[var(--text-muted)]'
                           }`}
                         >
@@ -455,14 +455,14 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                                     <Heart
                                       size={13}
                                       weight="fill"
-                                      className="text-rose-500 shrink-0"
+                                      className="text-negative-solid shrink-0"
                                     />
                                   )}
                                   {tx.isWaitingForPackage && (
                                     <Package
                                       size={13}
                                       weight="fill"
-                                      className="text-amber-500 shrink-0"
+                                      className="text-caution-solid shrink-0"
                                     />
                                   )}
                                   {tx.receiptUrl && (

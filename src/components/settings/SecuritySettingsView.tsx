@@ -34,7 +34,7 @@ export const SecuritySettingsView: React.FC<SecuritySettingsViewProps> = ({
             <span className="ui-admin-icon-slot">
               <DownloadSimple size={18} weight="regular" />
             </span>
-            <span className="font-medium text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
+            <span className="ui-list-row-title-medium">
               Exportera data
             </span>
           </div>
@@ -56,7 +56,7 @@ export const SecuritySettingsView: React.FC<SecuritySettingsViewProps> = ({
             <span className="ui-admin-icon-slot">
               <ArrowCounterClockwise size={18} weight="regular" />
             </span>
-            <span className="font-medium text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
+            <span className="ui-list-row-title-medium">
               Nollställ data
             </span>
           </div>
@@ -76,10 +76,10 @@ export const SecuritySettingsView: React.FC<SecuritySettingsViewProps> = ({
           className="ui-admin-row disabled:opacity-50"
         >
           <div className="flex items-center gap-3.5 min-w-0 flex-1">
-            <span className="w-5 h-5 flex items-center justify-center shrink-0 text-rose-600 dark:text-rose-400">
+            <span className="w-5 h-5 flex items-center justify-center shrink-0 text-negative">
               <Trash size={18} weight="regular" />
             </span>
-            <span className="font-medium text-[13px] sm:text-[14px] text-rose-600 dark:text-rose-400 truncate">
+            <span className="font-medium text-footnote sm:text-callout text-negative truncate">
               Radera konto
             </span>
           </div>

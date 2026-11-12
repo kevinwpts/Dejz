@@ -85,7 +85,7 @@ export const SetNewPasswordSheet: React.FC<{
             <button
               type="button"
               onClick={() => setShow((v) => !v)}
-              className="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0"
+              className="ui-clear-btn"
               aria-label={show ? 'Dölj lösenord' : 'Visa lösenord'}
             >
               {show ? <EyeSlash size={18} /> : <Eye size={18} />}
@@ -94,7 +94,7 @@ export const SetNewPasswordSheet: React.FC<{
         </label>
 
         {error && (
-          <p className="flex items-center gap-1.5 text-xs font-medium text-rose-600 dark:text-rose-400">
+          <p className="flex items-center gap-1.5 text-xs font-medium text-negative">
             <WarningCircle size={14} weight="bold" />
             {error}
           </p>

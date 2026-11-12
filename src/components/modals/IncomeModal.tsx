@@ -447,7 +447,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
               <button
                 type="button"
                 onClick={handleCancelEdit}
-                className="w-16 h-8 text-left text-[14px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+                className="ui-text-btn"
               >
                 Avbryt
               </button>
@@ -457,7 +457,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
           )}
 
           {/* Stort och tydligt inmatningskort för Namn + Belopp med live-logga */}
-          <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-3.5">
+          <div className="ui-field-card space-y-3.5">
             <div className="flex items-center gap-3.5">
               <label className="flex items-center gap-3.5 cursor-text flex-1 min-w-0">
                 <ItemLogo
@@ -467,7 +467,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
                   isRecurring={true}
                 />
                 <div className="flex-1 min-w-0">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
+                  <span className="ui-field-label block mb-0.5">
                     Namn
                   </span>
                   <input
@@ -486,7 +486,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
                         setCategory(inferred.category);
                       }
                     }}
-                    className="w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none focus:ring-0"
+                    className="ui-field-input-lg focus:ring-0"
                   />
                 </div>
               </label>
@@ -494,7 +494,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
 
             <div className="border-t border-[var(--border-subtle)] pt-3.5">
               <label className="block cursor-text">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
+                <span className="ui-field-label block mb-0.5">
                   Belopp per månad
                 </span>
                 <div className="flex items-baseline justify-between gap-2">
@@ -504,7 +504,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
                     placeholder="0"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value.replace(/[^\d]/g, ''))}
-                    className="w-full bg-transparent border-0 p-0 font-display font-bold text-2xl sm:text-3xl text-emerald-600 dark:text-emerald-400 placeholder-[var(--text-muted)]/40 tabular-nums focus:outline-none"
+                    className="w-full bg-transparent border-0 p-0 font-display font-bold text-2xl sm:text-3xl text-positive placeholder-[var(--text-muted)]/40 tabular-nums focus:outline-none"
                   />
                   <span className="font-display font-semibold text-sm text-[var(--text-muted)] shrink-0">
                     kr/mån
@@ -573,7 +573,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
               <button
                 type="button"
                 onClick={() => navigateSubView('edit', 'forward')}
-                className="h-8 px-3.5 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[13px] font-semibold text-[var(--text-primary)] inline-flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+                className="ui-pill-btn"
               >
                 <PencilSimple size={14} weight="bold" />
                 Redigera
@@ -586,7 +586,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
 
           {/* Kvitto-huvud: bara läsning. Ändringar görs via Redigera eller raderna nedan. */}
           <div className="ui-hero-header relative overflow-hidden pt-5 mb-5 pb-5">
-            <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 w-44 h-32 rounded-full bg-emerald-500 blur-2xl opacity-15 dark:opacity-20" />
+            <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 w-44 h-32 rounded-full bg-positive-solid blur-2xl opacity-15 dark:opacity-20" />
             <div className="relative flex justify-center mb-3.5">
               {(() => {
                 void logoPrefTick;
@@ -635,9 +635,9 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
               />
             </button>
 
-            <div className="mt-1 flex items-baseline justify-center font-display font-bold text-2xl sm:text-3xl text-emerald-600 dark:text-emerald-400 tabular-nums">
+            <div className="mt-1 flex items-baseline justify-center font-display font-bold text-2xl sm:text-3xl text-positive tabular-nums">
               +{formatKr(Number(amount) || 0)}
-              <span className="ml-1.5 font-display font-medium text-base text-emerald-600/70 dark:text-emerald-400/70">/mån</span>
+              <span className="ml-1.5 font-display font-medium text-base text-positive/70">/mån</span>
             </div>
 
             <p className="text-xs text-[var(--text-secondary)] tabular-nums mt-1.5">
@@ -685,7 +685,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setShowFullAccount((prev) => !prev)}
-                      className="px-2 py-0.5 rounded-md bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer shrink-0"
+                      className="px-2 py-0.5 rounded-md bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-caption font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer shrink-0"
                     >
                       {showFullAccount ? 'Dölj' : 'Visa'}
                     </button>

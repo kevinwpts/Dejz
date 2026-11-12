@@ -74,7 +74,7 @@ export const TxViewSwish: React.FC<TxViewSwishProps> = ({
           return (
             <div className="space-y-4">
               {/* Uppdelningskort */}
-              <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-3.5">
+              <div className="ui-field-card space-y-3.5">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
                     <ItemLogo
@@ -123,7 +123,7 @@ export const TxViewSwish: React.FC<TxViewSwishProps> = ({
 
                 {swishSplitMode === 'custom' && (
                   <div className="pt-1">
-                    <span className="text-[11px] font-medium text-[var(--text-secondary)] block mb-1">
+                    <span className="text-caption font-medium text-[var(--text-secondary)] block mb-1">
                       Belopp att få tillbaka (kr)
                     </span>
                     <input
@@ -142,18 +142,18 @@ export const TxViewSwish: React.FC<TxViewSwishProps> = ({
                 {/* Tydlig fördelning */}
                 <div className="grid grid-cols-2 gap-3 pt-3 border-t border-[var(--border-subtle)]">
                   <div className="p-3 rounded-xl bg-[var(--surface-color)]">
-                    <span className="text-[11px] text-[var(--text-secondary)] block">
+                    <span className="text-caption text-[var(--text-secondary)] block">
                       Din del i budget
                     </span>
                     <span className="font-display font-bold text-base text-[var(--text-primary)] tabular-nums mt-0.5 block">
                       {formatKr(myRemainingShare)}
                     </span>
                   </div>
-                  <div className="p-3 rounded-xl bg-emerald-500/10 text-right">
-                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 block font-medium">
+                  <div className="p-3 rounded-xl bg-positive-solid/10 text-right">
+                    <span className="text-caption text-positive block font-medium">
                       Att få tillbaka
                     </span>
-                    <span className="font-display font-bold text-base text-emerald-600 dark:text-emerald-400 tabular-nums mt-0.5 block">
+                    <span className="font-display font-bold text-base text-positive tabular-nums mt-0.5 block">
                       +{formatKr(friendShare)}
                     </span>
                   </div>

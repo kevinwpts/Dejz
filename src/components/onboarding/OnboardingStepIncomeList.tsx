@@ -36,7 +36,7 @@ export const OnboardingStepIncomeList: React.FC<OnboardingStepIncomeListProps> =
         className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
       >
         <div className="shrink-0 pt-6 pb-4">
-          <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+          <h1 className="ui-step-title">
             Vilka fasta inkomster har du?
           </h1>
           <p className="mt-1.5 text-sm text-[var(--text-secondary)]">
@@ -138,7 +138,7 @@ export const OnboardingStepIncomeList: React.FC<OnboardingStepIncomeListProps> =
               <span>
                 {suggestedIncomes.filter((i) => i.checked).length} valda inkomster
               </span>
-              <span className="font-display font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
+              <span className="font-display font-semibold text-positive tabular-nums">
                 +
                 {formatKr(
                   suggestedIncomes
@@ -152,7 +152,7 @@ export const OnboardingStepIncomeList: React.FC<OnboardingStepIncomeListProps> =
           <button
             type="button"
             onClick={handleSaveSuggestedIncomes}
-            className="w-full py-3.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+            className="ui-btn-primary-flow"
           >
             <span>Fortsätt</span>
             <ArrowRight size={16} weight="bold" />

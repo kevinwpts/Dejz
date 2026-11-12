@@ -31,13 +31,13 @@ export interface SettingsMainListProps {
   setSubView: (next: SettingsSubView) => void;
   userAvatar?: string | null;
   initialChar: string;
-  rowTitleClass: "font-normal text-[13px] sm:text-[14px] tracking-[-0.005em] leading-[1.35] text-[var(--text-primary)] block truncate";
+  rowTitleClass: "font-normal text-footnote sm:text-callout tracking-[-0.005em] leading-[1.35] text-[var(--text-primary)] block truncate";
   userName?: string | null;
-  rowSubClass: "font-normal text-[12px] leading-[1.35] text-[var(--text-secondary)] mt-0.5 block truncate";
+  rowSubClass: "font-normal text-meta leading-[1.35] text-[var(--text-secondary)] mt-0.5 block truncate";
   userEmail: string | null;
   onOpenSection?: (section: "goals" | "receipts" | "packages") => void;
   sectionCounts: { goals?: number; receipts?: number; packages?: number; };
-  sectionLabelClass: "px-1 pt-1.5 pb-0.5 text-[14px] sm:text-[15px] font-semibold tracking-[-0.01em] text-[var(--text-primary)] block";
+  sectionLabelClass: "px-1 pt-1.5 pb-0.5 text-callout sm:text-subhead font-semibold tracking-[-0.01em] text-[var(--text-primary)] block";
   bankEnabled: boolean;
   hasActiveBank: boolean;
   targetPayday: number;
@@ -165,7 +165,7 @@ export const SettingsMainList: React.FC<SettingsMainListProps> = ({
                 <span
                   className={`ui-admin-value ${
                     hasActiveBank
-                      ? 'text-emerald-600 dark:text-emerald-400 font-medium'
+                      ? 'text-positive font-medium'
                       : ''
                   }`}
                 >
@@ -185,7 +185,7 @@ export const SettingsMainList: React.FC<SettingsMainListProps> = ({
                 <span className={rowTitleClass}>Bankkoppling</span>
               </div>
               <div className="ui-admin-right">
-                <span className="px-2.5 py-0.5 rounded-full bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-muted)]">
+                <span className="px-2.5 py-0.5 rounded-full bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-caption font-medium text-[var(--text-muted)]">
                   Kommer snart
                 </span>
               </div>
@@ -405,13 +405,13 @@ export const SettingsMainList: React.FC<SettingsMainListProps> = ({
           <button
             type="button"
             onClick={onSignOut}
-            className="ui-admin-row hover:bg-rose-500/5"
+            className="ui-admin-row hover:bg-negative-solid/5"
           >
             <div className="flex items-center gap-3.5">
-              <div className="w-5 h-5 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0">
+              <div className="w-5 h-5 flex items-center justify-center text-negative shrink-0">
                 <SignOut size={18} weight="regular" />
               </div>
-              <span className="text-[13px] sm:text-[14px] font-medium text-rose-600 dark:text-rose-400">
+              <span className="text-footnote sm:text-callout font-medium text-negative">
                 Logga ut
               </span>
             </div>

@@ -875,7 +875,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       <button
                         type="button"
                         onClick={() => commitEditChanges('single')}
-                        className="w-full py-2.5 px-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
+                        className="ui-dialog-btn-primary"
                       >
                         Bara den här Swishen
                       </button>
@@ -883,7 +883,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       <button
                         type="button"
                         onClick={() => commitEditChanges('same-merchant')}
-                        className="w-full py-2.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] transition-all cursor-pointer tabular-nums"
+                        className="ui-dialog-btn-secondary tabular-nums"
                       >
                         Alla med nummer {activeSwishPhone} ({similarInfo.transactions.length} st)
                       </button>
@@ -893,7 +893,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       <button
                         type="button"
                         onClick={() => commitEditChanges('single')}
-                        className="w-full py-2.5 px-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
+                        className="ui-dialog-btn-primary"
                       >
                         Bara det här köpet (rekommenderas)
                       </button>
@@ -901,7 +901,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       <button
                         type="button"
                         onClick={() => commitEditChanges('chain')}
-                        className="w-full py-2.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] transition-all cursor-pointer"
+                        className="ui-dialog-btn-secondary"
                       >
                         Alla liknande köp ({similarInfo.transactions.length} st)
                       </button>
@@ -911,7 +911,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       <button
                         type="button"
                         onClick={() => commitEditChanges('same-merchant')}
-                        className="w-full py-2.5 px-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
+                        className="ui-dialog-btn-primary"
                       >
                         Alla från {bankOriginLabel} ({similarInfo.sameMerchantTransactions.length} st)
                       </button>
@@ -919,7 +919,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       <button
                         type="button"
                         onClick={() => commitEditChanges('chain')}
-                        className="w-full py-2.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] transition-all cursor-pointer"
+                        className="ui-dialog-btn-secondary"
                       >
                         Hela {similarInfo.brandLabel}-kedjan ({similarInfo.transactions.length} st)
                       </button>
@@ -927,7 +927,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       <button
                         type="button"
                         onClick={() => commitEditChanges('single')}
-                        className="w-full py-2.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] transition-all cursor-pointer"
+                        className="ui-dialog-btn-secondary"
                       >
                         Bara det här köpet
                       </button>
@@ -937,7 +937,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       <button
                         type="button"
                         onClick={() => commitEditChanges('chain')}
-                        className="w-full py-2.5 px-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
+                        className="ui-dialog-btn-primary"
                       >
                         Alla liknande köp ({similarInfo.transactions.length} st)
                       </button>
@@ -945,7 +945,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       <button
                         type="button"
                         onClick={() => commitEditChanges('single')}
-                        className="w-full py-2.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] transition-all cursor-pointer"
+                        className="ui-dialog-btn-secondary"
                       >
                         Bara det här köpet
                       </button>

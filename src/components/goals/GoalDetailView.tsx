@@ -268,7 +268,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                 }
               }}
               placeholder="10 000"
-              className="bg-transparent border-0 focus:outline-none focus:ring-0 text-right font-display font-semibold tabular-nums text-xs sm:text-[13px] text-[var(--text-primary)] max-w-[130px] p-0"
+              className="bg-transparent border-0 focus:outline-none focus:ring-0 text-right font-display font-semibold tabular-nums text-xs sm:text-footnote text-[var(--text-primary)] max-w-[130px] p-0"
             />
             <span className="text-xs text-[var(--text-secondary)]">kr</span>
           </div>
@@ -315,7 +315,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                 className="py-3.5 flex items-center justify-between gap-3.5"
               >
                 <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                  <div className="w-10 h-10 rounded-full bg-emerald-400/20 text-emerald-600 dark:bg-emerald-400 dark:text-emerald-950 font-display font-bold text-xs flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-positive-solid/20 text-positive dark:bg-positive-solid dark:text-on-positive font-display font-bold text-xs flex items-center justify-center shrink-0">
                     {act.authorInitials || userInitials}
                   </div>
                   <div className="min-w-0 flex-1">
@@ -361,7 +361,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                       }}
                       title="Ta bort aktivitet"
                       aria-label={`Ta bort ${displayLabel}`}
-                      className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:text-negative-solid hover:bg-negative-solid/10 transition-colors cursor-pointer"
                     >
                       <Trash size={14} />
                     </button>
@@ -521,7 +521,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
             ) : (
               <>
                 <ImageSquare size={20} className="text-[var(--text-primary)]" />
-                <span className="text-[10px] font-medium text-[var(--text-secondary)]">
+                <span className="text-micro font-medium text-[var(--text-secondary)]">
                   Egen bild
                 </span>
               </>
@@ -568,9 +568,9 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
         }
       >
         <div className="space-y-4">
-          <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4">
+          <div className="ui-field-card">
             <label className="block cursor-text">
-              <span className="text-[11px] font-semibold text-[var(--text-muted)] block mb-1">
+              <span className="text-caption font-semibold text-[var(--text-muted)] block mb-1">
                 Belopp
               </span>
               <div className="flex items-baseline justify-between gap-2">
@@ -607,7 +607,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               if (recentSavingsTxs.length === 0) return null;
               return (
                 <div className="space-y-2">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block px-1">
+                  <span className="ui-field-label block px-1">
                     Eller välj en spar-händelse från banken
                   </span>
                   <div className="space-y-1.5">
@@ -646,11 +646,11 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                             <span className="text-xs font-semibold text-[var(--text-primary)] block truncate">
                               {tx.title}
                             </span>
-                            <span className="text-[11px] text-[var(--text-secondary)] block">
+                            <span className="text-caption text-[var(--text-secondary)] block">
                               {formatSwedishDateHeading(tx.date)}
                             </span>
                           </div>
-                          <span className="font-display font-bold text-xs text-emerald-600 dark:text-emerald-400 tabular-nums shrink-0">
+                          <span className="font-display font-bold text-xs text-positive tabular-nums shrink-0">
                             +{formatKr(amt)}
                           </span>
                         </button>

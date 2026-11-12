@@ -21,13 +21,13 @@ export const EmailVerifiedNotice: React.FC = () => {
   const ok = result === 'verified';
   return (
     <div className="fixed top-[calc(env(safe-area-inset-top,0px)+12px)] left-1/2 -translate-x-1/2 z-[400] w-[calc(100%-2rem)] max-w-sm animate-fade-in">
-      <div className="px-4 py-3 rounded-2xl bg-[#16141F] text-white shadow-[0_16px_40px_-12px_rgba(22,20,31,0.45)] flex items-center gap-2.5">
+      <div className="px-4 py-3 rounded-2xl bg-toast text-on-toast shadow-[var(--toast-shadow)] flex items-center gap-2.5">
         {ok ? (
-          <CheckCircle size={20} weight="fill" className="text-emerald-400 shrink-0" />
+          <CheckCircle size={20} weight="fill" className="text-positive shrink-0" />
         ) : (
-          <WarningCircle size={20} weight="fill" className="text-amber-400 shrink-0" />
+          <WarningCircle size={20} weight="fill" className="text-caution shrink-0" />
         )}
-        <p className="text-[14px] font-medium">
+        <p className="text-callout font-medium">
           {ok ? 'Din e-post är verifierad ✓' : 'Länken har gått ut. Skicka en ny från profilen.'}
         </p>
       </div>
@@ -46,7 +46,7 @@ export const EmailVerificationStatus: React.FC<{ compact?: boolean }> = ({ compa
   if (status === 'verified') {
     if (compact) return null;
     return (
-      <span className="inline-flex items-center gap-1 text-[12px] font-medium text-emerald-600 dark:text-emerald-400">
+      <span className="inline-flex items-center gap-1 text-meta font-medium text-positive">
         <CheckCircle size={13} weight="fill" /> Verifierad e-post
       </span>
     );
@@ -54,7 +54,7 @@ export const EmailVerificationStatus: React.FC<{ compact?: boolean }> = ({ compa
 
   if (compact) {
     return (
-      <span className="inline-flex items-center gap-1 mt-1 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+      <span className="inline-flex items-center gap-1 mt-1 text-caption font-medium text-caution">
         <WarningCircle size={12} weight="fill" /> E-post inte verifierad
       </span>
     );
@@ -80,20 +80,20 @@ export const EmailVerificationStatus: React.FC<{ compact?: boolean }> = ({ compa
   return (
     <div className="mt-2 space-y-1.5">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="inline-flex items-center gap-1 text-[12px] font-medium text-amber-600 dark:text-amber-400">
+        <span className="inline-flex items-center gap-1 text-meta font-medium text-caution">
           <WarningCircle size={13} weight="fill" /> E-post inte verifierad
         </span>
         <button
           type="button"
           onClick={send}
           disabled={sending}
-          className="px-3 py-1 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] text-[12px] font-semibold inline-flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer disabled:opacity-60"
+          className="px-3 py-1 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] text-meta font-semibold inline-flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer disabled:opacity-60"
         >
           {sending && <SpinnerGap size={12} className="animate-spin" />}
           Verifiera
         </button>
       </div>
-      {message && <p className="text-[12px] text-[var(--text-secondary)]">{message}</p>}
+      {message && <p className="text-meta text-[var(--text-secondary)]">{message}</p>}
     </div>
   );
 };

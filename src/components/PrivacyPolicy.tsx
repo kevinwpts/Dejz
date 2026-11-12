@@ -11,7 +11,7 @@ export const PRIVACY_CONTACT = 'hej@dejz.se';
 
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <section className="space-y-2">
-    <h3 className="font-display font-semibold text-[15px] text-[var(--text-primary)]">{title}</h3>
+    <h3 className="font-display font-semibold text-subhead text-[var(--text-primary)]">{title}</h3>
     <div className="space-y-2 text-sm leading-relaxed text-[var(--text-secondary)]">{children}</div>
   </section>
 );

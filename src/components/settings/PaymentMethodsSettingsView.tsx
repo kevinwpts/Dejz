@@ -121,7 +121,7 @@ export const PaymentMethodsSettingsView: React.FC<PaymentMethodsSettingsViewProp
                 <span className="ui-admin-icon-slot">
                   <PaymentMethodIcon method={method.name} iconId={method.icon || method.id} size={20} />
                 </span>
-                <span className="font-medium text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
+                <span className="ui-list-row-title-medium">
                   {method.name}
                 </span>
               </div>
@@ -192,7 +192,7 @@ export const PaymentMethodsSettingsView: React.FC<PaymentMethodsSettingsViewProp
         </div>
 
         <form onSubmit={handleSavePmSheet} className="space-y-4">
-          <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4">
+          <div className="ui-field-card">
             <label className="flex items-center gap-3.5 cursor-text">
               <div className="w-11 h-11 flex items-center justify-center shrink-0">
                 <PaymentMethodIcon
@@ -202,7 +202,7 @@ export const PaymentMethodsSettingsView: React.FC<PaymentMethodsSettingsViewProp
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
+                <span className="ui-field-label block mb-0.5">
                   Namn på betalsätt
                 </span>
                 <input
@@ -212,14 +212,14 @@ export const PaymentMethodsSettingsView: React.FC<PaymentMethodsSettingsViewProp
                   onChange={(e) => setPmFormName(e.target.value)}
                   placeholder="Namn"
                   required
-                  className="w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none"
+                  className="ui-field-input-lg"
                 />
               </div>
             </label>
           </div>
 
           <div className="space-y-1.5">
-            <span className="px-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
+            <span className="px-1 ui-field-label block">
               Välj ikon
             </span>
             <div className="grid grid-cols-6 gap-2 p-3 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)]">

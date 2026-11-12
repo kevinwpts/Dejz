@@ -542,7 +542,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                           }}
                         />
                       </div>
-                      <span className="text-[11px] font-medium text-[var(--text-secondary)] tabular-nums shrink-0">
+                      <span className="text-caption font-medium text-[var(--text-secondary)] tabular-nums shrink-0">
                         {pct} %
                       </span>
                     </div>

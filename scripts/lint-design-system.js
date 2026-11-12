@@ -1,230 +1,77 @@
 /**
- * Dejz Design System Linter (Phase 5)
- * 
- * Scans the codebase for hardcoded design values to protect the central design system
- * from future drift. It categorizes violations into:
- * - ERRORS (Critical): Hardcoded layout radii (12px, 14px, 16px) and primary layout/canvas colors.
- * - WARNINGS: Micro-radii (4px, 6px, 8px, 10px) and static text/border hex fallbacks.
- * 
- * Blocks the build (Exit code 1) only if the `--fail-on-errors` flag is specified.
+ * Designvakt för Dejz – körs i `npm run lint` och stoppar bygget vid fel.
+ *
+ * Allt utseende ska komma från designsystemet (src/index.css), så att hela appen kan få
+ * ny design genom att ändra på ett ställe. Den här kontrollen stoppar:
+ *  1. Tailwind-standardfärger (t.ex. text-emerald-600) → använd text-positive / negative / caution
+ *  2. Hex-färger i klassnamn (t.ex. bg-[#5B3DF5])       → använd en variabel (bg-brand, var(--…))
+ *  3. Egna textstorlekar 10–15 px (t.ex. text-[13px])  → använd text-micro/caption/meta/footnote/callout/subhead
+ *  4. Egna hörnradier ≥ 12 px (t.ex. rounded-[16px])   → använd rounded-card, rounded-modal …
+ *
+ * Undantag: illustrationer och temaförhandsvisningar där färgerna ÄR innehållet.
+ * Se DESIGN_SYSTEM.md.
  */
-
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const ROOT_DIR = path.resolve(__dirname, '..');
-const SRC_DIR = path.join(ROOT_DIR, 'src');
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const SRC = path.join(ROOT, 'src');
 
-// Regex patterns to identify hardcoded design values (including directional modifiers)
-const PATTERNS = {
-  // Capture any rounded-[NUMBERpx]
-  radius: /rounded-(?:(?:t|b|l|r|tl|tr|bl|br)-)?\[([0-9]+)px\]/g,
-  // Capture any hex color inside brackets [#[0-9a-fA-F]]
-  hexColor: /(?:bg|text|border|from|to|via|ring|outline|decoration)-(?:(?:t|b|l|r|tl|tr|bl|br)-)?\[(#(?:[0-9a-fA-F]{3,8}))\]/g,
-  // Inline styling patterns
-  inlineStyleRadius: /borderRadius\s*:\s*['"`]([0-9]+px)['"`]/g,
-  inlineStyleColor: /(?:backgroundColor|color|borderColor)\s*:\s*['"`](#(?:[0-9a-fA-F]{3,8}))['"`]/g
-};
+/** Filer där färgerna är själva innehållet (konst, temaförhandsvisning, marknadsföring). */
+const EXEMPT = new Set([
+  'src/components/ui/VisualArtwork.tsx', // sparmålsillustrationer
+  'src/components/settings/AppearanceSettingsView.tsx', // förhandsvisning av ljust/mörkt tema
+  'src/components/WaitlistLanding.tsx', // marknadsföringssida med egna mockups
+]);
 
-// Files or directories that are exempt from style rules due to database definitions, color pickers, or demo data configuration
-const EXEMPT_FILES = [
-  'designSystem.ts', // Single source of truth defining fallback hex values
-  'index.css', // Defines actual CSS variables
-  'src/constants.ts', // Database categories definition with static colors
-  'src/utils/demoData.ts', // Large seed database with mock transaction objects and category colors
-  'src/utils/appCache.ts', // Local storage cache, default categories and payment methods
-  'src/utils/cache/categories.ts', // Default payment method colors (moved from appCache.ts)
-  'src/utils/logoVisuals.ts', // Data lookup maps and logo constants
-  'src/App.tsx', // Contains basic mock categories definition mapping
-  'src/components/AnalysisView.tsx', // Legitimate database/fallback colors for Recharts slices
-  'src/components/SettingsView.tsx', // Legitimate database/fallback colors for default payment method records
-  'src/components/LandingPage.tsx', // Marketing and editorial landing page with unique phone frames
+const PALETTE =
+  'red|rose|pink|fuchsia|purple|violet|indigo|blue|sky|cyan|teal|emerald|green|lime|yellow|amber|orange|slate|gray|zinc|neutral|stone';
+const RULES = [
+  {
+    re: new RegExp(`(?<![\\w-])(?:[a-z0-9-]+:)*(?:text|bg|border|ring|from|via|to|fill|stroke|divide|outline|decoration|shadow|placeholder)-(?:${PALETTE})-\\d{2,3}(?:/\\d+)?(?![\\w-])`, 'g'),
+    msg: 'Tailwind-standardfärg – använd positive/negative/caution, brand eller var(--…)',
+  },
+  {
+    re: /(?<![\w-])(?:[a-z0-9-]+:)*(?:text|bg|border|ring|from|via|to|fill|stroke|outline|decoration|shadow)-\[[^\]]*#[0-9a-fA-F]{3,8}[^\]]*\]/g,
+    msg: 'Hex-färg i klassnamn – lägg färgen som variabel i index.css',
+  },
+  {
+    re: /(?<![\w-])(?:[a-z0-9-]+:)*text-\[(?:10|11|12|13|14|15)px\]/g,
+    msg: 'Egen textstorlek – använd text-micro/caption/meta/footnote/callout/subhead',
+  },
+  {
+    re: /(?<![\w-])(?:[a-z0-9-]+:)*rounded(?:-[trbl]{1,2})?-\[(?:1[2-9]|[2-9]\d)px\]/g,
+    msg: 'Egen hörnradie – använd rounded-card, rounded-modal, rounded-pill …',
+  },
 ];
 
-const LEGITIMATE_EXCEPTIONS = [
-  // Chart configurations, third-party libraries, dynamic categories colors
-  'Recharts',
-  'ResponsiveContainer',
-  'PieChart',
-  'customCategory',
-  'iconColor',
-  'logoUrl',
-];
-
-// Critical colors that should NEVER be hardcoded in views/components
-const CRITICAL_LAYOUT_COLORS = [
-  '#FAF8F5', '#EFECE6', '#EAE6DE', // Light mode core surfaces/canvas
-  '#191919', '#1C1C1C', // Dark mode core surfaces/canvas
-  '#0A0A0A', '#121212', // Black mode core surfaces/canvas
-  '#3B82F6', '#2563EB', // Primary accent colors
-];
-
-let totalErrors = 0;
-let totalWarnings = 0;
-
-function scanDirectory(dir) {
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    
-    // Skip ignored folders
-    if (entry.name === 'node_modules' || entry.name === 'dist' || entry.name === '.git') {
-      continue;
-    }
-
-    // Skip the UI primitives directory as they contain low-level default configurations
-    if (entry.name === 'ui' && dir.endsWith('components')) {
-      continue;
-    }
-
-    if (entry.isDirectory()) {
-      scanDirectory(fullPath);
-    } else if (entry.isFile()) {
-      const ext = path.extname(entry.name);
-      if (['.tsx', '.ts', '.css'].includes(ext)) {
-        // Check if file is explicitly exempted
-        const relative = path.relative(ROOT_DIR, fullPath);
-        if (EXEMPT_FILES.some(exempt => relative === exempt || fullPath.endsWith(exempt))) {
-          continue;
-        }
-        checkFile(fullPath);
-      }
-    }
+const problems = [];
+function walk(dir) {
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, e.name);
+    if (e.isDirectory()) walk(full);
+    else if (/\.(tsx|ts)$/.test(e.name)) check(full);
   }
 }
-
-function checkFile(filePath) {
-  const content = fs.readFileSync(filePath, 'utf-8');
-  const lines = content.split('\n');
-  const relativePath = path.relative(ROOT_DIR, filePath);
-  let fileErrors = [];
-  let fileWarnings = [];
-
-  lines.forEach((line, index) => {
-    // Skip comment lines
-    if (line.trim().startsWith('//') || line.trim().startsWith('/*') || line.trim().startsWith('*')) {
-      return;
-    }
-
-    // 1. Check Tailwind arbitrary border-radius
-    let match;
-    while ((match = PATTERNS.radius.exec(line)) !== null) {
-      const radiusValue = parseInt(match[1], 10);
-      const isCritical = radiusValue >= 12; // any arbitrary layout radius (>=12px) should be a central token
-      
-      const log = {
-        line: index + 1,
-        match: match[0],
-        message: isCritical 
-          ? `CRITICAL ERROR: Hardcoded layout corner radius '${match[0]}'. Use semantic DS tokens (e.g., rounded-card, rounded-btn, rounded-modal) instead.`
-          : `Warning: Hardcoded micro corner radius '${match[0]}' (fine for small icons/badges, but consider DS tokens where possible).`
-      };
-
-      if (isCritical) {
-        fileErrors.push(log);
-      } else {
-        fileWarnings.push(log);
+function check(file) {
+  const rel = path.relative(ROOT, file).split(path.sep).join('/');
+  if (EXEMPT.has(rel)) return;
+  fs.readFileSync(file, 'utf8')
+    .split('\n')
+    .forEach((line, i) => {
+      const t = line.trim();
+      if (t.startsWith('//') || t.startsWith('*') || t.startsWith('/*')) return;
+      for (const rule of RULES) {
+        for (const m of line.matchAll(rule.re)) problems.push(`${rel}:${i + 1}  ${m[0]}  → ${rule.msg}`);
       }
-    }
-
-    // 2. Check Tailwind arbitrary hex color
-    while ((match = PATTERNS.hexColor.exec(line)) !== null) {
-      const hex = match[1].toUpperCase();
-      const isCriticalColor = CRITICAL_LAYOUT_COLORS.some(c => hex.includes(c.toUpperCase()));
-      
-      const log = {
-        line: index + 1,
-        match: match[0],
-        message: isCriticalColor
-          ? `CRITICAL ERROR: Hardcoded core surface/accent color '${match[0]}'. Use CSS variables (e.g., bg-[var(--surface-color)]) instead.`
-          : `Warning: Hardcoded minor/accent hex color '${match[0]}'. Consider moving to variables.`
-      };
-
-      if (isCriticalColor) {
-        fileErrors.push(log);
-      } else {
-        fileWarnings.push(log);
-      }
-    }
-
-    // 3. Check Inline Style Radius
-    while ((match = PATTERNS.inlineStyleRadius.exec(line)) !== null) {
-      const radiusValue = parseInt(match[1], 10);
-      const isCritical = radiusValue >= 12;
-      
-      const log = {
-        line: index + 1,
-        match: match[0],
-        message: isCritical
-          ? `CRITICAL ERROR: Inline layout corner radius '${match[0]}'. Use CSS variables like 'var(--radius-card)' instead.`
-          : `Warning: Inline micro corner radius '${match[0]}' detected.`
-      };
-
-      if (isCritical) {
-        fileErrors.push(log);
-      } else {
-        fileWarnings.push(log);
-      }
-    }
-
-    // 4. Check Inline Style Color
-    while ((match = PATTERNS.inlineStyleColor.exec(line)) !== null) {
-      const isExempt = LEGITIMATE_EXCEPTIONS.some(exc => line.includes(exc));
-      if (!isExempt) {
-        const hex = match[1].toUpperCase();
-        const isCriticalColor = CRITICAL_LAYOUT_COLORS.some(c => hex.includes(c.toUpperCase()));
-        
-        const log = {
-          line: index + 1,
-          match: match[0],
-          message: isCriticalColor
-            ? `CRITICAL ERROR: Inline core layout color '${match[0]}'. Use CSS variables instead.`
-            : `Warning: Inline hex color fallback '${match[0]}' detected.`
-        };
-
-        if (isCriticalColor) {
-          fileErrors.push(log);
-        } else {
-          fileWarnings.push(log);
-        }
-      }
-    }
-  });
-
-  if (fileErrors.length > 0 || fileWarnings.length > 0) {
-    if (fileErrors.length > 0) {
-      console.log(`\x1b[31m❌ Design system violations in: ${relativePath}\x1b[0m`);
-      fileErrors.forEach(v => {
-        console.log(`  Line ${v.line}: [ERROR] \x1b[31m${v.match}\x1b[0m\n    -> ${v.message}`);
-      });
-      totalErrors += fileErrors.length;
-    }
-    
-    if (fileWarnings.length > 0) {
-      console.log(`\x1b[33m⚠️  Design system warnings in: ${relativePath}\x1b[0m`);
-      fileWarnings.forEach(v => {
-        console.log(`  Line ${v.line}: [WARN] \x1b[33m${v.match}\x1b[0m\n    -> ${v.message}`);
-      });
-      totalWarnings += fileWarnings.length;
-    }
-    console.log();
-  }
+    });
 }
 
-console.log('🔍 Starting Dejz Design System linting...');
-scanDirectory(SRC_DIR);
-
-console.log(`📊 Scan summary: ${totalErrors} Critical Errors, ${totalWarnings} Warnings.`);
-
-if (totalErrors > 0) {
-  console.log(`\x1b[31m❌ Design system check failed with ${totalErrors} critical violations.\x1b[0m`);
-  console.log('Please migrate the above hardcoded layout values to the central Design System tokens.');
+walk(SRC);
+if (problems.length) {
+  console.error(`\x1b[31m✖ Designvakt: ${problems.length} avvikelse(r) från designsystemet\x1b[0m`);
+  for (const p of problems) console.error('  ' + p);
   process.exit(1);
-} else {
-  console.log('\x1b[32m✅ Design system check completed successfully!\x1b[0m');
-  process.exit(0);
 }
+console.log('\x1b[32m✔ Designvakt: allt följer designsystemet\x1b[0m');

@@ -86,10 +86,10 @@ export const FixedViewCancelGuide: React.FC<FixedViewCancelGuideProps> = ({
             </div>
           </div>
           <div className="text-right shrink-0">
-            <span className="text-[11px] text-[var(--text-muted)] block">
+            <span className="text-caption text-[var(--text-muted)] block">
               Årlig besparing
             </span>
-            <span className="font-display font-semibold text-[14px] text-emerald-600 dark:text-emerald-400 tabular-nums">
+            <span className="font-display font-semibold text-callout text-positive tabular-nums">
               +{formatKr((Number(amount) || 0) * 12)}/år
             </span>
           </div>
@@ -138,12 +138,12 @@ export const FixedViewCancelGuide: React.FC<FixedViewCancelGuideProps> = ({
                 </div>
 
                 {/* Steg-för-steg instruktioner */}
-                <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-3">
+                <div className="ui-field-card space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[12px] font-medium text-[var(--text-secondary)]">
+                    <span className="text-meta font-medium text-[var(--text-secondary)]">
                       Så säger du upp
                     </span>
-                    <span className="text-[11px] text-[var(--text-muted)] flex items-center gap-1">
+                    <span className="text-caption text-[var(--text-muted)] flex items-center gap-1">
                       <Sparkle size={11} weight="fill" />
                       <span>AI-guide</span>
                     </span>
@@ -153,9 +153,9 @@ export const FixedViewCancelGuide: React.FC<FixedViewCancelGuideProps> = ({
                     {guide.steps.map((step, idx) => (
                       <li
                         key={idx}
-                        className="flex items-start gap-2.5 text-[13px] leading-snug text-[var(--text-primary)]"
+                        className="flex items-start gap-2.5 text-footnote leading-snug text-[var(--text-primary)]"
                       >
-                        <span className="w-5 h-5 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[11px] font-display font-semibold text-[var(--text-primary)] flex items-center justify-center shrink-0 mt-0.5 tabular-nums">
+                        <span className="w-5 h-5 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-caption font-display font-semibold text-[var(--text-primary)] flex items-center justify-center shrink-0 mt-0.5 tabular-nums">
                           {idx + 1}
                         </span>
                         <span className="flex-1">{step}</span>
@@ -166,7 +166,7 @@ export const FixedViewCancelGuide: React.FC<FixedViewCancelGuideProps> = ({
 
                 {/* Smart tips */}
                 {guide.tip && (
-                  <div className="px-3.5 py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-start gap-2.5 text-[12px] leading-snug text-[var(--text-secondary)]">
+                  <div className="px-3.5 py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-start gap-2.5 text-meta leading-snug text-[var(--text-secondary)]">
                     <Info size={15} className="text-[var(--text-primary)] shrink-0 mt-0.5" />
                     <span>{guide.tip}</span>
                   </div>

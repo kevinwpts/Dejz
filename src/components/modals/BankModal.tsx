@@ -393,7 +393,7 @@ export const BankModal: React.FC<BankModalProps> = ({
         ) : (
           <>
             {errorMsg && (
-              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-start gap-2">
+              <div className="p-3 rounded-xl bg-negative-solid/10 border border-negative-solid/20 text-negative text-xs flex items-start gap-2">
                 <WarningCircle size={16} className="shrink-0 mt-0.5" />
                 <span>{errorMsg}</span>
               </div>
@@ -404,7 +404,7 @@ export const BankModal: React.FC<BankModalProps> = ({
               <div className="space-y-4">
                 {connections.length > 0 && (
                   <div className="space-y-1.5">
-                    <span className="px-1 text-[11px] uppercase tracking-wider font-semibold text-[var(--text-muted)] block">
+                    <span className="px-1 text-caption uppercase tracking-wider font-semibold text-[var(--text-muted)] block">
                       Anslutna banker
                     </span>
                     <div className="ui-sheet-group">
@@ -439,15 +439,15 @@ export const BankModal: React.FC<BankModalProps> = ({
                                   {conn.aspsp_name}
                                 </span>
                                 {isExpired ? (
-                                  <span className="text-[11px] text-rose-600 dark:text-rose-400 font-medium block">
+                                  <span className="text-caption text-negative font-medium block">
                                     Samtycket har gått ut
                                   </span>
                                 ) : isExpiringSoon ? (
-                                  <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium block">
+                                  <span className="text-caption text-caution font-medium block">
                                     Går ut om {daysLeft} d
                                   </span>
                                 ) : (
-                                  <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium block">
+                                  <span className="text-caption text-positive font-medium block">
                                     Ansluten
                                   </span>
                                 )}
@@ -494,7 +494,7 @@ export const BankModal: React.FC<BankModalProps> = ({
                 <div className="relative">
                   <MagnifyingGlass
                     size={16}
-                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
+                    className="ui-input-icon"
                   />
                   <input
                     type="text"
@@ -594,7 +594,7 @@ export const BankModal: React.FC<BankModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setShowManualCallback(true)}
-                      className="text-[11px] font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                      className="text-caption font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                     >
                       Öppnades inloggningen i en annan flik?
                     </button>
@@ -654,7 +654,7 @@ export const BankModal: React.FC<BankModalProps> = ({
                         >
                           <div className="flex items-center gap-3 min-w-0 flex-1">
                             <div
-                              className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors ${
+                              className={`ui-checkbox ${
                                 isChecked
                                   ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
                                   : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'

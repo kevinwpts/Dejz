@@ -134,13 +134,13 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                 onClick={() => onToggleHeart(activeTx.id, !activeTx.isHearted)}
                 title="Spara köp"
                 className={`ui-icon-btn ${
-                  activeTx.isHearted ? 'text-rose-500 hover:text-rose-600' : ''
+                  activeTx.isHearted ? 'text-negative-solid hover:text-negative' : ''
                 }`}
               >
                 <Heart
                   size={18}
                   weight={activeTx.isHearted ? 'fill' : 'regular'}
-                  className={activeTx.isHearted ? 'text-rose-500' : ''}
+                  className={activeTx.isHearted ? 'text-negative-solid' : ''}
                 />
               </button>
             )}
@@ -152,13 +152,13 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                 }
                 title="Väntar på paket"
                 className={`ui-icon-btn ${
-                  activeTx.isWaitingForPackage ? 'text-amber-500 hover:text-amber-600' : ''
+                  activeTx.isWaitingForPackage ? 'text-caution-solid hover:text-caution' : ''
                 }`}
               >
                 <Package
                   size={18}
                   weight={activeTx.isWaitingForPackage ? 'fill' : 'regular'}
-                  className={activeTx.isWaitingForPackage ? 'text-amber-500' : ''}
+                  className={activeTx.isWaitingForPackage ? 'text-caution-solid' : ''}
                 />
               </button>
             )}
@@ -168,7 +168,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
             <button
               type="button"
               onClick={() => navigateSubView('edit', 'forward')}
-              className="h-8 px-3.5 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[13px] font-semibold text-[var(--text-primary)] inline-flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+              className="ui-pill-btn"
             >
               <PencilSimple size={14} weight="bold" />
               Redigera
@@ -243,7 +243,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
 
           <div
             className={`mt-1 font-display font-bold tabular-nums text-2xl sm:text-3xl ${
-              isIncome ? 'text-emerald-500' : 'text-[var(--text-primary)]'
+              isIncome ? 'text-positive-solid' : 'text-[var(--text-primary)]'
             }`}
           >
             {isIncome ? '+' : '−'}
@@ -273,15 +273,15 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                   fileInputRef.current?.click();
                 }
               }}
-              className="p-2.5 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer text-center group relative"
+              className="ui-action-tile group relative"
             >
               <div className="w-8 h-8 rounded-full bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] group-hover:scale-105 transition-transform relative">
                 <Paperclip size={16} weight="regular" />
                 {draftReceipts.length > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-[var(--bg-color)]" />
+                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-positive-solid ring-2 ring-[var(--bg-color)]" />
                 )}
               </div>
-              <span className="text-[11px] font-medium text-[var(--text-primary)] truncate max-w-full">
+              <span className="ui-action-tile-label">
                 {draftReceipts.length > 0 ? `${draftReceipts.length} kvitto` : 'Kvitto'}
               </span>
             </button>
@@ -299,18 +299,18 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                     onMarkAsFixed(activeTx, isIncome ? 'income' : 'expense');
                   }
                 }}
-                className="p-2.5 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer text-center group"
+                className="ui-action-tile group"
               >
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center group-hover:scale-105 transition-transform ${
                     recurringStatus.isRecurring
-                      ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                      ? 'bg-positive-solid/15 text-positive'
                       : 'bg-[var(--surface-color)] text-[var(--text-primary)]'
                   }`}
                 >
                   <ArrowsClockwise size={16} />
                 </div>
-                <span className="text-[11px] font-medium text-[var(--text-primary)] truncate max-w-full">
+                <span className="ui-action-tile-label">
                   {recurringStatus.isRecurring ? 'Fast post' : 'Gör fast'}
                 </span>
               </button>
@@ -319,12 +319,12 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
             <button
               type="button"
               onClick={() => navigateSubView('similar', 'forward')}
-              className="p-2.5 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer text-center group"
+              className="ui-action-tile group"
             >
               <div className="w-8 h-8 rounded-full bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] group-hover:scale-105 transition-transform">
                 <ClockCounterClockwise size={16} />
               </div>
-              <span className="text-[11px] font-medium text-[var(--text-primary)] truncate max-w-full">
+              <span className="ui-action-tile-label">
                 {similarInfo.transactions.length > 0 ? `${similarInfo.transactions.length} köp` : 'Historik'}
               </span>
             </button>
@@ -392,7 +392,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                   <button
                     type="button"
                     onClick={() => setShowFullAccount((prev) => !prev)}
-                    className="px-2 py-0.5 rounded-md bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer shrink-0"
+                    className="px-2 py-0.5 rounded-md bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-caption font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer shrink-0"
                   >
                     {showFullAccount ? 'Dölj' : 'Visa'}
                   </button>
@@ -425,7 +425,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                         <span className="text-xs font-medium text-[var(--text-primary)] block truncate group-hover:opacity-80">
                           {rcpt.name || `Kvitto ${idx + 1}`}
                         </span>
-                        <span className="text-[11px] text-[var(--text-muted)] block">
+                        <span className="text-caption text-[var(--text-muted)] block">
                           Klicka för att granska
                         </span>
                       </div>
@@ -437,14 +437,14 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                           setPreviewReceipt(rcpt);
                           navigateSubView('receipt-preview', 'forward');
                         }}
-                        className="px-2 py-1 rounded-md text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+                        className="px-2 py-1 rounded-md text-caption text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
                       >
                         Öppna
                       </button>
                       <button
                         type="button"
                         onClick={() => handleRemoveReceiptAt(idx)}
-                        className="p-1 rounded-md text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer"
+                        className="p-1 rounded-md text-[var(--text-muted)] hover:text-negative-solid transition-colors cursor-pointer"
                         title="Ta bort kvitto"
                       >
                         <Trash size={13} />
@@ -511,7 +511,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                 <div className="ui-row flex-col items-stretch gap-2 py-3">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-xs font-medium text-[var(--text-secondary)] flex items-center gap-1.5">
-                      <Sparkle size={13} weight="fill" className="text-emerald-500 shrink-0" />
+                      <Sparkle size={13} weight="fill" className="text-positive-solid shrink-0" />
                       <span>
                         {linkedGoal
                           ? `Kopplad till sparmål: ${linkedGoal.name}`
@@ -545,7 +545,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                           saveSavingsGoals(nextGoals);
                           setLogoPrefTick((t) => t + 1);
                         }}
-                        className="text-xs font-medium text-rose-600 dark:text-rose-400 hover:underline cursor-pointer shrink-0"
+                        className="text-xs font-medium text-negative hover:underline cursor-pointer shrink-0"
                       >
                         Koppla bort
                       </button>
@@ -583,7 +583,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                           }}
                           className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1 cursor-pointer transition-colors"
                         >
-                          <Plus size={11} weight="bold" className="text-emerald-500" />
+                          <Plus size={11} weight="bold" className="text-positive-solid" />
                           <span>{g.name}</span>
                         </button>
                       ))}
@@ -596,8 +596,8 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
             {/* Rå banktext diskret längst ner i detaljkortet */}
             {rawBankText && (
               <div className="ui-row items-start py-2.5 bg-[var(--surface-hover)]/25">
-                <span className="text-[12px] text-[var(--text-muted)] shrink-0 pt-0.5">Banktext</span>
-                <span className="text-[12px] text-right break-words max-w-[230px] sm:max-w-[265px] text-[var(--text-secondary)] font-normal leading-snug">
+                <span className="text-meta text-[var(--text-muted)] shrink-0 pt-0.5">Banktext</span>
+                <span className="text-meta text-right break-words max-w-[230px] sm:max-w-[265px] text-[var(--text-secondary)] font-normal leading-snug">
                   {rawBankText}
                 </span>
               </div>

@@ -36,7 +36,7 @@ export const DayOfMonthPicker: React.FC<DayOfMonthPickerProps> = ({
     >
       {showHeader && (
         <div className="flex items-center justify-between px-0.5 pb-1 border-b border-[var(--border-subtle)]">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+          <span className="ui-field-label">
             {title || (mode === 'payday' ? 'Lönedag' : 'Förfallodag')}
           </span>
           <span className="text-xs font-semibold text-[var(--text-primary)] tabular-nums">
@@ -58,7 +58,7 @@ export const DayOfMonthPicker: React.FC<DayOfMonthPickerProps> = ({
               key={day}
               type="button"
               onClick={() => onSelectDay(day)}
-              className={`h-10 sm:h-11 rounded-2xl font-display text-[13px] sm:text-sm tabular-nums transition-all cursor-pointer flex flex-col items-center justify-center relative select-none active:scale-95 ${
+              className={`h-10 sm:h-11 rounded-2xl font-display text-footnote sm:text-sm tabular-nums transition-all cursor-pointer flex flex-col items-center justify-center relative select-none active:scale-95 ${
                 isSelected
                   ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-bold shadow-sm scale-[1.05] ring-2 ring-[var(--text-primary)]/15'
                   : 'bg-transparent text-[var(--text-primary)] hover:bg-[var(--bg-color)] font-medium hover:scale-105'
@@ -66,7 +66,7 @@ export const DayOfMonthPicker: React.FC<DayOfMonthPickerProps> = ({
             >
               <span>{day}</span>
               {isCommonHighlight && (
-                <span className="w-1 h-1 rounded-full bg-emerald-500 absolute bottom-1.5" />
+                <span className="w-1 h-1 rounded-full bg-positive-solid absolute bottom-1.5" />
               )}
             </button>
           );

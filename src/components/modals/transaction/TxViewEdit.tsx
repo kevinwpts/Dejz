@@ -106,7 +106,7 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
             <button
               type="button"
               onClick={handleCancelEdit}
-              className="w-16 h-8 text-left text-[14px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+              className="ui-text-btn"
             >
               Avbryt
             </button>
@@ -158,7 +158,7 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
 
         <div className="space-y-4">
           {/* Stort och tydligt inmatningskort för Namn + Belopp med live-logga */}
-          <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-3.5">
+          <div className="ui-field-card space-y-3.5">
             <div className="flex items-center gap-3.5">
               <label className="flex items-center gap-3.5 cursor-text flex-1 min-w-0">
                 <ItemLogo
@@ -169,7 +169,7 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
                   isRecurring={Boolean(!isCreateMode && recurringStatus.isRecurring)}
                 />
                 <div className="flex-1 min-w-0">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
+                  <span className="ui-field-label block mb-0.5">
                     Namn
                   </span>
                   <input
@@ -192,7 +192,7 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
                         setPaymentMethod(inferred.paymentMethod);
                       }
                     }}
-                    className="w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none"
+                    className="ui-field-input-lg"
                   />
                 </div>
               </label>
@@ -221,7 +221,7 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
             </div>
 
             {!isCreateMode && rawBankText && (
-              <div className="flex items-center justify-between gap-2 pt-1 text-[11px] text-[var(--text-muted)]">
+              <div className="flex items-center justify-between gap-2 pt-1 text-caption text-[var(--text-muted)]">
                 <span className="truncate" title={rawBankText}>
                   Banktext:{' '}
                   <span className="font-medium text-[var(--text-secondary)]">
@@ -234,7 +234,7 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
             <div className="border-t border-[var(--border-subtle)] pt-3.5">
               {!isBankSynced ? (
                 <label className="block cursor-text">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
+                  <span className="ui-field-label block mb-0.5">
                     Belopp
                   </span>
                   <div className="flex items-baseline justify-between gap-2">
@@ -246,7 +246,7 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
                       onChange={(e) => setAmount(e.target.value.replace(/[^\d]/g, ''))}
                       className={`w-full bg-transparent border-0 p-0 font-display font-bold text-2xl sm:text-3xl placeholder-[var(--text-muted)]/40 tabular-nums focus:outline-none ${
                         isIncome
-                          ? 'text-emerald-600 dark:text-emerald-400'
+                          ? 'text-positive'
                           : 'text-[var(--text-primary)]'
                       }`}
                     />
@@ -257,13 +257,13 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
                 </label>
               ) : (
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                  <span className="ui-field-label">
                     Belopp
                   </span>
                   <span
                     className={`font-display font-bold text-xl tabular-nums ${
                       isIncome
-                        ? 'text-emerald-600 dark:text-emerald-400'
+                        ? 'text-positive'
                         : 'text-[var(--text-primary)]'
                     }`}
                   >
@@ -362,7 +362,7 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
                     <button
                       type="button"
                       onClick={() => handleRemoveReceiptAt(idx)}
-                      className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer shrink-0"
+                      className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-negative-solid transition-colors cursor-pointer shrink-0"
                       title="Ta bort kvitto"
                     >
                       <Trash size={13} />
@@ -375,7 +375,7 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
                   className="ui-row-btn text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 >
                   <span className="flex items-center gap-2">
-                    <Plus size={13} weight="bold" className="text-emerald-500" />
+                    <Plus size={13} weight="bold" className="text-positive-solid" />
                     <span>Bifoga fler kvitton</span>
                   </span>
                   <Paperclip size={13} className="text-[var(--text-muted)]" />

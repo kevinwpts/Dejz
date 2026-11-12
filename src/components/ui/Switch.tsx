@@ -60,7 +60,7 @@ export const Switch: React.FC<SwitchProps> = ({
         className={`pointer-events-none inline-block rounded-full shadow-none transform transition-transform duration-[var(--duration-normal,150ms)] ease-out ${thumbSize} ${
           checked
             ? `${translateChecked} ml-1 bg-[var(--on-accent)]`
-            : 'translate-x-1 bg-[var(--surface-color)] dark:bg-[#FFFFFF] border-none'
+            : 'translate-x-1 bg-[var(--surface-color)] dark:bg-white border-none'
         }`}
       />
     </button>

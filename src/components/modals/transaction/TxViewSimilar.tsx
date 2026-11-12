@@ -93,7 +93,7 @@ export const TxViewSimilar: React.FC<TxViewSimilarProps> = ({
                         {tx.title}
                       </span>
                       {isCurrent && (
-                        <span className="text-[11px] font-normal text-[var(--text-secondary)] shrink-0">
+                        <span className="text-caption font-normal text-[var(--text-secondary)] shrink-0">
                           · Denna
                         </span>
                       )}

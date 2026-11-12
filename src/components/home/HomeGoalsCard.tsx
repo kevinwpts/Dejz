@@ -49,7 +49,7 @@ export const HomeGoalsCard: React.FC<HomeGoalsCardProps> = ({
             title={showGoals ? 'Dölj sparmål' : 'Visa sparmål'}
           >
             <div className="min-w-0">
-              <span className="text-[12px] text-[var(--text-secondary)] font-normal block">
+              <span className="text-meta text-[var(--text-secondary)] font-normal block">
                 Sparmål
               </span>
               <div className="font-display text-[20px] sm:text-[20px] font-semibold tracking-[-0.015em] leading-tight text-[var(--text-primary)] tabular-nums mt-0.5">
@@ -113,10 +113,10 @@ export const HomeGoalsCard: React.FC<HomeGoalsCardProps> = ({
 
                           <div className="min-w-0 flex-1 space-y-1">
                             <div className="flex items-baseline justify-between gap-2">
-                              <span className="font-normal text-[13px] sm:text-[14px] tracking-[-0.005em] leading-snug text-[var(--text-primary)] truncate">
+                              <span className="font-normal text-footnote sm:text-callout tracking-[-0.005em] leading-snug text-[var(--text-primary)] truncate">
                                 {goal.name}
                               </span>
-                              <span className="font-display font-semibold text-[14px] tracking-[-0.01em] text-[var(--text-primary)] tabular-nums shrink-0">
+                              <span className="font-display font-semibold text-callout tracking-[-0.01em] text-[var(--text-primary)] tabular-nums shrink-0">
                                 {formatKr(effectiveGoalAmt)}
                               </span>
                             </div>
@@ -131,7 +131,7 @@ export const HomeGoalsCard: React.FC<HomeGoalsCardProps> = ({
                                   }}
                                 />
                               </div>
-                              <span className="text-[11px] font-medium text-[var(--text-secondary)] tabular-nums shrink-0">
+                              <span className="text-caption font-medium text-[var(--text-secondary)] tabular-nums shrink-0">
                                 {pct} %
                               </span>
                             </div>
@@ -147,7 +147,7 @@ export const HomeGoalsCard: React.FC<HomeGoalsCardProps> = ({
                     className="w-full pt-1 flex items-center justify-between gap-3 text-left hover:opacity-90 transition-opacity cursor-pointer"
                   >
                     <div className="min-w-0 flex-1">
-                      <span className="font-normal text-[13px] sm:text-[14px] text-[var(--text-primary)] leading-snug block">
+                      <span className="font-normal text-footnote sm:text-callout text-[var(--text-primary)] leading-snug block">
                         Spara till en resa, buffert eller dröm
                       </span>
                       <span className="text-xs text-[var(--text-secondary)] flex items-center gap-1 mt-0.5">

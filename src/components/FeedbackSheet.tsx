@@ -70,8 +70,8 @@ export const FeedbackSheet: React.FC = () => {
 
         {sent ? (
           <div className="space-y-5">
-            <div className="flex items-start gap-3 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4">
-              <CheckCircle size={22} weight="fill" className="text-emerald-500 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3 ui-field-card">
+              <CheckCircle size={22} weight="fill" className="text-positive-solid shrink-0 mt-0.5" />
               <p className="text-sm text-[var(--text-secondary)] leading-[1.5]">
                 Din feedback har skickats. Jag läser allt som kommer in och hör av mig om jag har en fråga.
                 <span className="block mt-1 text-[var(--text-primary)] font-medium">– Kevin, grundare av Dejz</span>
@@ -94,7 +94,7 @@ export const FeedbackSheet: React.FC = () => {
                   type="button"
                   onClick={() => setType(t.id)}
                   aria-pressed={type === t.id}
-                  className={`h-10 rounded-xl text-[13px] font-medium border transition-all cursor-pointer active:scale-[0.97] ${
+                  className={`h-10 rounded-xl text-footnote font-medium border transition-all cursor-pointer active:scale-[0.97] ${
                     type === t.id
                       ? 'bg-[var(--accent-soft)] border-[var(--accent-color)] text-[var(--text-primary)]'
                       : 'bg-[var(--bg-color)] border-[var(--border-subtle)] text-[var(--text-secondary)]'

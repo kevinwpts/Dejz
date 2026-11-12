@@ -118,7 +118,7 @@ export const AppTopBar: React.FC = () => {
 
         {callbackStatusMsg && (
           <div className="max-w-md mx-auto w-full px-4 pt-3">
-            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-semibold text-center">
+            <div className="p-3 rounded-xl bg-positive-solid/10 border border-positive-solid/20 text-positive text-xs font-semibold text-center">
               {callbackStatusMsg}
             </div>
           </div>

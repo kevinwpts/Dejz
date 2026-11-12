@@ -52,7 +52,7 @@ export const HomeAccountsCard: React.FC<HomeAccountsCardProps> = ({
           title={showAccounts ? 'Dölj konton' : 'Visa konton'}
         >
           <div className="min-w-0">
-            <span className="text-[12px] text-[var(--text-secondary)] font-normal block">
+            <span className="text-meta text-[var(--text-secondary)] font-normal block">
               Totalt saldo
             </span>
             {isInitialLoading && accounts.length === 0 ? (
@@ -105,7 +105,7 @@ export const HomeAccountsCard: React.FC<HomeAccountsCardProps> = ({
                           setCopiedAccountNumber(false);
                         }}
                         title={`Visa kontodetaljer för ${acc.name}`}
-                        className="w-full py-2.5 first:pt-1 last:pb-0.5 flex items-center justify-between gap-2.5 text-left text-xs sm:text-[13px] hover:bg-[var(--surface-hover)] rounded-xl px-1 -mx-1 transition-colors cursor-pointer group"
+                        className="w-full py-2.5 first:pt-1 last:pb-0.5 flex items-center justify-between gap-2.5 text-left text-xs sm:text-footnote hover:bg-[var(--surface-hover)] rounded-xl px-1 -mx-1 transition-colors cursor-pointer group"
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <ItemLogo
@@ -115,13 +115,13 @@ export const HomeAccountsCard: React.FC<HomeAccountsCardProps> = ({
                             size="sm"
                           />
                           <div className="min-w-0 flex-1">
-                            <span className="font-normal text-[13px] sm:text-[14px] tracking-[-0.005em] leading-snug text-[var(--text-primary)] block truncate">
+                            <span className="font-normal text-footnote sm:text-callout tracking-[-0.005em] leading-snug text-[var(--text-primary)] block truncate">
                               {acc.name}
                             </span>
                             {(acc.bankName ||
                               (hasDuplicateName && last4) ||
                               acc.excludeFromTotalBalance) && (
-                              <span className="text-[12px] font-normal text-[var(--text-secondary)] block truncate mt-0.5">
+                              <span className="text-meta font-normal text-[var(--text-secondary)] block truncate mt-0.5">
                                 {acc.bankName}
                                 {hasDuplicateName && last4 ? ` · •••• ${last4}` : ''}
                                 {acc.excludeFromTotalBalance ? ' · Ej i totalt' : ''}
@@ -131,7 +131,7 @@ export const HomeAccountsCard: React.FC<HomeAccountsCardProps> = ({
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
                           <span
-                            className={`font-display font-semibold text-[14px] tracking-[-0.01em] tabular-nums ${
+                            className={`font-display font-semibold text-callout tracking-[-0.01em] tabular-nums ${
                               acc.excludeFromTotalBalance
                                 ? 'text-[var(--text-secondary)]'
                                 : 'text-[var(--text-primary)]'

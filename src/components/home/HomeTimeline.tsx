@@ -146,7 +146,7 @@ export const HomeTimeline: React.FC<HomeTimelineProps> = ({
                 }`}
               >
                 <span
-                  className={`text-[11px] leading-none ${
+                  className={`text-caption leading-none ${
                     isSelected
                       ? 'text-[var(--date-active-color)]/80 font-normal'
                       : isToday
@@ -157,7 +157,7 @@ export const HomeTimeline: React.FC<HomeTimelineProps> = ({
                   {day.topLabel}
                 </span>
                 <span
-                  className={`font-display text-[14px] tabular-nums leading-none mt-1.5 no-privacy-blur ${
+                  className={`font-display text-callout tabular-nums leading-none mt-1.5 no-privacy-blur ${
                     isSelected || isToday ? 'font-semibold' : 'font-normal'
                   }`}
                 >
@@ -191,7 +191,7 @@ export const HomeTimeline: React.FC<HomeTimelineProps> = ({
                   <button
                     type="button"
                     onClick={handleJumpToToday}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer active:scale-95"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-caption font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer active:scale-95"
                   >
                     <ArrowCounterClockwise size={11} weight="bold" />
                     <span>Idag</span>
@@ -253,14 +253,14 @@ export const HomeTimeline: React.FC<HomeTimelineProps> = ({
                           <Heart
                             size={11}
                             weight="fill"
-                            className="text-rose-500 shrink-0 ml-0.5"
+                            className="text-negative-solid shrink-0 ml-0.5"
                           />
                         )}
                         {tx.isWaitingForPackage && (
                           <Package
                             size={11}
                             weight="fill"
-                            className="text-amber-500 shrink-0 ml-0.5"
+                            className="text-caution-solid shrink-0 ml-0.5"
                           />
                         )}
                         {hasReceipts && (

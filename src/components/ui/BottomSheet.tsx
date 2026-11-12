@@ -50,11 +50,11 @@ export const BottomSheetOption: React.FC<BottomSheetOptionProps> = ({
     <div className="flex items-center gap-3 min-w-0 flex-1">
       {icon && <div className="shrink-0 text-[var(--text-secondary)]">{icon}</div>}
       <div className="min-w-0 flex-1">
-        <span className={`text-[14px] sm:text-[15px] block truncate ${isSelected ? 'font-semibold' : 'font-medium'}`}>
+        <span className={`text-callout sm:text-subhead block truncate ${isSelected ? 'font-semibold' : 'font-medium'}`}>
           {label}
         </span>
         {subtitle && (
-          <span className="text-[12px] text-[var(--text-muted)] block truncate mt-0.5">
+          <span className="text-meta text-[var(--text-muted)] block truncate mt-0.5">
             {subtitle}
           </span>
         )}
@@ -257,7 +257,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
         className={`relative z-10 w-full flex flex-col overflow-hidden ${maxWidthClass} ${
           fullScreen
             ? 'h-[100dvh] max-h-[100dvh] rounded-none border-x border-[var(--border-subtle)]'
-            : `mt-auto rounded-t-[28px] rounded-b-none border-t border-x border-[var(--border-subtle)] ${maxHeightClass}`
+            : `mt-auto rounded-t-sheet rounded-b-none border-t border-x border-[var(--border-subtle)] ${maxHeightClass}`
         } ${surfaceClass} shadow-modal ${
           !isClosing && dragOffsetY === 0 ? 'animate-sheet-up' : ''
         }`}
@@ -287,7 +287,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
                   {title}
                 </span>
                 {subtitle && (
-                  <span className="text-[11px] text-[var(--text-muted)] block truncate mt-0.5">
+                  <span className="text-caption text-[var(--text-muted)] block truncate mt-0.5">
                     {subtitle}
                   </span>
                 )}

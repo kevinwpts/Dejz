@@ -100,8 +100,8 @@ export const SwipeableTxRow: React.FC<SwipeableTxRowProps> = ({
               title={isHearted ? 'Ta bort sparat köp' : 'Spara köp'}
               className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors cursor-pointer ${
                 isHearted
-                  ? 'bg-rose-500 text-white'
-                  : 'bg-[var(--bg-color)] border border-[var(--border-subtle)] text-rose-500'
+                  ? 'bg-negative-solid text-white'
+                  : 'bg-[var(--bg-color)] border border-[var(--border-subtle)] text-negative-solid'
               }`}
             >
               <Heart size={16} weight={isHearted ? 'fill' : 'bold'} />
@@ -118,8 +118,8 @@ export const SwipeableTxRow: React.FC<SwipeableTxRowProps> = ({
               title={isWaitingForPackage ? 'Markera paket mottaget' : 'Väntar på paket'}
               className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors cursor-pointer ${
                 isWaitingForPackage
-                  ? 'bg-amber-500 text-white'
-                  : 'bg-[var(--bg-color)] border border-[var(--border-subtle)] text-amber-500'
+                  ? 'bg-caution-solid text-white'
+                  : 'bg-[var(--bg-color)] border border-[var(--border-subtle)] text-caution-solid'
               }`}
             >
               <Package size={16} weight={isWaitingForPackage ? 'fill' : 'bold'} />

@@ -93,15 +93,15 @@ export const HomeHeroCard: React.FC<HomeHeroCardProps> = ({
             >
               <div className="flex items-center justify-between gap-2">
                 <span
-                  className={`text-[13px] font-normal ${
+                  className={`text-footnote font-normal ${
                     isOverBudget
-                      ? 'text-rose-600 dark:text-rose-400 font-medium'
+                      ? 'text-negative font-medium'
                       : 'text-[var(--text-secondary)]'
                   }`}
                 >
                   {isOverBudget ? 'Över budget' : 'Kvar att spendera'}
                 </span>
-                <span className="text-[13px] font-normal text-[var(--text-secondary)] tabular-nums text-right shrink-0">
+                <span className="text-footnote font-normal text-[var(--text-secondary)] tabular-nums text-right shrink-0">
                   {daysLabel}
                 </span>
               </div>
@@ -115,7 +115,7 @@ export const HomeHeroCard: React.FC<HomeHeroCardProps> = ({
                       className={`font-display text-[44px] sm:text-[48px] font-[600] tracking-[-0.035em] leading-none tabular-nums mt-1.5 ${
                         kvarAttSpendera >= 0
                           ? 'text-[var(--text-primary)]'
-                          : 'text-rose-600 dark:text-rose-400'
+                          : 'text-negative'
                       }`}
                     >
                       {formatKr(kvarAttSpendera)}
@@ -131,7 +131,7 @@ export const HomeHeroCard: React.FC<HomeHeroCardProps> = ({
                     >
                       <div
                         className={`h-full rounded-full transition-all duration-500 ${
-                          pace === "fast" ? "bg-amber-400" : "bg-[var(--text-primary)]"
+                          pace === "fast" ? "bg-caution-solid" : "bg-[var(--text-primary)]"
                         }`}
                         style={{ width: `${remainingShare * 100}%` }}
                       />
@@ -142,11 +142,11 @@ export const HomeHeroCard: React.FC<HomeHeroCardProps> = ({
 
               {/* Text bara när något behöver uppmärksamhet */}
               {pace !== 'good' && (
-                <div className="mt-2.5 flex items-center gap-1.5 text-[12px] tabular-nums">
+                <div className="mt-2.5 flex items-center gap-1.5 text-meta tabular-nums">
                   <span
                     aria-hidden="true"
                     className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                      pace === 'over' ? 'bg-rose-500' : 'bg-amber-500'
+                      pace === 'over' ? 'bg-negative-solid' : 'bg-caution-solid'
                     }`}
                   />
                   <span className="text-[var(--text-secondary)]">
@@ -154,7 +154,7 @@ export const HomeHeroCard: React.FC<HomeHeroCardProps> = ({
                       <>Pengarna är slut för den här perioden</>
                     ) : (
                       <>
-                        <span className="font-medium text-amber-700 dark:text-amber-400">Lite för snabbt</span>
+                        <span className="font-medium text-caution">Lite för snabbt</span>
                         {' – '}
                         {formatKr(Math.abs(paceDiff))} över planen
                       </>
@@ -185,7 +185,7 @@ export const HomeHeroCard: React.FC<HomeHeroCardProps> = ({
                     {isInitialLoading && accounts.length === 0 ? (
                       <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
                     ) : (
-                      <span className="ui-stat-value text-emerald-600 dark:text-emerald-400">
+                      <span className="ui-stat-value text-positive">
                         +{formatKr(totalIncome)}
                       </span>
                     )}

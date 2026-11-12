@@ -236,7 +236,7 @@ export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
             )}
           </div>
 
-          <h2 className="text-[15px] sm:text-base font-medium text-center text-[var(--text-primary)] tracking-[-0.01em]">
+          <h2 className="text-subhead sm:text-base font-medium text-center text-[var(--text-primary)] tracking-[-0.01em]">
             {stepHeading}
           </h2>
         </header>
@@ -328,7 +328,7 @@ export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
               <div className="relative shrink-0">
                 <MagnifyingGlass
                   size={15}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
+                  className="ui-input-icon"
                 />
                 <input
                   type="text"
@@ -368,7 +368,7 @@ export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
                       />
                       <div className="absolute inset-0 bg-black/35 flex flex-col items-center justify-center p-2">
                         <ImageSquare size={22} weight="bold" className="text-white mb-1" />
-                        <span className="text-[11px] font-medium text-white leading-tight">
+                        <span className="text-caption font-medium text-white leading-tight">
                           Byt bild
                         </span>
                       </div>
@@ -380,7 +380,7 @@ export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
                         weight="regular"
                         className="text-[var(--text-primary)] mb-1.5"
                       />
-                      <span className="text-[11px] font-medium text-[var(--text-primary)] leading-tight">
+                      <span className="text-caption font-medium text-[var(--text-primary)] leading-tight">
                         Egen bild
                       </span>
                     </>
@@ -486,14 +486,14 @@ export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
               <button
                 type="button"
                 onClick={() => setGoalLinkedAccountId(undefined)}
-                className={`w-full p-4 rounded-2xl border flex items-center gap-3.5 text-left transition-all cursor-pointer ${
+                className={`ui-option-card ${
                   !goalLinkedAccountId
                     ? 'bg-[var(--surface-color)] border-[var(--text-primary)]/40'
                     : 'bg-[var(--surface-color)]/50 border-[var(--border-subtle)] opacity-65'
                 }`}
               >
                 <div
-                  className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors ${
+                  className={`ui-checkbox ${
                     !goalLinkedAccountId
                       ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
                       : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
@@ -502,7 +502,7 @@ export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
                   {!goalLinkedAccountId && <Check size={12} weight="bold" />}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <span className="font-display font-semibold text-sm text-[var(--text-primary)] block truncate">
+                  <span className="ui-option-title">
                     Eget valt belopp
                   </span>
                   <span className="text-xs text-[var(--text-muted)] block mt-0.5">
@@ -518,14 +518,14 @@ export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
                     setGoalLinkedAccountId('__TOTAL__');
                     setGoalCurrentInput(String(effectiveTotalBalance));
                   }}
-                  className={`w-full p-4 rounded-2xl border flex items-center gap-3.5 text-left transition-all cursor-pointer ${
+                  className={`ui-option-card ${
                     goalLinkedAccountId === '__TOTAL__'
                       ? 'bg-[var(--surface-color)] border-[var(--text-primary)]/40'
                       : 'bg-[var(--surface-color)]/50 border-[var(--border-subtle)] opacity-65'
                   }`}
                 >
                   <div
-                    className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors ${
+                    className={`ui-checkbox ${
                       goalLinkedAccountId === '__TOTAL__'
                         ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
                         : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
@@ -539,7 +539,7 @@ export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
                     <Bank size={15} weight="regular" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="font-display font-semibold text-sm text-[var(--text-primary)] block truncate">
+                    <span className="ui-option-title">
                       Totalsaldo
                     </span>
                     <span className="text-xs text-[var(--text-muted)] block mt-0.5">
@@ -574,14 +574,14 @@ export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
                       setGoalLinkedAccountId(acc.id);
                       setGoalCurrentInput(String(accBal));
                     }}
-                    className={`w-full p-4 rounded-2xl border flex items-center gap-3.5 text-left transition-all cursor-pointer ${
+                    className={`ui-option-card ${
                       isSelected
                         ? 'bg-[var(--surface-color)] border-[var(--text-primary)]/40'
                         : 'bg-[var(--surface-color)]/50 border-[var(--border-subtle)] opacity-65'
                     }`}
                   >
                     <div
-                      className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors ${
+                      className={`ui-checkbox ${
                         isSelected
                           ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
                           : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
@@ -596,7 +596,7 @@ export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
                       size="sm"
                     />
                     <div className="min-w-0 flex-1">
-                      <span className="font-display font-semibold text-sm text-[var(--text-primary)] block truncate">
+                      <span className="ui-option-title">
                         {acc.name}
                       </span>
                       {(showBankSub || (hasDuplicateName && last4)) && (

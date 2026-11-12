@@ -34,7 +34,7 @@ export const OnboardingStepResult: React.FC<OnboardingStepResultProps> = ({
         className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
       >
         <div className="shrink-0 pt-6 pb-4">
-          <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+          <h1 className="ui-step-title">
             Kvar efter fasta räkningar
           </h1>
         </div>
@@ -49,7 +49,7 @@ export const OnboardingStepResult: React.FC<OnboardingStepResultProps> = ({
               <span className="text-[var(--text-muted)]">
                 Inkomster
               </span>
-              <span className="font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
+              <span className="font-semibold text-positive tabular-nums">
                 +{formatKr(totalInc)}
               </span>
             </div>

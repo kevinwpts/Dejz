@@ -106,7 +106,7 @@ export const FixedViewGoalPicker: React.FC<FixedViewGoalPickerProps> = ({
                   >
                     {g.name}
                   </span>
-                  <span className="text-[11px] text-[var(--text-secondary)] tabular-nums">
+                  <span className="text-caption text-[var(--text-secondary)] tabular-nums">
                     {formatKr(g.currentAmount)} av {formatKr(g.targetAmount)}
                   </span>
                 </div>

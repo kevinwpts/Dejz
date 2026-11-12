@@ -93,7 +93,7 @@ export const FeedbackSettingsView: React.FC<FeedbackSettingsViewProps> = ({
           />
 
           {feedbackSent && (
-            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold text-center animate-fade-in">
+            <div className="p-3 rounded-xl bg-positive-solid/10 border border-positive-solid/20 text-positive text-xs font-semibold text-center animate-fade-in">
               Tack för din feedback!
             </div>
           )}
@@ -120,7 +120,7 @@ export const FeedbackSettingsView: React.FC<FeedbackSettingsViewProps> = ({
               <span className="ui-admin-icon-slot">
                 <Compass size={18} weight="regular" />
               </span>
-              <span className="font-normal text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
+              <span className="ui-list-row-title">
                 Visa introduktionsguiden igen
               </span>
             </div>

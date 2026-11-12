@@ -118,7 +118,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
             <span className="ui-stat-label">
               Inkomster
             </span>
-            <span className="ui-stat-value text-emerald-600 dark:text-emerald-400">
+            <span className="ui-stat-value text-positive">
               +{formatKr(totalIncome)}
             </span>
           </div>
@@ -140,7 +140,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
               className={`ui-stat-value ${
                 netAfterFixed >= 0
                   ? 'text-[var(--text-primary)]'
-                  : 'text-rose-600 dark:text-rose-400'
+                  : 'text-negative'
               }`}
             >
               {formatKr(netAfterFixed)}
@@ -321,11 +321,11 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                           <PaymentMethodIcon method={paymentMethodLabel} size={11} />
                         </span>
                         {cancelBadge ? (
-                          <span className="text-amber-600 dark:text-amber-400 font-medium">
+                          <span className="text-caution font-medium">
                             {cancelBadge}
                           </span>
                         ) : matchedTx ? (
-                          <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                          <span className="text-positive font-medium">
                             Betald {formatPaidDate(matchedTx.date)}
                           </span>
                         ) : (

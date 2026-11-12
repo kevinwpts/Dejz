@@ -231,7 +231,7 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="px-3 py-1 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[12px] font-medium text-[var(--text-primary)] inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-3 py-1 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-meta font-medium text-[var(--text-primary)] inline-flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Camera size={12} weight="regular" />
               <span>{userAvatar ? 'Byt bild' : 'Välj bild'}</span>
@@ -240,7 +240,7 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
               <button
                 type="button"
                 onClick={() => onUpdateAvatar(null)}
-                className="px-2.5 py-1 rounded-full text-[12px] font-medium text-[var(--text-secondary)] hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
+                className="px-2.5 py-1 rounded-full text-meta font-medium text-[var(--text-secondary)] hover:text-negative dark:hover:text-negative transition-colors cursor-pointer"
               >
                 Ta bort
               </button>
@@ -261,7 +261,7 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
         <form onSubmit={handleSaveProfile} className="space-y-3">
           <div className="ui-admin-card divide-y divide-[var(--border-subtle)]">
             <label className="px-4 py-3 block cursor-text">
-              <span className="text-[11px] font-normal text-[var(--text-secondary)] block mb-0.5">
+              <span className="text-caption font-normal text-[var(--text-secondary)] block mb-0.5">
                 Namn
               </span>
               <input
@@ -269,12 +269,12 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
                 placeholder="Ditt för- och efternamn"
-                className="w-full bg-transparent border-0 p-0 text-[14px] font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/55 focus:outline-none"
+                className="w-full bg-transparent border-0 p-0 text-callout font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/55 focus:outline-none"
               />
             </label>
 
             <label className="px-4 py-3 block cursor-text">
-              <span className="text-[11px] font-normal text-[var(--text-secondary)] block mb-0.5">
+              <span className="text-caption font-normal text-[var(--text-secondary)] block mb-0.5">
                 E-postadress
               </span>
               <input
@@ -282,12 +282,12 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
                 value={editEmail}
                 onChange={(e) => setEditEmail(e.target.value)}
                 placeholder="namn@exempel.se"
-                className="w-full bg-transparent border-0 p-0 text-[14px] font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/55 focus:outline-none"
+                className="w-full bg-transparent border-0 p-0 text-callout font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/55 focus:outline-none"
               />
             </label>
 
             <label className="px-4 py-3 block cursor-text">
-              <span className="text-[11px] font-normal text-[var(--text-secondary)] block mb-0.5">
+              <span className="text-caption font-normal text-[var(--text-secondary)] block mb-0.5">
                 Mobilnummer
               </span>
               <input
@@ -295,7 +295,7 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
                 value={editPhone}
                 onChange={(e) => setEditPhone(e.target.value)}
                 placeholder="070-123 45 67"
-                className="w-full bg-transparent border-0 p-0 text-[14px] font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/55 focus:outline-none tabular-nums"
+                className="w-full bg-transparent border-0 p-0 text-callout font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/55 focus:outline-none tabular-nums"
               />
             </label>
           </div>
@@ -334,7 +334,7 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
               <span className="ui-admin-icon-slot">
                 <Key size={18} weight="regular" />
               </span>
-              <span className="font-normal text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
+              <span className="ui-list-row-title">
                 Ändra lösenord
               </span>
             </div>
@@ -352,7 +352,7 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
               <span className="ui-admin-icon-slot">
                 <EnvelopeSimple size={18} weight="regular" />
               </span>
-              <span className="font-normal text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
+              <span className="ui-list-row-title">
                 Skicka återställningslänk
               </span>
             </div>
@@ -370,7 +370,7 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
                   <Eye size={18} weight="regular" />
                 )}
               </span>
-              <span className="font-normal text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
+              <span className="ui-list-row-title">
                 Sekretessläge (dölj belopp)
               </span>
             </div>
@@ -400,7 +400,7 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
         </div>
 
         {resetEmailStatus && (
-          <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-medium text-center animate-fade-in">
+          <div className="p-2.5 rounded-xl bg-positive-solid/10 border border-positive-solid/20 text-positive text-xs font-medium text-center animate-fade-in">
             {resetEmailStatus}
           </div>
         )}
@@ -419,7 +419,7 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
           <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] overflow-hidden">
             <div className="px-4 py-3.5 flex items-center justify-between gap-2">
               <label className="flex-1 cursor-text">
-                <span className="text-[11px] font-normal text-[var(--text-secondary)] block mb-0.5">
+                <span className="text-caption font-normal text-[var(--text-secondary)] block mb-0.5">
                   Nytt lösenord
                 </span>
                 <input
@@ -442,7 +442,7 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
             </div>
 
             <label className="px-4 py-3.5 block cursor-text">
-              <span className="text-[11px] font-normal text-[var(--text-secondary)] block mb-0.5">
+              <span className="text-caption font-normal text-[var(--text-secondary)] block mb-0.5">
                 Bekräfta nytt lösenord
               </span>
               <input
@@ -459,8 +459,8 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
             <div
               className={`p-3 rounded-xl text-xs font-medium text-center ${
                 passwordStatus.type === 'success'
-                  ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
-                  : 'bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400'
+                  ? 'bg-positive-solid/10 border border-positive-solid/20 text-positive'
+                  : 'bg-negative-solid/10 border border-negative-solid/20 text-negative'
               }`}
             >
               {passwordStatus.text}

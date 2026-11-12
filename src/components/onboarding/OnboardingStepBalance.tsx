@@ -40,7 +40,7 @@ export const OnboardingStepBalance: React.FC<OnboardingStepBalanceProps> = ({
         className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
       >
         <div className="shrink-0 pt-6 pb-4">
-          <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+          <h1 className="ui-step-title">
             Hur mycket har du på kontot just nu?
           </h1>
           <p className="mt-1.5 text-sm text-[var(--text-secondary)]">
@@ -80,7 +80,7 @@ export const OnboardingStepBalance: React.FC<OnboardingStepBalanceProps> = ({
                 }}
                 className="mt-0.5 w-5 h-5 shrink-0 rounded-md accent-[var(--accent-color)] cursor-pointer"
               />
-              <span className="text-[13px] leading-[1.45] text-[var(--text-secondary)]">
+              <span className="text-footnote leading-[1.45] text-[var(--text-secondary)]">
                 Ja, skicka mig tips och nyheter från Dejz. Du kan avsluta när du vill.
               </span>
             </label>

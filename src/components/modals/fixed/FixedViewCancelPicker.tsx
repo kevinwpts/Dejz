@@ -141,7 +141,7 @@ export const FixedViewCancelPicker: React.FC<FixedViewCancelPickerProps> = ({
                   className="w-full py-3 px-4 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center justify-between transition-colors cursor-pointer"
                 >
                   <span>Ångra uppsägning</span>
-                  <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+                  <span className="text-positive font-semibold">
                     Gör aktiv igen
                   </span>
                 </button>

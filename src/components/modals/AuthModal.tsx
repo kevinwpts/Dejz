@@ -251,7 +251,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] max-w-full">
               <span className="truncate max-w-[240px]">{email.trim()}</span>
             </div>
-            <p className="text-[12px] text-[var(--text-muted)] pt-1 leading-relaxed max-w-xs mx-auto">
+            <p className="text-meta text-[var(--text-muted)] pt-1 leading-relaxed max-w-xs mx-auto">
               Klicka på länken i mejlet för att välja ett nytt lösenord. Hittar du det inte? Kika i skräpposten.
             </p>
           </div>
@@ -306,7 +306,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           {/* General Non-Password Error Notice */}
           {errorMsg && !hasPasswordError && (
-            <div className="mb-4 p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs animate-scale-in flex items-start gap-2">
+            <div className="mb-4 p-3 rounded-2xl bg-negative-solid/10 border border-negative-solid/20 text-negative text-xs animate-scale-in flex items-start gap-2">
               <WarningCircle size={15} className="shrink-0 mt-0.5" />
               <span>{errorMsg}</span>
             </div>
@@ -320,7 +320,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   type="button"
                   onClick={() => handleGoogleSignIn('apple')}
                   disabled={googleLoading || loading}
-                  className="w-full h-[48px] mb-3 rounded-full bg-black text-white dark:bg-white dark:text-black font-semibold text-[14px] flex items-center justify-center gap-2.5 active:scale-[0.98] disabled:opacity-40 cursor-pointer"
+                  className="w-full h-[48px] mb-3 rounded-full bg-black text-white dark:bg-white dark:text-black font-semibold text-callout flex items-center justify-center gap-2.5 active:scale-[0.98] disabled:opacity-40 cursor-pointer"
                 >
                   <svg className="w-[14px] h-[17px] shrink-0" viewBox="0 0 814 1000" fill="currentColor" aria-hidden="true">
                     <path d="M788 341c-6 4-108 62-108 190 0 148 130 200 134 202-1 3-21 72-69 142-43 62-88 124-156 124s-86-40-165-40c-77 0-104 41-166 41s-106-57-156-128C44 790 0 671 0 558 0 377 118 281 234 281c62 0 113 41 152 41 37 0 95-43 165-43 27 0 123 2 187 96zM557 159c29-35 50-83 50-131 0-7-1-13-2-19-47 2-104 32-138 72-27 30-52 79-52 127 0 7 1 15 2 17 3 0 8 1 13 1 43 0 96-28 127-67z" />
@@ -363,7 +363,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-[var(--border-subtle)]" />
                 </div>
-                <span className="relative px-3 bg-[var(--surface-color)] text-[11px] text-[var(--text-muted)] font-medium">
+                <span className="relative px-3 bg-[var(--surface-color)] text-caption text-[var(--text-muted)] font-medium">
                   eller med e-post
                 </span>
               </div>
@@ -376,7 +376,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               key={shakeTrigger}
               className={`ui-sheet-group transition-all ${
                 hasPasswordError
-                  ? 'border-rose-500/50 ring-1 ring-rose-500/20 animate-shake'
+                  ? 'border-negative-solid/50 ring-1 ring-negative-solid/20 animate-shake'
                   : ''
               }`}
             >
@@ -393,7 +393,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     setEmail(e.target.value);
                     if (hasPasswordError || errorMsg) handleReset();
                   }}
-                  className="w-full bg-transparent border-0 p-0 text-base font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/55 focus:outline-none"
+                  className="ui-field-input"
                 />
               </label>
 
@@ -412,12 +412,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         setPassword(e.target.value);
                         if (hasPasswordError || errorMsg) handleReset();
                       }}
-                      className="w-full bg-transparent border-0 p-0 text-base font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/55 focus:outline-none"
+                      className="ui-field-input"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword((prev) => !prev)}
-                      className="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0"
+                      className="ui-clear-btn"
                     >
                       {showPassword ? <EyeSlash size={17} /> : <Eye size={17} />}
                     </button>
@@ -427,7 +427,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
               {/* Inline Password Error micro-banner */}
               {hasPasswordError && (
-                <div className="px-3.5 py-2 bg-rose-500/5 flex items-center justify-between text-[11px] text-rose-600 dark:text-rose-400 font-medium animate-scale-in">
+                <div className="px-3.5 py-2 bg-negative-solid/5 flex items-center justify-between text-caption text-negative font-medium animate-scale-in">
                   <div className="flex items-center gap-1.5">
                     <WarningCircle size={13} weight="bold" className="shrink-0" />
                     <span>Fel lösenord. Kontrollera och försök igen.</span>
@@ -454,7 +454,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     setView('forgot_password');
                     handleReset();
                   }}
-                  className="text-[11px] font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                  className="text-caption font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                 >
                   Glömt lösenord?
                 </button>

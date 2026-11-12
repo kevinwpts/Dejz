@@ -37,7 +37,7 @@ export const BankSummaryStep: React.FC<{
     className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${animClass}`}
   >
     <div className="shrink-0 pt-6 pb-4">
-      <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+      <h1 className="ui-step-title">
         {title}
       </h1>
       <p className="mt-1.5 text-sm text-[var(--text-secondary)]">{subtitle}</p>
@@ -68,7 +68,7 @@ export const BankSummaryStep: React.FC<{
         type="button"
         onClick={onConfirm}
         disabled={loading}
-        className="w-full py-3.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-default"
+        className="ui-btn-primary-flow disabled:opacity-40 disabled:cursor-default"
       >
         <span>{confirmLabel}</span>
         <Check size={16} weight="bold" />

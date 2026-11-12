@@ -58,7 +58,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                 }`}
               >
                 <Icon size={20} weight={isActive ? 'fill' : 'regular'} />
-                <span className="text-[11px] tracking-normal leading-none whitespace-nowrap">
+                <span className="text-caption tracking-normal leading-none whitespace-nowrap">
                   {tab.label}
                 </span>
               </button>

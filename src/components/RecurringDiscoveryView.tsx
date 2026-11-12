@@ -449,7 +449,7 @@ export const RecurringDiscoveryView: React.FC<RecurringDiscoveryViewProps> = ({
         </section>
       ) : (
         <section className="ui-empty-state-page">
-          <div className="w-11 h-11 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-3">
+          <div className="w-11 h-11 rounded-full bg-positive-solid/15 text-positive flex items-center justify-center mx-auto mb-3">
             <Check size={20} weight="bold" />
           </div>
           <h3 className="ui-empty-title">Inga saknade fasta poster</h3>

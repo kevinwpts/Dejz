@@ -464,7 +464,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         <div className="ui-card-p">
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0 flex-1">
-              <span className="ui-row-title text-[14px] sm:text-sm">
+              <span className="ui-row-title text-callout sm:text-sm">
                 Helghantering
               </span>
               <p className="ui-row-subtitle">
@@ -645,11 +645,11 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   // ==========================================
   const initialChar = (userName || userEmail || '').trim().charAt(0);
   const rowTitleClass =
-    'font-normal text-[13px] sm:text-[14px] tracking-[-0.005em] leading-[1.35] text-[var(--text-primary)] block truncate';
+    'font-normal text-footnote sm:text-callout tracking-[-0.005em] leading-[1.35] text-[var(--text-primary)] block truncate';
   const rowSubClass =
-    'font-normal text-[12px] leading-[1.35] text-[var(--text-secondary)] mt-0.5 block truncate';
+    'font-normal text-meta leading-[1.35] text-[var(--text-secondary)] mt-0.5 block truncate';
   const sectionLabelClass =
-    'px-1 pt-1.5 pb-0.5 text-[14px] sm:text-[15px] font-semibold tracking-[-0.01em] text-[var(--text-primary)] block';
+    'px-1 pt-1.5 pb-0.5 text-callout sm:text-subhead font-semibold tracking-[-0.01em] text-[var(--text-primary)] block';
 
   return (
     <div className="space-y-5 pb-40 sm:pb-44 animate-slide-in-left">

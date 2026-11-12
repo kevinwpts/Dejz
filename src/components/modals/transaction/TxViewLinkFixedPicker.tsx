@@ -100,13 +100,13 @@ export const TxViewLinkFixedPicker: React.FC<TxViewLinkFixedPickerProps> = ({
                     >
                       {item.name}
                     </span>
-                    <span className="text-[11px] text-[var(--text-secondary)] tabular-nums">
+                    <span className="text-caption text-[var(--text-secondary)] tabular-nums">
                       {formatKr(item.amount)}/mån · Den {dayNum}:e
                     </span>
                   </div>
                 </div>
                 {isMatched && (
-                  <Check size={14} weight="bold" className="text-emerald-500 shrink-0" />
+                  <Check size={14} weight="bold" className="text-positive-solid shrink-0" />
                 )}
               </button>
             );
@@ -119,7 +119,7 @@ export const TxViewLinkFixedPicker: React.FC<TxViewLinkFixedPickerProps> = ({
                 onLinkToFixed(activeTx, null, isIncome ? 'income' : 'expense');
                 navigateSubView(pickerReturnView, 'back');
               }}
-              className="ui-row-btn text-rose-500"
+              className="ui-row-btn text-negative-solid"
             >
               <span className="font-medium">Ta bort koppling till fast post</span>
             </button>

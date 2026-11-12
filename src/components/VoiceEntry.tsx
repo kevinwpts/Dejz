@@ -185,7 +185,7 @@ export const AddEntrySheet: React.FC<AddEntrySheetProps> = ({
             }}
           >
             {listening && (
-              <span className="absolute inset-0 rounded-full bg-[#5B3DF5]/40 animate-ping" />
+              <span className="absolute inset-0 rounded-full bg-brand/40 animate-ping" />
             )}
             <Microphone size={38} weight="fill" className="relative" />
           </button>

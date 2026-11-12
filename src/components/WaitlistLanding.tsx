@@ -100,7 +100,7 @@ const FAQ = [
 const ComparisonVisual: React.FC = () => (
   <div aria-hidden="true">
     {/* Dejz */}
-    <div className="rounded-container p-5 sm:p-6 text-white bg-[linear-gradient(150deg,#7356FF_0%,#5B3DF5_48%,#3F22C9_100%)] shadow-[0_18px_40px_-18px_rgba(91,61,245,0.6)]">
+    <div className="rounded-container p-5 sm:p-6 text-white bg-[image:var(--brand-gradient)] shadow-[0_18px_40px_-18px_rgba(91,61,245,0.6)]">
       <div className="flex items-center justify-between text-xs">
         <span className="inline-flex items-center gap-1.5 font-medium">
           <BrandLogo className="h-3.5" />
@@ -139,7 +139,7 @@ const SignupCta: React.FC<{
       onClick={onSignup}
       className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 h-14 px-8 rounded-pill font-display font-semibold text-base tracking-[-0.01em] active:scale-[0.98] transition-all cursor-pointer ${
         onDark
-          ? 'bg-white text-[#3F22C9] hover:bg-white/90'
+          ? 'bg-white text-brand-deep hover:bg-white/90'
           : 'bg-[var(--accent-color)] text-[var(--on-accent)] hover:opacity-90 shadow-[0_12px_30px_-12px_rgba(91,61,245,0.6)]'
       }`}
     >
@@ -299,7 +299,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
         </section>
 
         {/* Avslutande CTA */}
-        <section className="relative overflow-hidden mt-24 sm:mt-32 rounded-container text-white px-6 py-12 sm:px-12 sm:py-16 text-center bg-[radial-gradient(120%_90%_at_100%_0%,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0)_55%),radial-gradient(80%_70%_at_0%_100%,rgba(255,140,210,0.3)_0%,rgba(255,140,210,0)_60%),linear-gradient(150deg,#7356FF_0%,#5B3DF5_48%,#3F22C9_100%)] shadow-[0_24px_60px_-24px_rgba(91,61,245,0.7)]">
+        <section className="relative overflow-hidden mt-24 sm:mt-32 rounded-container text-white px-6 py-12 sm:px-12 sm:py-16 text-center bg-[radial-gradient(120%_90%_at_100%_0%,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0)_55%),radial-gradient(80%_70%_at_0%_100%,rgba(255,140,210,0.3)_0%,rgba(255,140,210,0)_60%),var(--brand-gradient)] shadow-[0_24px_60px_-24px_rgba(91,61,245,0.7)]">
           <h2 className="font-display font-semibold text-[1.875rem] leading-[1.08] sm:text-[2.5rem] tracking-[-0.04em] text-balance">
             Se vad du har kvar till nästa lön.
           </h2>

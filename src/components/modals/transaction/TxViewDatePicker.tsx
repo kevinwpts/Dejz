@@ -131,7 +131,7 @@ export const TxViewDatePicker: React.FC<TxViewDatePickerProps> = ({
                         {p.label}
                       </span>
                       <span
-                        className={`text-[11px] block truncate mt-0.5 tabular-nums ${
+                        className={`text-caption block truncate mt-0.5 tabular-nums ${
                           isSel ? 'opacity-80' : 'text-[var(--text-muted)]'
                         }`}
                       >
@@ -180,7 +180,7 @@ export const TxViewDatePicker: React.FC<TxViewDatePickerProps> = ({
                   {['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'].map((w) => (
                     <span
                       key={w}
-                      className="text-[10px] font-medium text-[var(--text-muted)] py-0.5"
+                      className="text-micro font-medium text-[var(--text-muted)] py-0.5"
                     >
                       {w}
                     </span>

@@ -125,7 +125,7 @@ export const FixedViewSimilar: React.FC<FixedViewSimilarProps> = ({
                           onMarkAsFixed(tx, 'expense');
                         }}
                         title="Lägg till detta belopp som egen fast utgift"
-                        className="px-2 py-1 rounded-lg bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-primary)] flex items-center gap-1 transition-colors cursor-pointer"
+                        className="px-2 py-1 rounded-lg bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-caption font-medium text-[var(--text-primary)] flex items-center gap-1 transition-colors cursor-pointer"
                       >
                         <ArrowsClockwise size={11} weight="bold" />
                         <span>+ Fast</span>

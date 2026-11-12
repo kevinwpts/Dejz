@@ -25,7 +25,7 @@ export const OnboardingStepName: React.FC<OnboardingStepNameProps> = ({
         className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
       >
         <div className="shrink-0 pt-6 pb-4">
-          <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+          <h1 className="ui-step-title">
             Vad heter du?
           </h1>
         </div>

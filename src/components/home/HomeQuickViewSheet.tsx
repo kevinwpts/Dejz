@@ -74,7 +74,7 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
 
               if (incomes.length === 0 && extraIncomeTxs.length === 0) {
                 return (
-                  <div className="ui-list-card py-10 text-center text-[13px] text-[var(--text-secondary)]">
+                  <div className="ui-list-card py-10 text-center text-footnote text-[var(--text-secondary)]">
                     Inga inkomster
                   </div>
                 );
@@ -136,7 +136,7 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
                                 : `Den ${inc.payday || 25}:e`}
                             </span>
                             {matchedTx && (
-                              <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                              <span className="text-positive font-medium">
                                 · Utbetald
                               </span>
                             )}
@@ -256,7 +256,7 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
                               : `Den ${exp.dueDay || 28}:e`}
                           </span>
                           {matchedTx && (
-                            <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                            <span className="text-positive font-medium">
                               · Betald
                             </span>
                           )}
@@ -267,7 +267,7 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
                 })}
               </div>
             ) : (
-              <div className="ui-list-card py-10 text-center text-[13px] text-[var(--text-secondary)]">
+              <div className="ui-list-card py-10 text-center text-footnote text-[var(--text-secondary)]">
                 Inga fasta utgifter
               </div>
             ))}
@@ -276,7 +276,7 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
             (() => {
               if (variablePeriodTransactions.length === 0) {
                 return (
-                  <div className="ui-list-card py-10 text-center text-[13px] text-[var(--text-secondary)]">
+                  <div className="ui-list-card py-10 text-center text-footnote text-[var(--text-secondary)]">
                     Inga rörliga utgifter i perioden
                   </div>
                 );
@@ -315,7 +315,7 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
                           <span
                             className={`font-display font-medium tabular-nums ${
                               dayNet > 0
-                                ? 'text-emerald-600 dark:text-emerald-400'
+                                ? 'text-positive'
                                 : 'text-[var(--text-secondary)]'
                             }`}
                           >
@@ -377,14 +377,14 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
                                         <Heart
                                           size={11}
                                           weight="fill"
-                                          className="text-rose-500 shrink-0 ml-0.5"
+                                          className="text-negative-solid shrink-0 ml-0.5"
                                         />
                                       )}
                                       {tx.isWaitingForPackage && (
                                         <Package
                                           size={11}
                                           weight="fill"
-                                          className="text-amber-500 shrink-0 ml-0.5"
+                                          className="text-caution-solid shrink-0 ml-0.5"
                                         />
                                       )}
                                       {hasReceipts && (

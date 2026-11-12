@@ -310,7 +310,7 @@ export const AppTabContent: React.FC = () => {
                             </span>
                             <span
                               className={`ui-date-header-sum ${
-                                net > 0 ? 'text-emerald-600 dark:text-emerald-400' : ''
+                                net > 0 ? 'text-positive' : ''
                               }`}
                             >
                               {net > 0 ? `+${netStr}` : `−${netStr}`}
@@ -355,14 +355,14 @@ export const AppTabContent: React.FC = () => {
                                           <Heart
                                             size={11}
                                             weight="fill"
-                                            className="text-rose-500 shrink-0"
+                                            className="text-negative-solid shrink-0"
                                           />
                                         )}
                                         {tx.isWaitingForPackage && (
                                           <Package
                                             size={11}
                                             weight="fill"
-                                            className="text-amber-500 shrink-0"
+                                            className="text-caution-solid shrink-0"
                                           />
                                         )}
                                         {tx.receiptUrl && (
@@ -444,7 +444,7 @@ export const AppTabContent: React.FC = () => {
                             </span>
                             <span
                               className={`ui-date-header-sum ${
-                                net > 0 ? 'text-emerald-600 dark:text-emerald-400' : ''
+                                net > 0 ? 'text-positive' : ''
                               }`}
                             >
                               {net > 0 ? `+${netStr}` : `−${netStr}`}
@@ -459,7 +459,7 @@ export const AppTabContent: React.FC = () => {
                               return (
                                 <div
                                   key={tx.id}
-                                  className="py-3 sm:py-3.5 flex items-center justify-between gap-3.5 text-[13px] sm:text-sm"
+                                  className="py-3 sm:py-3.5 flex items-center justify-between gap-3.5 text-footnote sm:text-sm"
                                 >
                                   <button
                                     type="button"
@@ -491,14 +491,14 @@ export const AppTabContent: React.FC = () => {
                                           <Heart
                                             size={11}
                                             weight="fill"
-                                            className="text-rose-500 shrink-0"
+                                            className="text-negative-solid shrink-0"
                                           />
                                         )}
                                         {tx.isWaitingForPackage && (
                                           <Package
                                             size={11}
                                             weight="fill"
-                                            className="text-amber-500 shrink-0"
+                                            className="text-caution-solid shrink-0"
                                           />
                                         )}
                                         {tx.receiptUrl && (
@@ -530,7 +530,7 @@ export const AppTabContent: React.FC = () => {
                                       type="button"
                                       onClick={() => handleTogglePackage(tx.id, false)}
                                       title="Markera som mottaget"
-                                      className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 hover:bg-amber-500/20 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                                      className="w-8 h-8 rounded-xl bg-caution-solid/10 border border-caution-solid/20 text-caution-solid hover:bg-caution-solid/20 flex items-center justify-center transition-colors cursor-pointer shrink-0"
                                     >
                                       <Package size={14} weight="fill" />
                                     </button>
@@ -562,7 +562,7 @@ export const AppTabContent: React.FC = () => {
                             return (
                               <div
                                 key={`receipt-fix-${exp.id}`}
-                                className="py-3 sm:py-3.5 flex items-center justify-between gap-3.5 text-[13px] sm:text-sm"
+                                className="py-3 sm:py-3.5 flex items-center justify-between gap-3.5 text-footnote sm:text-sm"
                               >
                                 <button
                                   type="button"
@@ -596,7 +596,7 @@ export const AppTabContent: React.FC = () => {
                                         className="text-[var(--text-secondary)] shrink-0"
                                       />
                                       {expReceipts.length > 1 && (
-                                        <span className="text-[10px] font-bold text-[var(--text-secondary)]">
+                                        <span className="text-micro font-bold text-[var(--text-secondary)]">
                                           {expReceipts.length} st
                                         </span>
                                       )}
@@ -655,7 +655,7 @@ export const AppTabContent: React.FC = () => {
                             return (
                               <div
                                 key={`receipt-tx-${tx.id}`}
-                                className="py-3 sm:py-3.5 flex items-center justify-between gap-3.5 text-[13px] sm:text-sm"
+                                className="py-3 sm:py-3.5 flex items-center justify-between gap-3.5 text-footnote sm:text-sm"
                               >
                                 <button
                                   type="button"
@@ -687,14 +687,14 @@ export const AppTabContent: React.FC = () => {
                                         <Heart
                                           size={11}
                                           weight="fill"
-                                          className="text-rose-500 shrink-0"
+                                          className="text-negative-solid shrink-0"
                                         />
                                       )}
                                       {tx.isWaitingForPackage && (
                                         <Package
                                           size={11}
                                           weight="fill"
-                                          className="text-amber-500 shrink-0"
+                                          className="text-caution-solid shrink-0"
                                         />
                                       )}
                                       <Paperclip

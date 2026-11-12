@@ -33,14 +33,14 @@ export const AdminPanelView: React.FC<AdminPanelProps> = ({
           <button
             type="button"
             onClick={onStartCreateGoalWizard}
-            className="p-3.5 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-left flex items-center gap-2.5 transition-colors cursor-pointer"
+            className="ui-shortcut-tile"
           >
             <PiggyBank size={18} className="text-[var(--text-primary)] shrink-0" />
             <div className="min-w-0">
-              <span className="font-display font-medium text-xs text-[var(--text-primary)] block truncate">
+              <span className="ui-tile-title">
                 Skapa sparmål
               </span>
-              <span className="text-[11px] text-[var(--text-secondary)] block truncate">
+              <span className="text-caption text-[var(--text-secondary)] block truncate">
                 Testa steg 1–5
               </span>
             </div>
@@ -49,14 +49,14 @@ export const AdminPanelView: React.FC<AdminPanelProps> = ({
           <button
             type="button"
             onClick={onRestartOnboarding}
-            className="p-3.5 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-left flex items-center gap-2.5 transition-colors cursor-pointer"
+            className="ui-shortcut-tile"
           >
             <Play size={18} className="text-[var(--text-primary)] shrink-0" />
             <div className="min-w-0">
-              <span className="font-display font-medium text-xs text-[var(--text-primary)] block truncate">
+              <span className="ui-tile-title">
                 Onboarding-guide
               </span>
-              <span className="text-[11px] text-[var(--text-secondary)] block truncate">
+              <span className="text-caption text-[var(--text-secondary)] block truncate">
                 Från första steget
               </span>
             </div>
@@ -65,14 +65,14 @@ export const AdminPanelView: React.FC<AdminPanelProps> = ({
           <button
             type="button"
             onClick={onOpenPreviewFixed}
-            className="p-3.5 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-left flex items-center gap-2.5 transition-colors cursor-pointer"
+            className="ui-shortcut-tile"
           >
             <Receipt size={18} className="text-[var(--text-primary)] shrink-0" />
             <div className="min-w-0">
-              <span className="font-display font-medium text-xs text-[var(--text-primary)] block truncate">
+              <span className="ui-tile-title">
                 Fast utgift (Vy)
               </span>
-              <span className="text-[11px] text-[var(--text-secondary)] block truncate">
+              <span className="text-caption text-[var(--text-secondary)] block truncate">
                 Testa förhandsgranskning
               </span>
             </div>
@@ -81,14 +81,14 @@ export const AdminPanelView: React.FC<AdminPanelProps> = ({
           <button
             type="button"
             onClick={onOpenPreviewTransaction}
-            className="p-3.5 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-left flex items-center gap-2.5 transition-colors cursor-pointer"
+            className="ui-shortcut-tile"
           >
             <Wallet size={18} className="text-[var(--text-primary)] shrink-0" />
             <div className="min-w-0">
-              <span className="font-display font-medium text-xs text-[var(--text-primary)] block truncate">
+              <span className="ui-tile-title">
                 Transaktion (Vy)
               </span>
-              <span className="text-[11px] text-[var(--text-secondary)] block truncate">
+              <span className="text-caption text-[var(--text-secondary)] block truncate">
                 Testa förhandsgranskning
               </span>
             </div>
@@ -97,14 +97,14 @@ export const AdminPanelView: React.FC<AdminPanelProps> = ({
           <button
             type="button"
             onClick={onOpenDiscoverSubscriptions}
-            className="p-3.5 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-left flex items-center gap-2.5 transition-colors cursor-pointer"
+            className="ui-shortcut-tile"
           >
             <Sparkle size={18} className="text-[var(--text-primary)] shrink-0" />
             <div className="min-w-0">
-              <span className="font-display font-medium text-xs text-[var(--text-primary)] block truncate">
+              <span className="ui-tile-title">
                 Hitta abonnemang
               </span>
-              <span className="text-[11px] text-[var(--text-secondary)] block truncate">
+              <span className="text-caption text-[var(--text-secondary)] block truncate">
                 Skanna bankköp
               </span>
             </div>
@@ -113,14 +113,14 @@ export const AdminPanelView: React.FC<AdminPanelProps> = ({
           <button
             type="button"
             onClick={onOpenAddFixed}
-            className="p-3.5 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-left flex items-center gap-2.5 transition-colors cursor-pointer"
+            className="ui-shortcut-tile"
           >
             <Plus size={18} className="text-[var(--text-primary)] shrink-0" />
             <div className="min-w-0">
-              <span className="font-display font-medium text-xs text-[var(--text-primary)] block truncate">
+              <span className="ui-tile-title">
                 Ny fast utgift
               </span>
-              <span className="text-[11px] text-[var(--text-secondary)] block truncate">
+              <span className="text-caption text-[var(--text-secondary)] block truncate">
                 Öppna skapandevy
               </span>
             </div>
@@ -129,14 +129,14 @@ export const AdminPanelView: React.FC<AdminPanelProps> = ({
           <button
             type="button"
             onClick={onOpenAddIncome}
-            className="p-3.5 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-left flex items-center gap-2.5 transition-colors cursor-pointer"
+            className="ui-shortcut-tile"
           >
             <Plus size={18} className="text-[var(--text-primary)] shrink-0" />
             <div className="min-w-0">
-              <span className="font-display font-medium text-xs text-[var(--text-primary)] block truncate">
+              <span className="ui-tile-title">
                 Ny fast inkomst
               </span>
-              <span className="text-[11px] text-[var(--text-secondary)] block truncate">
+              <span className="text-caption text-[var(--text-secondary)] block truncate">
                 Öppna skapandevy
               </span>
             </div>
@@ -145,14 +145,14 @@ export const AdminPanelView: React.FC<AdminPanelProps> = ({
           <button
             type="button"
             onClick={onOpenAddTransaction}
-            className="p-3.5 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-left flex items-center gap-2.5 transition-colors cursor-pointer"
+            className="ui-shortcut-tile"
           >
             <Plus size={18} className="text-[var(--text-primary)] shrink-0" />
             <div className="min-w-0">
-              <span className="font-display font-medium text-xs text-[var(--text-primary)] block truncate">
+              <span className="ui-tile-title">
                 Ny transaktion
               </span>
-              <span className="text-[11px] text-[var(--text-secondary)] block truncate">
+              <span className="text-caption text-[var(--text-secondary)] block truncate">
                 Öppna skapandevy
               </span>
             </div>

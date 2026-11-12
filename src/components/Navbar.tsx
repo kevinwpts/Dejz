@@ -169,7 +169,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <CaretLeft size={20} weight="regular" />
               </button>
-              <span className="absolute left-12 right-12 text-center font-display font-semibold text-[15px] tracking-[-0.01em] text-[var(--text-primary)] truncate pointer-events-none">
+              <span className="absolute left-12 right-12 text-center font-display font-semibold text-subhead tracking-[-0.01em] text-[var(--text-primary)] truncate pointer-events-none">
                 {pageTitle}
               </span>
               <div className="w-9 shrink-0" aria-hidden="true" />
@@ -191,7 +191,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     onError={() => setImgError(true)}
                   />
                 ) : initialChar ? (
-                  <span className="font-display font-semibold text-[14px] uppercase text-[var(--text-primary)]">
+                  <span className="font-display font-semibold text-callout uppercase text-[var(--text-primary)]">
                     {initialChar}
                   </span>
                 ) : (
@@ -251,7 +251,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {hasUnreadNotifications && (
                   <span
                     aria-hidden="true"
-                    className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-[var(--bg-color)]"
+                    className="absolute top-2 right-2 w-2 h-2 rounded-full bg-negative-solid ring-2 ring-[var(--bg-color)]"
                   />
                 )}
               </button>

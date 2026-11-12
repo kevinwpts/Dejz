@@ -51,15 +51,15 @@ export const WelcomeBetaCard: React.FC = () => {
         <X size={14} weight="bold" />
       </button>
       <div className="pr-8">
-        <p className="font-display font-semibold text-[15px] text-[var(--text-primary)]">👋 Välkommen till Dejz!</p>
-        <p className="mt-1 text-[13px] leading-[1.5] text-[var(--text-secondary)] text-pretty">
+        <p className="font-display font-semibold text-subhead text-[var(--text-primary)]">👋 Välkommen till Dejz!</p>
+        <p className="mt-1 text-footnote leading-[1.5] text-[var(--text-secondary)] text-pretty">
           Dejz är nytt och jag bygger det just nu. Saknar du något eller strular något? Berätta – jag läser allt.
         </p>
       </div>
       <button
         type="button"
         onClick={() => openFeedback('idea')}
-        className="mt-3 h-10 px-4 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] text-[13px] font-semibold inline-flex items-center gap-2 active:scale-[0.97] transition-all cursor-pointer"
+        className="mt-3 h-10 px-4 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] text-footnote font-semibold inline-flex items-center gap-2 active:scale-[0.97] transition-all cursor-pointer"
       >
         <ChatTeardropText size={16} weight="bold" />
         Ge feedback

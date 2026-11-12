@@ -429,7 +429,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
               weight="duotone"
               className="text-[var(--text-secondary)] shrink-0"
             />
-            <span className="font-display font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] tabular-nums">
+            <span className="font-display font-semibold text-xs sm:text-footnote text-[var(--text-primary)] tabular-nums">
               {computedPeriod.startLabel} – {computedPeriod.endLabel}
             </span>
             <CaretDown
@@ -460,7 +460,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                   setSelectedSliceCategory(null);
                   setInspectedCategory(null);
                 }}
-                className="absolute top-3 right-1 px-2.5 py-1 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                className="absolute top-3 right-1 px-2.5 py-1 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-caption font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
               >
                 Visa alla
               </button>
@@ -530,7 +530,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                         size={22}
                       />
                     </div>
-                    <span className="text-[12px] font-medium text-[var(--text-secondary)] truncate max-w-[120px]">
+                    <span className="text-meta font-medium text-[var(--text-secondary)] truncate max-w-[120px]">
                       {activeSlice.category}
                     </span>
                     <span className="font-display font-semibold text-xl sm:text-[22px] tracking-[-0.02em] text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
@@ -539,7 +539,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                   </>
                 ) : (
                   <>
-                    <span className="text-[12px] font-normal text-[var(--text-secondary)]">
+                    <span className="text-meta font-normal text-[var(--text-secondary)]">
                       Utgifter i perioden
                     </span>
                     <span className="font-display font-[600] text-[24px] sm:text-[26px] tracking-[-0.03em] whitespace-nowrap text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
@@ -610,7 +610,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
             <span className="ui-stat-label">
               Inkomst
             </span>
-            <span className="ui-stat-value text-emerald-600 dark:text-emerald-400">
+            <span className="ui-stat-value text-positive">
               +{formatKr(periodIncomeTotal)}
             </span>
           </div>
@@ -632,7 +632,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
               className={`ui-stat-value ${
                 netSavings >= 0
                   ? 'text-[var(--text-primary)]'
-                  : 'text-rose-600 dark:text-rose-400'
+                  : 'text-negative'
               }`}
             >
               {netSavings >= 0 ? formatKr(netSavings) : formatKr(netSavings)}
@@ -689,9 +689,9 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                       <div className="flex items-center gap-2.5 shrink-0">
                         <div className="text-right">
                           <span
-                            className={`font-display font-semibold text-[15px] sm:text-[15px] tabular-nums block ${
+                            className={`font-display font-semibold text-subhead sm:text-subhead tabular-nums block ${
                               item.isIncomeCategory
-                                ? 'text-emerald-600 dark:text-emerald-400'
+                                ? 'text-positive'
                                 : 'text-[var(--text-primary)]'
                             }`}
                           >
@@ -768,7 +768,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                                     isRecurring={isSubRecurring}
                                   />
                                   <div className="min-w-0 flex-1">
-                                    <span className="ui-row-title text-[13px] sm:text-[14px]">
+                                    <span className="ui-row-title text-footnote sm:text-callout">
                                       {itemName}
                                     </span>
                                     <span className="ui-row-subtitle flex items-center gap-1.5">
@@ -785,14 +785,14 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                                         <Heart
                                           size={11}
                                           weight="fill"
-                                          className="text-rose-500 shrink-0"
+                                          className="text-negative-solid shrink-0"
                                         />
                                       )}
                                       {subItem.isWaitingForPackage && (
                                         <Package
                                           size={11}
                                           weight="fill"
-                                          className="text-amber-500 shrink-0"
+                                          className="text-caution-solid shrink-0"
                                         />
                                       )}
                                       {hasSubReceipts && (
@@ -811,8 +811,8 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                                     <span
                                       className={
                                         isIncome
-                                          ? 'ui-row-amount-income text-[14px]'
-                                          : 'ui-row-amount text-[14px]'
+                                          ? 'ui-row-amount-income text-callout'
+                                          : 'ui-row-amount text-callout'
                                       }
                                     >
                                       {isIncome
