@@ -7,7 +7,6 @@ import {
   Trash,
   Check,
   CaretRight,
-  CaretLeft,
   Paperclip,
   ClockCounterClockwise,
 } from '@phosphor-icons/react';
@@ -114,16 +113,12 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
                 }
                 navigateSubView('details', 'back');
               }}
-              title="Tillbaka"
-              aria-label="Tillbaka"
-              className="ui-icon-btn"
+              className="w-16 h-8 text-left text-[14px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
             >
-              <CaretLeft size={15} weight="bold" />
+              Avbryt
             </button>
             <span className="ui-sheet-title">Redigera fast utgift</span>
-            <button type="button" onClick={onClose} className="ui-icon-btn">
-              <X size={16} />
-            </button>
+            <div className="w-16" />
           </div>
         )}
 

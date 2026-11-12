@@ -174,3 +174,28 @@ test('hela introduktionen utan bank går att klicka igenom till hemskärmen', as
   await expect(page.getByText('Kvar att spendera').first()).toBeVisible({ timeout: 10_000 });
   expect(errors).toEqual([]);
 });
+
+test('köp: förhandsvisning är bara läsning, Redigera byter namn och Avbryt ångrar', async ({ page }) => {
+  const errors = collectErrors(page);
+  await openDemo(page);
+  await page.getByText('ICA Supermarket').first().click();
+  const sheet = page.getByRole('dialog').or(page.locator('body'));
+
+  // Namnet är text (ingen dold inmatningsruta) och det finns en tydlig Redigera-knapp
+  await expect(sheet.getByRole('heading', { name: 'ICA Supermarket' })).toBeVisible();
+  await page.getByRole('button', { name: 'Redigera', exact: true }).click();
+  await expect(page.getByText('Redigera köp')).toBeVisible();
+
+  // Avbryt: ändringen syns inte
+  await page.getByPlaceholder('Butik eller köp').fill('Ska inte sparas');
+  await page.getByRole('button', { name: 'Avbryt', exact: true }).click();
+  await expect(sheet.getByRole('heading', { name: 'ICA Supermarket' })).toBeVisible();
+
+  // Spara: nya namnet syns
+  await page.getByRole('button', { name: 'Redigera', exact: true }).click();
+  await page.getByPlaceholder('Butik eller köp').fill('ICA Kvantum');
+  await page.getByRole('button', { name: 'Spara ändringar' }).click();
+  await page.getByRole('button', { name: 'Bara det här köpet' }).click();
+  await expect(sheet.getByRole('heading', { name: 'ICA Kvantum' })).toBeVisible();
+  expect(errors).toEqual([]);
+});

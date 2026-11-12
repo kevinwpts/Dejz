@@ -486,6 +486,21 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     navigateSubView('details', 'back');
   };
 
+  // Avbryt redigering: släng osparade ändringar och visa köpet som det var
+  const handleCancelEdit = () => {
+    if (activeTx) {
+      setTitle(activeTx.title || '');
+      setAmount(activeTx.amount);
+      setDate(activeTx.date || '');
+      setCategory(
+        normalizeCategoryToValid(activeTx.category || (isIncome ? 'Lön' : 'Övrigt'), isIncome ? 'income' : 'expense')
+      );
+      setPaymentMethod(getDefaultPaymentMethodForTx(activeTx));
+    }
+    setShowSimilarPopup(false);
+    navigateSubView('details', 'back');
+  };
+
   const handleSaveEditClick = () => {
     if (isCreateMode || !activeTx) return;
     const nextTitle = title.trim() || activeTx.title;
@@ -722,13 +737,10 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         title={title}
         setLogoPrefTick={setLogoPrefTick}
         recurringStatus={recurringStatus}
-        setTitle={setTitle}
         onUpdate={onUpdate}
-        defaultCleanBankTitle={defaultCleanBankTitle}
         isBankSynced={isBankSynced}
         formatKr={formatKr}
         amount={amount}
-        setAmount={setAmount}
         txTime={txTime}
         navigateSubView={navigateSubView}
         date={date}
@@ -793,6 +805,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         fileInputRef={fileInputRef}
         handleCreateSave={handleCreateSave}
         handleSaveEditClick={handleSaveEditClick}
+        handleCancelEdit={handleCancelEdit}
         onDelete={onDelete}
         setShowDeleteConfirm={setShowDeleteConfirm}
         showDeleteConfirm={showDeleteConfirm}
@@ -837,9 +850,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                         ? 'Byt namn på Swish?'
                         : isAggregatorTx
                         ? 'Ändra namn på köpet?'
-                        : 'Byt namn bakåt och framåt i tiden?'
-                      : 'Byt kategori bakåt och framåt i tiden?'}
+                        : 'Ändra namnet på fler köp?'
+                      : 'Ändra kategorin på fler köp?'}
                   </h3>
+                  {!activeSwishPhone && !(isTitleChanged && isAggregatorTx) && (
+                    <p className="mt-1 text-xs text-[var(--text-secondary)]">
+                      Välj du flera gäller det även nya köp som kommer in.
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2 pt-1">
@@ -850,7 +868,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                         onClick={() => commitEditChanges('single')}
                         className="w-full py-2.5 px-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
                       >
-                        Endast denna Swish-händelse
+                        Bara den här Swishen
                       </button>
 
                       <button
@@ -868,7 +886,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                         onClick={() => commitEditChanges('single')}
                         className="w-full py-2.5 px-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
                       >
-                        Endast detta köp (rekommenderas)
+                        Bara det här köpet (rekommenderas)
                       </button>
 
                       <button
@@ -876,7 +894,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                         onClick={() => commitEditChanges('chain')}
                         className="w-full py-2.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] transition-all cursor-pointer"
                       >
-                        Byt bakåt och framåt i tiden
+                        Alla liknande köp ({similarInfo.transactions.length} st)
                       </button>
                     </>
                   ) : hasDistinctChainVsStore ? (
@@ -886,7 +904,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                         onClick={() => commitEditChanges('same-merchant')}
                         className="w-full py-2.5 px-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
                       >
-                        Byt för {bankOriginLabel} ({similarInfo.sameMerchantTransactions.length} st + framtida)
+                        Alla från {bankOriginLabel} ({similarInfo.sameMerchantTransactions.length} st)
                       </button>
 
                       <button
@@ -894,7 +912,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                         onClick={() => commitEditChanges('chain')}
                         className="w-full py-2.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] transition-all cursor-pointer"
                       >
-                        Byt för hela kedjan {similarInfo.brandLabel} ({similarInfo.transactions.length} st)
+                        Hela {similarInfo.brandLabel}-kedjan ({similarInfo.transactions.length} st)
                       </button>
 
                       <button
@@ -902,7 +920,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                         onClick={() => commitEditChanges('single')}
                         className="w-full py-2.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] transition-all cursor-pointer"
                       >
-                        Endast detta köp
+                        Bara det här köpet
                       </button>
                     </>
                   ) : (
@@ -912,7 +930,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                         onClick={() => commitEditChanges('chain')}
                         className="w-full py-2.5 px-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
                       >
-                        Byt bakåt och framåt i tiden
+                        Alla liknande köp ({similarInfo.transactions.length} st)
                       </button>
 
                       <button
@@ -920,7 +938,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                         onClick={() => commitEditChanges('single')}
                         className="w-full py-2.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] transition-all cursor-pointer"
                       >
-                        Endast detta köp
+                        Bara det här köpet
                       </button>
                     </>
                   )}

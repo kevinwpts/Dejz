@@ -10,6 +10,7 @@ import {
   Trash,
   ArrowsClockwise,
   CaretRight,
+  PencilSimple,
   ClockCounterClockwise,
   Sparkle,
   Plus,
@@ -44,13 +45,10 @@ export interface TxViewDetailsProps {
   title: string;
   setLogoPrefTick: (value: SetStateAction<number>) => void;
   recurringStatus: RecurringMatchResult;
-  setTitle: (value: SetStateAction<string>) => void;
   onUpdate: (tx: TransactionItem, applyToSimilarIds?: string[], options?: { renameScope?: "single" | "same-merchant" | "chain"; renameTargetIds?: string[]; categoryTargetIds?: string[]; }) => void;
-  defaultCleanBankTitle: string;
   isBankSynced: boolean;
   formatKr: (val: number) => string;
   amount: string | number;
-  setAmount: (value: SetStateAction<string | number>) => void;
   txTime: string;
   navigateSubView: (next: ModalSubView, dir?: "forward" | "back") => void;
   date: string;
@@ -93,13 +91,10 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
   title,
   setLogoPrefTick,
   recurringStatus,
-  setTitle,
   onUpdate,
-  defaultCleanBankTitle,
   isBankSynced,
   formatKr,
   amount,
-  setAmount,
   txTime,
   navigateSubView,
   date,
@@ -172,7 +167,16 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
           <div className="flex items-center gap-1.5">
             <button
               type="button"
+              onClick={() => navigateSubView('edit', 'forward')}
+              className="h-8 px-3.5 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[13px] font-semibold text-[var(--text-primary)] inline-flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+            >
+              <PencilSimple size={14} weight="bold" />
+              Redigera
+            </button>
+            <button
+              type="button"
               onClick={onClose}
+              aria-label="Stäng"
               className="ui-icon-btn"
             >
               <X size={16} />
@@ -180,7 +184,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
           </div>
         </div>
 
-        {/* Hero Receipt Header (Direkt redigerbar) */}
+        {/* Kvitto-huvud: bara läsning. Ändringar görs via Redigera eller raderna nedan. */}
         <div className="ui-hero-header relative overflow-hidden pt-5 mb-5 pb-5">
           {(() => {
             void logoPrefTick;
@@ -220,136 +224,45 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
             );
           })()}
 
-          <div className="flex items-center justify-center gap-1.5 px-3 max-w-md mx-auto">
-            <input
-              type="text"
-              spellCheck={false}
-              autoCorrect="off"
-              value={title}
-              onChange={(e) => {
-                const nextTitle = e.target.value;
-                setTitle(nextTitle);
-                if (activeTx && onUpdate) {
-                  onUpdate({ ...activeTx, title: nextTitle.trim() || activeTx.title });
-                }
-              }}
-              className="font-display font-semibold text-base sm:text-lg text-[var(--text-primary)] text-center bg-transparent border-0 focus:outline-none focus:ring-0 transition-colors w-full p-0"
-              placeholder="Transaktionens namn"
+          {/* Namnet är text – tryck för att ändra (öppnar redigering, som i Revolut/Monzo) */}
+          <button
+            type="button"
+            onClick={() => navigateSubView('edit', 'forward')}
+            className="group flex items-center justify-center gap-1.5 px-3 max-w-md mx-auto cursor-pointer"
+            aria-label={`Byt namn på ${title || activeTx.title}`}
+          >
+            <h2 className="font-display font-semibold text-base sm:text-lg text-[var(--text-primary)] text-center truncate">
+              {title || activeTx.title}
+            </h2>
+            <PencilSimple
+              size={14}
+              weight="bold"
+              className="shrink-0 text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
             />
-            {(() => {
-              const canResetTitle =
-                Boolean(defaultCleanBankTitle) &&
-                title.trim().toLowerCase() !== defaultCleanBankTitle.trim().toLowerCase();
-              if (!canResetTitle) return null;
-              return (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setTitle(defaultCleanBankTitle);
-                    if (activeTx && onUpdate) {
-                      onUpdate({ ...activeTx, title: defaultCleanBankTitle });
-                    }
-                  }}
-                  title={`Återställ till ursprungsnamn (${defaultCleanBankTitle})`}
-                  aria-label={`Återställ till ursprungsnamn (${defaultCleanBankTitle})`}
-                  className="w-7 h-7 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 transition-all cursor-pointer shrink-0"
-                >
-                  <ClockCounterClockwise size={13} weight="bold" />
-                </button>
-              );
-            })()}
+          </button>
+
+          <div
+            className={`mt-1 font-display font-bold tabular-nums text-2xl sm:text-3xl ${
+              isIncome ? 'text-emerald-500' : 'text-[var(--text-primary)]'
+            }`}
+          >
+            {isIncome ? '+' : '−'}
+            {formatKr(Number(amount) || activeTx.amount)}
           </div>
 
-          {isBankSynced ? (
-            <div
-              className={`mt-1 font-display font-bold tabular-nums text-2xl sm:text-3xl ${
-                isIncome ? 'text-emerald-500' : 'text-[var(--text-primary)]'
-              }`}
-            >
-              {isIncome ? '+' : '−'}
-              {formatKr(activeTx.amount)}
-            </div>
-          ) : (
-            <div
-              className={`mt-1 flex items-baseline justify-center ${
-                isIncome ? 'ui-hero-amount-income' : 'ui-hero-amount'
-              }`}
-            >
-              <span className="font-display font-bold text-2xl sm:text-3xl mr-0.5">
-                {isIncome ? '+' : '−'}
-              </span>
-              {/* Rutan blir exakt lika bred som siffrorna (en osynlig kopia bestämmer bredden),
-                  så att tecknet sitter ihop med beloppet */}
-              <span className="relative inline-block">
-                <span
-                  aria-hidden="true"
-                  className="invisible whitespace-pre font-display font-bold text-2xl sm:text-3xl tracking-[-0.02em]"
-                >
-                  {amount || '0'}
-                </span>
-              <input
-                type="text"
-                inputMode="numeric"
-                spellCheck={false}
-                value={amount}
-                onChange={(e) => {
-                  const cleaned = e.target.value.replace(/[^\d]/g, '');
-                  setAmount(cleaned);
-                  const num = Number(cleaned);
-                  if (num > 0 && activeTx && onUpdate) {
-                    onUpdate({ ...activeTx, amount: num });
-                  }
-                }}
-                className={`absolute inset-0 w-full min-w-0 bg-transparent border-0 focus:outline-none focus:ring-0 text-left font-display font-bold text-2xl sm:text-3xl tracking-[-0.02em] p-0 ${
-                  isIncome ? 'text-emerald-500' : 'text-[var(--text-primary)]'
-                }`}
-                placeholder="0"
-              />
-              </span>
-              <span className="ml-1.5 font-display font-medium text-base text-[var(--text-secondary)]">
-                kr
-              </span>
-            </div>
-          )}
-
-          {isBankSynced ? (
-            <p className="text-xs text-[var(--text-secondary)] tabular-nums mt-1.5 flex items-center justify-center gap-1">
-              <span>{formatSwedishDateHeading(activeTx.date)}</span>
-              {activeTx.bookingStatus === 'PDNG' || activeTx.bookingStatus === 'HOLD'
-                ? ' · Reserverat'
-                : txTime
-                ? ` · ${txTime}`
-                : ''}
-            </p>
-          ) : (
-            <button
-              type="button"
-              onClick={() => navigateSubView('date-picker', 'forward')}
-              className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] tabular-nums mt-1.5 transition-colors cursor-pointer inline-flex items-center gap-1"
-            >
-              <span>{formatSwedishDateHeading(date || activeTx.date)}</span>
-              <CaretRight size={11} className="text-[var(--text-muted)]" />
-            </button>
-          )}
+          <p className="text-xs text-[var(--text-secondary)] tabular-nums mt-1.5">
+            {formatSwedishDateHeading(isBankSynced ? activeTx.date : date || activeTx.date)}
+            {activeTx.bookingStatus === 'PDNG' || activeTx.bookingStatus === 'HOLD'
+              ? ' · Reserverat'
+              : txTime
+              ? ` · ${txTime}`
+              : ''}
+          </p>
         </div>
 
         <div className="space-y-3.5">
           {/* 1. Kompakta snabbåtgärder (Apple Wallet / Revolut-stil) */}
-          <div className="grid grid-cols-4 gap-2">
-            {/* Kategori (Dela med Swish är borttaget för att hålla appen enkel) */}
-              <button
-                type="button"
-                onClick={() => navigateSubView('category-picker', 'forward')}
-                className="p-2.5 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer text-center group"
-              >
-                <div className="w-8 h-8 rounded-full bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] group-hover:scale-105 transition-transform">
-                  <CategoryIcon category={category || activeTx.category} size={16} />
-                </div>
-                <span className="text-[11px] font-medium text-[var(--text-primary)] truncate max-w-full">
-                  Kategori
-                </span>
-              </button>
-
+          <div className="grid grid-cols-3 gap-2">
             <button
               type="button"
               onClick={() => {

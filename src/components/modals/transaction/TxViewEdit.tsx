@@ -7,7 +7,6 @@ import {
   Paperclip,
   Trash,
   CaretRight,
-  CaretLeft,
   Check,
   ClockCounterClockwise,
   CalendarBlank,
@@ -53,6 +52,7 @@ export interface TxViewEditProps {
   fileInputRef: MutableRefObject<HTMLInputElement>;
   handleCreateSave: () => void;
   handleSaveEditClick: () => void;
+  handleCancelEdit: () => void;
   onDelete: (id: string) => void;
   setShowDeleteConfirm: (value: SetStateAction<boolean>) => void;
   showDeleteConfirm: boolean;
@@ -92,6 +92,7 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
   fileInputRef,
   handleCreateSave,
   handleSaveEditClick,
+  handleCancelEdit,
   onDelete,
   setShowDeleteConfirm,
   showDeleteConfirm,
@@ -104,26 +105,26 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
           {!isCreateMode ? (
             <button
               type="button"
-              onClick={() => navigateSubView('details', 'back')}
-              title="Tillbaka"
-              aria-label="Tillbaka"
-              className="ui-icon-btn"
+              onClick={handleCancelEdit}
+              className="w-16 h-8 text-left text-[14px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
             >
-              <CaretLeft size={15} weight="bold" />
+              Avbryt
             </button>
           ) : (
-            <div className="w-8" />
+            <div className="w-16" />
           )}
           <span className="ui-sheet-title">
-            {isCreateMode ? 'Lägg till händelse' : 'Redigera händelse'}
+            {isCreateMode ? 'Lägg till händelse' : isIncome ? 'Redigera inkomst' : 'Redigera köp'}
           </span>
-          <button
-            type="button"
-            onClick={onClose}
-            className="ui-icon-btn"
-          >
-            <X size={16} />
-          </button>
+          {isCreateMode ? (
+            <div className="w-16 flex justify-end">
+              <button type="button" onClick={onClose} aria-label="Stäng" className="ui-icon-btn">
+                <X size={16} />
+              </button>
+            </div>
+          ) : (
+            <div className="w-16" />
+          )}
         </div>
 
         {isCreateMode && (

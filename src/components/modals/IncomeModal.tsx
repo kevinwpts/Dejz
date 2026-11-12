@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   X,
+  PencilSimple,
   Trash,
   Check,
   CaretRight,
@@ -24,7 +25,6 @@ import {
 } from '../../utils/appCache';
 import {
   inferCategoryAndMethodFromName,
-  cleanDisplayMerchantName,
 } from '../../utils/bankHistoryAnalyzer';
 import {
   isMerchantCategoryIconPreferred,
@@ -204,6 +204,17 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
       });
     }
     onClose();
+  };
+
+  // Avbryt redigering: släng osparade ändringar
+  const handleCancelEdit = () => {
+    if (activeIncome) {
+      setName(activeIncome.name);
+      setAmount(activeIncome.amount);
+      setPayday(activeIncome.payday);
+      setCategory(activeIncome.category);
+    }
+    navigateSubView('details', 'back');
   };
 
   const handleDelete = () => {
@@ -421,14 +432,28 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
       {/* ============================================================== */}
       {/* SUB-VIEW 4: LÄGG TILL NY INKOMST                               */}
       {/* ============================================================== */}
-      {subView === 'edit' && isCreateMode && (
+      {subView === 'edit' && (
         <div className={`${slideAnimClass} space-y-4`}>
-          <div className="ui-sheet-header">
-            <span className="ui-sheet-title">Lägg till inkomst</span>
-            <button type="button" onClick={onClose} className="ui-icon-btn">
-              <X size={16} />
-            </button>
-          </div>
+          {isCreateMode ? (
+            <div className="ui-sheet-header">
+              <span className="ui-sheet-title">Lägg till inkomst</span>
+              <button type="button" onClick={onClose} className="ui-icon-btn">
+                <X size={16} />
+              </button>
+            </div>
+          ) : (
+            <div className="ui-sheet-sub-header">
+              <button
+                type="button"
+                onClick={handleCancelEdit}
+                className="w-16 h-8 text-left text-[14px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+              >
+                Avbryt
+              </button>
+              <span className="ui-sheet-title">Redigera inkomst</span>
+              <div className="w-16" />
+            </div>
+          )}
 
           {/* Stort och tydligt inmatningskort för Namn + Belopp med live-logga */}
           <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-3.5">
@@ -448,12 +473,13 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
                     type="text"
                     spellCheck={false}
                     autoCorrect="off"
-                    autoFocus
+                    autoFocus={isCreateMode}
                     placeholder="Inkomstkälla"
                     value={name}
                     onChange={(e) => {
                       const nextName = e.target.value;
                       setName(nextName);
+                      if (!isCreateMode) return;
                       const inferred = inferCategoryAndMethodFromName(nextName, 'income');
                       if (inferred?.category) {
                         setCategory(inferred.category);
@@ -517,12 +543,19 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
           <div className="space-y-2.5">
             <button
               type="button"
-              onClick={handleCreateSave}
+              onClick={() => {
+                if (isCreateMode) {
+                  handleCreateSave();
+                } else {
+                  commitInlineChanges();
+                  navigateSubView('details', 'back');
+                }
+              }}
               disabled={!name.trim() || !(Number(amount) > 0)}
               className="ui-btn-primary"
             >
               <Check size={14} weight="bold" />
-              <span>Spara inkomst</span>
+              <span>{isCreateMode ? 'Spara inkomst' : 'Spara ändringar'}</span>
             </button>
           </div>
         </div>
@@ -536,13 +569,21 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
           <div className="ui-sheet-header !mb-0">
             <span className="ui-sheet-title">Fast inkomst</span>
             <div className="flex items-center gap-1.5">
-              <button type="button" onClick={onClose} className="ui-icon-btn">
+              <button
+                type="button"
+                onClick={() => navigateSubView('edit', 'forward')}
+                className="h-8 px-3.5 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[13px] font-semibold text-[var(--text-primary)] inline-flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+              >
+                <PencilSimple size={14} weight="bold" />
+                Redigera
+              </button>
+              <button type="button" onClick={onClose} aria-label="Stäng" className="ui-icon-btn">
                 <X size={16} />
               </button>
             </div>
           </div>
 
-          {/* Hero Receipt Header (Direkt redigerbar, samma design som Fast utgift & Transaktion) */}
+          {/* Kvitto-huvud: bara läsning. Ändringar görs via Redigera eller raderna nedan. */}
           <div className="ui-hero-header relative overflow-hidden pt-5 mb-5 pb-5">
             <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 w-44 h-32 rounded-full bg-emerald-500 blur-2xl opacity-15 dark:opacity-20" />
             <div className="relative flex justify-center mb-3.5">
@@ -576,87 +617,31 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
               })()}
             </div>
 
-            <div className="flex items-center justify-center gap-1.5 px-3 max-w-md mx-auto">
-              <input
-                type="text"
-                spellCheck={false}
-                autoCorrect="off"
-                value={name}
-                onChange={(e) => {
-                  const nextName = e.target.value;
-                  setName(nextName);
-                  commitInlineChanges({ name: nextName });
-                }}
-                className="font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] text-center bg-transparent border-0 focus:outline-none focus:ring-0 transition-colors w-full p-0"
-                placeholder="Inkomstkälla"
-              />
-              {(() => {
-                const rawOrig = (activeIncome?.originalName || '').trim();
-                const cleanedOrig = rawOrig ? cleanDisplayMerchantName(rawOrig) : '';
-                const originalDisplayName =
-                  cleanedOrig && cleanedOrig !== 'Banktransaktion' ? cleanedOrig : rawOrig;
-                const canResetName =
-                  Boolean(originalDisplayName) &&
-                  name.trim().toLowerCase() !== originalDisplayName.toLowerCase();
-                if (!canResetName) return null;
-                return (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setName(originalDisplayName);
-                      commitInlineChanges({ name: originalDisplayName });
-                    }}
-                    title={`Återställ till ursprungsnamn (${originalDisplayName})`}
-                    aria-label={`Återställ till ursprungsnamn (${originalDisplayName})`}
-                    className="w-7 h-7 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 transition-all cursor-pointer shrink-0"
-                  >
-                    <ClockCounterClockwise size={13} weight="bold" />
-                  </button>
-                );
-              })()}
-            </div>
-
-            <div className="mt-1 flex items-baseline justify-center">
-              <span className="font-display font-bold text-2xl sm:text-3xl text-emerald-600 dark:text-emerald-400 mr-0.5">
-                +
-              </span>
-              <span className="relative inline-block">
-                <span
-                  aria-hidden="true"
-                  className="invisible whitespace-pre font-display font-bold text-2xl sm:text-3xl tracking-[-0.02em]"
-                >
-                  {amount || '0'}
-                </span>
-              <input
-                type="text"
-                inputMode="numeric"
-                spellCheck={false}
-                value={amount}
-                onChange={(e) => {
-                  const cleaned = e.target.value.replace(/[^\d]/g, '');
-                  setAmount(cleaned);
-                  const num = Number(cleaned);
-                  if (num > 0) {
-                    commitInlineChanges({ amount: num });
-                  }
-                }}
-                className="absolute inset-0 w-full min-w-0 bg-transparent border-0 focus:outline-none focus:ring-0 text-left font-display font-bold text-2xl sm:text-3xl tracking-[-0.02em] p-0 text-emerald-600 dark:text-emerald-400"
-                placeholder="0"
-              />
-              </span>
-              <span className="ml-1.5 font-display font-medium text-base text-emerald-600/70 dark:text-emerald-400/70">
-                kr/mån
-              </span>
-            </div>
-
+            {/* Namnet är text – tryck för att ändra (öppnar redigering) */}
             <button
               type="button"
-              onClick={() => navigateSubView('day-picker', 'forward')}
-              className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] tabular-nums mt-1.5 transition-colors cursor-pointer inline-flex items-center gap-1"
+              onClick={() => navigateSubView('edit', 'forward')}
+              className="group flex items-center justify-center gap-1.5 px-3 max-w-md mx-auto cursor-pointer"
+              aria-label={`Byt namn på ${name || displayName}`}
             >
-              <span>Utbetalas den {payday}:e varje månad</span>
-              <CaretRight size={11} className="text-[var(--text-muted)]" />
+              <h2 className="font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] text-center truncate">
+                {name || displayName}
+              </h2>
+              <PencilSimple
+                size={14}
+                weight="bold"
+                className="shrink-0 text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
+              />
             </button>
+
+            <div className="mt-1 flex items-baseline justify-center font-display font-bold text-2xl sm:text-3xl text-emerald-600 dark:text-emerald-400 tabular-nums">
+              +{formatKr(Number(amount) || 0)}
+              <span className="ml-1.5 font-display font-medium text-base text-emerald-600/70 dark:text-emerald-400/70">/mån</span>
+            </div>
+
+            <p className="text-xs text-[var(--text-secondary)] tabular-nums mt-1.5">
+              Utbetalas den {payday}:e varje månad
+            </p>
           </div>
 
           <div className="space-y-3.5">
