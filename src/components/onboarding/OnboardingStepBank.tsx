@@ -10,7 +10,7 @@ import {
   WarningCircle,
 } from '@phosphor-icons/react';
 import { BankAspsp, BankConnection, BankAccount } from '../../services/bank/types';
-import { ItemLogo } from '../ItemLogo';
+import { BankLogo } from '../BankLogo';
 import { OnboardingStep, POPULAR_SWEDISH_BANKS } from './onboardingConfig';
 
 export interface OnboardingStepBankProps {
@@ -195,7 +195,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                     <div key={conn.id} className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="relative shrink-0">
-                          <ItemLogo name={conn.aspsp_name} logoUrl={conn.aspsp_logo || undefined} size="md" />
+                          <BankLogo name={conn.aspsp_name} />
                           <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-positive-solid border-2 border-[var(--surface-color)]" />
                         </div>
                         <div className="min-w-0">
@@ -262,7 +262,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                               type="button"
                               disabled={isAnyConnecting}
                               onClick={() => handleSelectBankInline(b)}
-                              className={`p-2.5 sm:p-3 rounded-card-nested shadow-[var(--card-shadow)] flex flex-col items-center justify-center gap-1.5 sm:gap-2 transition-all duration-150 active:scale-95 cursor-pointer group ${
+                              className={`px-1.5 py-3 sm:p-3 rounded-card-nested shadow-[var(--card-shadow)] flex flex-col items-center justify-center gap-1.5 sm:gap-2 transition-all duration-150 active:scale-95 cursor-pointer group ${
                                 isConnecting
                                   ? 'bg-[var(--text-primary)] text-[var(--bg-color)] scale-[0.98]'
                                   : isAnyConnecting
@@ -274,7 +274,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                                 {isConnecting ? (
                                   <SpinnerGap size={24} className="animate-spin text-[var(--bg-color)]" />
                                 ) : (
-                                  <ItemLogo name={b.name} logoUrl={b.logo || undefined} size="lg" />
+                                  <BankLogo name={b.name} size="lg" />
                                 )}
                               </div>
                               <span className="font-display font-semibold text-caption sm:text-meta text-center truncate max-w-full leading-tight">
@@ -304,7 +304,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                             type="button"
                             disabled={isAnyConnecting}
                             onClick={() => handleSelectBankInline(b)}
-                            className={`p-2.5 sm:p-3 rounded-card-nested shadow-[var(--card-shadow)] flex flex-col items-center justify-center gap-1.5 sm:gap-2 transition-all duration-150 active:scale-95 cursor-pointer group ${
+                            className={`px-1.5 py-3 sm:p-3 rounded-card-nested shadow-[var(--card-shadow)] flex flex-col items-center justify-center gap-1.5 sm:gap-2 transition-all duration-150 active:scale-95 cursor-pointer group ${
                               isConnecting
                                 ? 'bg-[var(--text-primary)] text-[var(--bg-color)] scale-[0.98]'
                                 : isAnyConnecting
@@ -316,7 +316,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                               {isConnecting ? (
                                 <SpinnerGap size={24} className="animate-spin text-[var(--bg-color)]" />
                               ) : (
-                                <ItemLogo name={b.displayName} size="lg" />
+                                <BankLogo name={b.name} size="lg" />
                               )}
                             </div>
                             <span className="font-display font-semibold text-caption sm:text-meta text-center truncate max-w-full leading-tight">

@@ -18,6 +18,38 @@ const OPEN_PRIVACY_EVENT = 'dejz-open-privacy';
 
 /* --------------------------- Telefonram --------------------------- */
 
+/** Statusraden (klocka, Dynamic Island, signal/batteri) ritas som SVG så att den skalar med ramen.
+ *  Skärmbilderna saknar statusrad – utan den hamnade ön ovanpå appens huvud. */
+const StatusBar: React.FC = () => (
+  <svg viewBox="0 0 390 50" className="block w-full h-auto shrink-0" aria-hidden="true">
+    <text
+      x="52"
+      y="32"
+      textAnchor="middle"
+      fontFamily="Inter, system-ui, sans-serif"
+      fontSize="16"
+      fontWeight="600"
+      fill="#16141F"
+    >
+      18:30
+    </text>
+    <rect x="132" y="11" width="126" height="35" rx="17.5" fill="#0A0A0A" />
+    {/* Signal */}
+    <rect x="290" y="27" width="3.2" height="5" rx="1" fill="#16141F" />
+    <rect x="295" y="25" width="3.2" height="7" rx="1" fill="#16141F" />
+    <rect x="300" y="22.5" width="3.2" height="9.5" rx="1" fill="#16141F" />
+    <rect x="305" y="20" width="3.2" height="12" rx="1" fill="#16141F" />
+    {/* Wi-Fi */}
+    <path d="M319 24.2a10 10 0 0 1 13 0" stroke="#16141F" strokeWidth="2.1" fill="none" strokeLinecap="round" />
+    <path d="M321.6 27.4a6 6 0 0 1 7.8 0" stroke="#16141F" strokeWidth="2.1" fill="none" strokeLinecap="round" />
+    <circle cx="325.5" cy="30.6" r="1.6" fill="#16141F" />
+    {/* Batteri */}
+    <rect x="339" y="20.5" width="24" height="12" rx="3.5" stroke="#16141F" strokeOpacity="0.4" fill="none" />
+    <rect x="341" y="22.5" width="17" height="8" rx="2" fill="#16141F" />
+    <rect x="364.5" y="24.5" width="1.6" height="4" rx="0.8" fill="#16141F" fillOpacity="0.4" />
+  </svg>
+);
+
 const PhoneFrame: React.FC<{
   src: string;
   alt: string;
@@ -27,7 +59,9 @@ const PhoneFrame: React.FC<{
   <div
     className={`relative rounded-[2.6rem] bg-neutral-950 p-[4px] shadow-[0_30px_80px_-20px_rgba(0,0,0,0.35)] ring-1 ring-black/10 ${className}`}
   >
-    <div className="relative overflow-hidden rounded-[2.35rem] bg-[var(--bg-color)]">
+    {/* Skärmen: statusrad överst, sedan appen. Bakgrunden är appens ljusa bakgrund (skärmbilderna är ljusa). */}
+    <div className="relative overflow-hidden rounded-[2.35rem] bg-[#F5F4FA] aspect-[1170/2532] flex flex-col">
+      <StatusBar />
       <img
         src={src}
         alt={alt}
@@ -35,10 +69,8 @@ const PhoneFrame: React.FC<{
         height={2532}
         loading={eager ? 'eager' : 'lazy'}
         decoding="async"
-        className="block w-full h-auto"
+        className="block w-full flex-1 min-h-0 object-contain object-top"
       />
-      {/* Dynamic Island */}
-      <span className="absolute top-[2.2%] left-1/2 -translate-x-1/2 h-[3.3%] w-[30%] rounded-pill bg-neutral-950" />
     </div>
   </div>
 );
@@ -47,22 +79,22 @@ const PhoneFrame: React.FC<{
 
 const STEPS = [
   {
-    src: '/screens/ekonomi.webp?v=14',
+    src: '/screens/ekonomi.webp?v=15',
     alt: 'Dejz – inkomster och fasta utgifter',
     title: 'Lägg in lön och räkningar',
-    text: 'En gång, på under två minuter. Skriv in ditt saldo så drar Dejz av räkningarna som är kvar före lön.',
+    text: 'Tar under två minuter. Dejz drar av räkningarna som är kvar före lön.',
   },
   {
-    src: '/screens/historik.webp?v=14',
+    src: '/screens/historik.webp?v=15',
     alt: 'Dejz – historik över köp',
     title: 'Logga köp på sekunder',
-    text: 'Tryck på + och säg "Ica 342" – Dejz fyller i resten. När du lägger in köpen själv märker du direkt vart pengarna tar vägen.',
+    text: 'Tryck på + och säg "Ica 342" – Dejz fyller i resten.',
   },
   {
-    src: '/screens/analys.webp?v=14',
+    src: '/screens/analys.webp?v=15',
     alt: 'Dejz – analys av utgifter per kategori',
     title: 'Se vart pengarna tar vägen',
-    text: 'En tydlig överblick per kategori för varje löneperiod – inte per kalendermånad.',
+    text: 'Per kategori, för varje löneperiod – inte per kalendermånad.',
   },
 ];
 
@@ -103,15 +135,16 @@ const ComparisonVisual: React.FC = () => (
         <span className="inline-flex items-center gap-1.5 font-medium">
           <BrandLogo className="h-3.5" />
         </span>
-        <span className="text-white/75 tabular-nums">6 dagar till lön</span>
+        <span className="text-white/75 tabular-nums">17 dagar till lön</span>
       </div>
       <div className="mt-3 text-subhead text-white/80">Kvar att spendera till lön</div>
+      {/* Samma demoläge som skärmbilden public/screens/home.webp ovanför – uppdatera båda samtidigt */}
       <div className="mt-0.5 font-display text-[2.5rem] leading-none font-semibold tracking-[-0.035em] tabular-nums">
-        2 340 kr
+        6 751 kr
       </div>
       {/* Samma som i appen: stapeln är pengarna som är kvar av löneperioden */}
       <div className="mt-4 h-2 rounded-pill bg-white/20 overflow-hidden">
-        <div className="h-full w-[25%] rounded-pill bg-white" />
+        <div className="h-full w-[50%] rounded-pill bg-white" />
       </div>
     </div>
   </div>
@@ -193,7 +226,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
           <button
             type="button"
             onClick={onLogin}
-            className="h-9 px-4 -mr-1 rounded-pill bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-callout font-semibold text-[var(--text-primary)] hover:opacity-80 active:scale-[0.97] transition-all cursor-pointer"
+            className="h-9 px-4 -mr-1 rounded-pill bg-[var(--btn-secondary-fill)] text-callout font-semibold text-[var(--text-primary)] hover:opacity-80 active:scale-[0.97] transition-all cursor-pointer"
           >
             Logga in
           </button>
@@ -206,9 +239,8 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
               Se vad du har kvar till nästa lön.
             </h1>
 
-            <p className="mt-4 text-[17px] sm:text-lg text-[var(--text-secondary)] max-w-[26rem] sm:max-w-lg mx-auto lg:mx-0 leading-[1.45] tracking-[-0.01em] text-pretty">
-              Dejz räknar från lön till lön. Räkningar och sparande dras av direkt – så ser du alltid hur
-              mycket du kan spendera fram till nästa lön, utan att gå minus.
+            <p className="mt-4 text-[17px] sm:text-lg text-[var(--text-secondary)] max-w-[21rem] sm:max-w-md mx-auto lg:mx-0 leading-[1.45] tracking-[-0.01em] text-balance">
+              Räkningar och sparande dras av direkt. Du ser bara det du kan spendera.
             </p>
 
             <SignupCta onSignup={onSignup} className="mt-8" />
@@ -228,10 +260,10 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
           <div className="relative mx-auto w-full max-w-[420px] h-[560px] sm:h-[620px]">
             <div className="absolute inset-x-6 top-16 bottom-6 rounded-full bg-[radial-gradient(closest-side,rgba(91,61,245,0.22),transparent)] blur-2xl" />
             <div className="hidden sm:block absolute right-0 top-12 w-[230px] rotate-[6deg]">
-              <PhoneFrame src="/screens/analys.webp?v=14" alt="" />
+              <PhoneFrame src="/screens/analys.webp?v=15" alt="" />
             </div>
             <div className="absolute left-1/2 -translate-x-1/2 sm:left-2 sm:translate-x-0 top-0 w-[255px] sm:w-[270px]">
-              <PhoneFrame src="/screens/home.webp?v=14" alt="Dejz hemskärm – kvar att spendera" eager />
+              <PhoneFrame src="/screens/home.webp?v=15" alt="Dejz hemskärm – kvar att spendera" eager />
             </div>
           </div>
         </section>
@@ -242,11 +274,8 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
             <h2 className="font-display font-semibold text-[1.875rem] leading-[1.08] sm:text-[2.5rem] tracking-[-0.04em] text-balance">
               Andra appar räknar till månadsskiftet. Dejz räknar till lön.
             </h2>
-            <p className="mt-4 text-[var(--text-secondary)] leading-[1.5] tracking-[-0.005em] max-w-xl mx-auto lg:mx-0 text-pretty">
-              Pengarna tar inte slut vid månadsskiftet – de tar slut innan lön. Därför räknar Dejz från
-              lönedag till lönedag och drar av hyra, räkningar och sparande direkt. Det du ser är det du
-              faktiskt kan spendera – utan att hamna på minus innan lönen kommer. Infaller lönen på en helg
-              flyttas den automatiskt.
+            <p className="mt-4 text-[17px] text-[var(--text-secondary)] leading-[1.45] tracking-[-0.01em] max-w-[21rem] sm:max-w-md mx-auto lg:mx-0 text-balance">
+              Pengarna tar slut före lön – inte vid månadsskiftet. Därför räknar Dejz från lön till lön.
             </p>
           </div>
 
@@ -269,7 +298,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
                   {i + 1}
                 </span>
                 <h3 className="mt-3 font-display font-semibold text-xl tracking-[-0.02em]">{s.title}</h3>
-                <p className="mt-2 text-base text-[var(--text-secondary)] leading-[1.5] max-w-xs text-pretty">{s.text}</p>
+                <p className="mt-2 text-base text-[var(--text-secondary)] leading-[1.5] max-w-[17rem] text-balance">{s.text}</p>
               </div>
             ))}
           </div>

@@ -56,16 +56,29 @@ export const PublicInfoPage: React.FC<{ kind: PublicPageKind }> = ({ kind }) => 
   React.useEffect(() => {
     document.title = `${TITLES[kind]} – Dejz`;
   }, [kind]);
+  // Fast, täckande sidhuvud – hårfin linje när texten scrollar in under det
+  const [scrolled, setScrolled] = React.useState(false);
+  React.useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
   return (
     <div className="min-h-screen bg-[var(--bg-color)] text-[var(--text-primary)] font-sans">
+      <div
+        className={`sticky top-0 z-20 bg-[var(--bg-color)] transition-shadow ${
+          scrolled ? 'ui-header-scrolled' : ''
+        }`}
+      >
       <header className="max-w-2xl mx-auto px-5 pt-[calc(1rem+env(safe-area-inset-top,0px))] h-[calc(4rem+env(safe-area-inset-top,0px))] flex items-center justify-between">
         <a href="/" aria-label="Till Dejz startsida">
           <BrandLogo className="h-6 text-[var(--accent-color)]" />
         </a>
-        <a href="/" className="h-9 px-4 -mr-1 inline-flex items-center rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-callout font-semibold text-[var(--text-primary)] hover:opacity-80">
+        <a href="/" className="h-9 px-4 -mr-1 inline-flex items-center rounded-full bg-[var(--btn-secondary-fill)] text-callout font-semibold text-[var(--text-primary)] hover:opacity-80">
           Till appen
         </a>
       </header>
+      </div>
       <main className="max-w-2xl mx-auto px-5 pb-16">
         <h1 className="font-display font-bold text-[2rem] leading-tight tracking-[-0.03em] mt-6 mb-6">{TITLES[kind]}</h1>
         {/* Villkoren har egna kort (samma som i appen) – lägg dem inte i ett kort till */}

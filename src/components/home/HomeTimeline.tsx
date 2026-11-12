@@ -9,7 +9,6 @@ import {
 } from '@phosphor-icons/react';
 import { PeriodInfo, isDateInPeriod } from '../../utils/periodEngine';
 import { ItemLogo } from '../ItemLogo';
-import { CategoryIcon } from '../CategoryIcon';
 import { SwipeableTxRow } from '../ui/SwipeableTxRow';
 import { formatSwedishDateHeading } from '../../utils/swedishDate';
 import { checkIsRecurringTransaction } from '../../utils/recurring/checkRecurring';
@@ -90,7 +89,7 @@ export const HomeTimeline: React.FC<HomeTimelineProps> = ({
           onMouseUp={handleMouseUpOrLeave}
           onMouseLeave={handleMouseUpOrLeave}
           onWheel={handleWheel}
-          className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1 pb-6 -mb-3.5 select-none cursor-grab active:cursor-grabbing"
+          className="ui-day-strip flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1 pb-6 -mb-3.5 select-none cursor-grab active:cursor-grabbing"
         >
           {timelineDays.map((day) => {
             const isSelected = day.dateKey === selectedDateKey;
@@ -190,7 +189,7 @@ export const HomeTimeline: React.FC<HomeTimelineProps> = ({
                   <button
                     type="button"
                     onClick={handleJumpToToday}
-                    className="inline-flex items-center gap-1 h-7 px-2.5 rounded-full bg-[var(--accent-soft)] text-footnote font-semibold text-[var(--on-accent-container)] transition-all cursor-pointer active:scale-95"
+                    className="ui-btn-sm h-7 px-2.5"
                   >
                     <ArrowCounterClockwise size={12} weight="bold" />
                     <span>Idag</span>
@@ -242,11 +241,6 @@ export const HomeTimeline: React.FC<HomeTimelineProps> = ({
                         {tx.title}
                       </span>
                       <span className="ui-row-subtitle">
-                        <CategoryIcon
-                          category={tx.category}
-                          size={11}
-                          className="shrink-0"
-                        />
                         <span className="truncate">{tx.category}</span>
                         {tx.isHearted && (
                           <Heart

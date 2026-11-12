@@ -2,6 +2,7 @@ import type { SetStateAction } from 'react';
 import React from 'react';
 import { ArrowRight } from '@phosphor-icons/react';
 import { WeekendHandlingMode } from '../../utils/periodEngine';
+import { DayOfMonthPicker } from '../ui/DayOfMonthPicker';
 
 export interface OnboardingStepPaydayProps {
   step: 1 | 2 | 3 | 4 | 5 | 6 | 7;
@@ -35,40 +36,31 @@ export const OnboardingStepPayday: React.FC<OnboardingStepPaydayProps> = ({
           <p className="ui-onb-subtitle">Dejz räknar från lön till lön – inte per kalendermånad.</p>
         </div>
 
-        <div className="flex-1 min-h-0 pt-6 space-y-8">
-          <div className="space-y-6">
-            <div className="font-display font-bold text-5xl tracking-tight text-[var(--text-primary)] tabular-nums text-center">
-              {payday === 31 ? 'Sista dagen' : `Den ${payday}:e`}
-            </div>
-
-            <input
-              type="range"
-              min={1}
-              max={31}
-              value={payday}
-              onChange={(e) => setPayday(Number(e.target.value))}
-              aria-label="Välj lönedag"
-              style={{
-                background: `linear-gradient(to right, var(--cta-bg) 0%, var(--cta-bg) ${
-                  ((payday - 1) / 30) * 100
-                }%, var(--segment-track) ${
-                  ((payday - 1) / 30) * 100
-                }%, var(--segment-track) 100%)`,
-              }}
-              className="ui-payday-slider"
+        {/* Samma dagväljare och samma helgreglage som i Inställningar → Lönedag */}
+        <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-3 pb-2">
+          <div className="ui-card-p">
+            <DayOfMonthPicker
+              selectedDay={payday}
+              onSelectDay={setPayday}
+              mode="payday"
+              minimal
             />
           </div>
 
-          {/* Helghantering: en grupperad rad som i iOS Inställningar */}
           <div className="ui-onb-row-card">
-            <span className="text-subhead text-[var(--text-primary)]">
-              Betalas ut fredagen före vid helg
-            </span>
+            <div className="min-w-0 flex-1">
+              <span className="text-subhead font-medium text-[var(--text-primary)] block">
+                Lön före helg
+              </span>
+              <span className="text-footnote text-[var(--text-secondary)] block mt-0.5">
+                Infaller lönedagen på en helg räknar vi med fredagen före.
+              </span>
+            </div>
             <button
               type="button"
               role="switch"
               aria-checked={weekendHandling === 'before'}
-              aria-label="Betalas ut fredagen före vid helg"
+              aria-label="Lön före helg"
               onClick={() =>
                 setWeekendHandling((prev) => (prev === 'before' ? 'none' : 'before'))
               }

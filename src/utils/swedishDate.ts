@@ -86,7 +86,7 @@ export function formatIsoTimeStockholm(isoOrDate: string | number | Date): strin
 }
 
 const SHORT_MONTHS_SV = ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
-const SHORT_WEEKDAYS_SV = ['Sön', 'Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör'];
+export const SHORT_WEEKDAYS_SV = ['Sön', 'Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör'];
 
 /**
  * Formaterar datumrubriken i hela appen på ett modernt och luftigt sätt:

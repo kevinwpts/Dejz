@@ -1,3 +1,5 @@
+import { applyKnownBrandCasing } from './bankAnalysis/merchantRules';
+
 /**
  * Tolkar ett snabbt köp från röst eller text: "Ica 143", "ICA 143 kronor", "143 kr på Ica",
  * "Ica för 1 250 kr", "Max 129,50". Returnerar null om texten inte innehåller både namn och belopp.
@@ -36,7 +38,8 @@ export function parseQuickEntry(text: string): { name: string; amount: number } 
   // "89 kr" / "143 kronor" är bara ett belopp – valutan är inget namn på ett köp
   if (/^(kr|kronor|sek|:-)$/i.test(trimmedName)) return null;
 
-  // Stor bokstav först, som i resten av appen ("ica" → "Ica")
-  const prettyName = trimmedName.charAt(0).toUpperCase() + trimmedName.slice(1);
+  // Stor bokstav först, och kända varumärken rätt skrivna ("ica" → "ICA", "max" → "Max")
+  const capitalized = trimmedName.charAt(0).toUpperCase() + trimmedName.slice(1);
+  const prettyName = applyKnownBrandCasing(capitalized);
   return { name: prettyName, amount };
 }

@@ -1,9 +1,9 @@
 import type { SetStateAction } from 'react';
 import React from 'react';
-import { Heart, Package, Paperclip } from '@phosphor-icons/react';
+import { Heart, Package, Paperclip, Receipt, Repeat, Wallet } from '@phosphor-icons/react';
+import { EmptyState } from '../ui/EmptyState';
 import { PeriodInfo, isDateInPeriod } from '../../utils/periodEngine';
 import { ItemLogo } from '../ItemLogo';
-import { CategoryIcon } from '../CategoryIcon';
 import { BottomSheet } from '../ui/BottomSheet';
 import { deduplicateTransactions } from '../../utils/transactionDedup';
 import { formatSwedishDateHeading } from '../../utils/swedishDate';
@@ -74,9 +74,12 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
 
               if (incomes.length === 0 && extraIncomeTxs.length === 0) {
                 return (
-                  <div className="ui-list-card py-10 text-center text-callout text-[var(--text-secondary)]">
-                    Inga inkomster
-                  </div>
+                  <EmptyState
+                    variant="inline"
+                    icon={Wallet}
+                    title="Inga inkomster"
+                    description="Lägg till din lön under Fasta, så räknar Dejz från den."
+                  />
                 );
               }
 
@@ -116,11 +119,6 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
                           <div className="min-w-0 flex-1">
                             <span className="ui-row-title">{inc.name}</span>
                             <span className="ui-row-subtitle flex items-center gap-1">
-                              <CategoryIcon
-                                category={catLabel}
-                                size={11}
-                                className="shrink-0 text-[var(--text-secondary)]"
-                              />
                               <span className="truncate">{catLabel}</span>
                             </span>
                           </div>
@@ -171,11 +169,6 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
                           <div className="min-w-0 flex-1">
                             <span className="ui-row-title">{tx.title}</span>
                             <span className="ui-row-subtitle flex items-center gap-1">
-                              <CategoryIcon
-                                category={catLabel}
-                                size={11}
-                                className="shrink-0 text-[var(--text-secondary)]"
-                              />
                               <span className="truncate">{catLabel}</span>
                             </span>
                           </div>
@@ -236,11 +229,6 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
                             {exp.name}
                           </span>
                           <span className="ui-row-subtitle flex items-center gap-1">
-                            <CategoryIcon
-                              category={catLabel}
-                              size={11}
-                              className="shrink-0 text-[var(--text-secondary)]"
-                            />
                             <span className="truncate">{catLabel}</span>
                           </span>
                         </div>
@@ -267,18 +255,24 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
                 })}
               </div>
             ) : (
-              <div className="ui-list-card py-10 text-center text-callout text-[var(--text-secondary)]">
-                Inga fasta utgifter
-              </div>
+              <EmptyState
+                variant="inline"
+                icon={Repeat}
+                title="Inga fasta utgifter"
+                description="Hyra, abonnemang och andra räkningar du lägger till under Fasta syns här."
+              />
             ))}
 
           {activeHeroPopup === 'variable' &&
             (() => {
               if (variablePeriodTransactions.length === 0) {
                 return (
-                  <div className="ui-list-card py-10 text-center text-callout text-[var(--text-secondary)]">
-                    Inga köp än den här löneperioden
-                  </div>
+                  <EmptyState
+                    variant="inline"
+                    icon={Receipt}
+                    title="Inga köp än"
+                    description="Köp du gör fram till nästa lön samlas här. Tryck på + för att lägga till."
+                  />
                 );
               }
 
@@ -365,11 +359,6 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
                                       {tx.title}
                                     </span>
                                     <span className="ui-row-subtitle">
-                                      <CategoryIcon
-                                        category={tx.category}
-                                        size={11}
-                                        className="shrink-0"
-                                      />
                                       <span className="truncate">
                                         {tx.category}
                                       </span>

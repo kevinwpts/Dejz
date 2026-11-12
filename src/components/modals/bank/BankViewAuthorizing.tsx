@@ -3,7 +3,7 @@ import React from 'react';
 import { ArrowSquareOut } from '@phosphor-icons/react';
 import type { SetStateAction } from 'react';
 import type { BankAspsp } from '../../../services/bank/types';
-import { ItemLogo } from '../../ItemLogo';
+import { BankLogo } from '../../BankLogo';
 
 export interface BankViewAuthorizingProps {
   authUrl: string;
@@ -29,11 +29,7 @@ export const BankViewAuthorizing: React.FC<BankViewAuthorizingProps> = ({
   <div className="space-y-4">
     <div className="text-center pb-2 pt-2">
       <div className="flex justify-center mb-3.5">
-        <ItemLogo
-          name={selectedBank?.name || 'Bank'}
-          logoUrl={selectedBank?.logo ?? undefined}
-          size="xl"
-        />
+        <BankLogo name={selectedBank?.name || 'Bank'} size="xl" />
       </div>
       <h4 className="font-display font-semibold text-xl tracking-[-0.02em] text-[var(--text-primary)]">
         {selectedBank?.name}

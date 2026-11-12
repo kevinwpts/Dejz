@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { getConnectionDaysLeft } from '../../../services/bank/connectionExpiry';
 import type { BankConnection } from '../../../services/bank/types';
-import { ItemLogo } from '../../ItemLogo';
+import { BankLogo } from '../../BankLogo';
 
 interface BankConnectionsSectionProps {
   connections: BankConnection[];
@@ -37,11 +37,7 @@ export const BankConnectionsSection: React.FC<BankConnectionsSectionProps> = ({
             return (
               <div key={conn.id} className="ui-row">
                 <div className="flex items-center gap-3 min-w-0">
-                  <ItemLogo
-                    name={conn.aspsp_name}
-                    logoUrl={conn.aspsp_logo || undefined}
-                    size="md"
-                  />
+                  <BankLogo name={conn.aspsp_name} />
                   <div className="min-w-0">
                     <span className="ui-row-title">{conn.aspsp_name}</span>
                     {isExpired ? (
@@ -85,7 +81,7 @@ export const BankConnectionsSection: React.FC<BankConnectionsSectionProps> = ({
         ) : (
           <div className="ui-row">
             <div className="flex items-center gap-3 min-w-0">
-              <ItemLogo name={connectedBank || 'Bank'} size="md" />
+              <BankLogo name={connectedBank || 'Bank'} />
               <div className="min-w-0">
                 <span className="ui-row-title">{connectedBank}</span>
                 <span className="text-footnote text-positive font-medium block mt-0.5">

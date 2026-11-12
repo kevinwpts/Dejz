@@ -105,6 +105,8 @@ export const SettingsMainList: React.FC<SettingsMainListProps> = ({
 
       {/* 2. Mitt – sparmål, kvitton och paket */}
       {onOpenSection && (
+        <section>
+        <span className="ui-settings-label">Mina saker</span>
         <div className="ui-admin-card">
           {(
             [
@@ -138,6 +140,7 @@ export const SettingsMainList: React.FC<SettingsMainListProps> = ({
             );
           })}
         </div>
+        </section>
       )}
 
       {/* 3. Ekonomi */}

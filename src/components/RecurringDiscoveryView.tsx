@@ -6,7 +6,6 @@ import {
 } from '@phosphor-icons/react';
 import { FixedExpenseItem, IncomeItem, TransactionItem } from '../app/models';
 import { ItemLogo } from './ItemLogo';
-import { CategoryIcon } from './CategoryIcon';
 import { EmptyState } from './ui/EmptyState';
 import { bankService } from '../services/bankService';
 import { BankAccount } from '../services/bank/types';
@@ -432,11 +431,6 @@ export const RecurringDiscoveryView: React.FC<RecurringDiscoveryViewProps> = ({
                     <div className="min-w-0 flex-1">
                       <span className="ui-row-title">{cand.name}</span>
                       <span className="ui-row-subtitle flex items-center gap-1">
-                        <CategoryIcon
-                          category={cand.category}
-                          size={11}
-                          className="shrink-0 text-[var(--text-secondary)]"
-                        />
                         <span className="truncate">
                           {cand.category} · Den {cand.day}:e
                         </span>
@@ -480,7 +474,7 @@ export const RecurringDiscoveryView: React.FC<RecurringDiscoveryViewProps> = ({
           title="Allt är redan med"
           description="Vi hittade inga fler återkommande inkomster eller räkningar i dina köp."
           action={
-            <button type="button" onClick={rescan} className="ui-btn-secondary bg-[var(--surface-color)] shadow-[var(--card-shadow)]">
+            <button type="button" onClick={rescan} className="ui-btn-secondary">
               <ArrowClockwise size={16} />
               <span>Sök igen</span>
             </button>

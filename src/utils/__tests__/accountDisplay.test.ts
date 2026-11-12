@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { describeAccount } from '../accountDisplay';
+import { describeAccount, formatAccountNumberShort } from '../accountDisplay';
 import type { AccountItem } from '../../app/models';
 
 const account = (accountNumber = ''): AccountItem => ({
@@ -29,5 +29,18 @@ describe('describeAccount', () => {
       fullNumber: '•••• 4821',
       maskedNumber: '•••• 4821',
     });
+  });
+});
+
+describe('formatAccountNumberShort', () => {
+  test('clearing + fyra sista', () => {
+    expect(formatAccountNumberShort('83279123456789')).toBe('8327-9 ··· 6789');
+    expect(formatAccountNumberShort('8327-9 912 345 678')).toBe('8327-9 ··· 5678');
+    expect(formatAccountNumberShort('50001234567')).toBe('5000 ··· 4567');
+  });
+  test('IBAN och korta nummer visar bara slutet', () => {
+    expect(formatAccountNumberShort('SE4550000000058398257466')).toBe('··· 7466');
+    expect(formatAccountNumberShort('1234567')).toBe('··· 4567');
+    expect(formatAccountNumberShort('12')).toBe('12');
   });
 });

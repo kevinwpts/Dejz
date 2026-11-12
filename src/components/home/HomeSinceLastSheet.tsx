@@ -1,6 +1,5 @@
 import React from 'react';
 import { ItemLogo } from '../ItemLogo';
-import { CategoryIcon } from '../CategoryIcon';
 import { BottomSheet } from '../ui/BottomSheet';
 import { formatSwedishDateHeading } from '../../utils/swedishDate';
 import type { TransactionItem } from '../../app/models';
@@ -62,7 +61,6 @@ export const HomeSinceLastSheet: React.FC<HomeSinceLastSheetProps> = ({
                   <div className="min-w-0 flex-1">
                     <span className="ui-row-title truncate block">{tx.title}</span>
                     <span className="ui-row-subtitle flex items-center gap-1">
-                      <CategoryIcon category={tx.category} size={11} className="shrink-0" />
                       <span className="truncate">{tx.category}</span>
                     </span>
                   </div>

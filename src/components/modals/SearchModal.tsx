@@ -9,7 +9,6 @@ import {
 } from '@phosphor-icons/react';
 import { TransactionItem, FixedExpenseItem, IncomeItem, getTransactionTime, compareTransactionsChronologically } from '../../app/models';
 import { ItemLogo } from '../ItemLogo';
-import { CategoryIcon } from '../CategoryIcon';
 import { deduplicateTransactions } from '../../utils/transactionDedup';
 import { formatSwedishDateHeading } from '../../utils/swedishDate';
 import { checkIsRecurringTransaction } from '../../utils/recurring/checkRecurring';
@@ -305,11 +304,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                               {inc.name}
                             </span>
                             <span className="ui-row-subtitle flex items-center gap-1">
-                              <CategoryIcon
-                                category={inc.category || 'Lön'}
-                                size={11}
-                                className="shrink-0 text-[var(--text-secondary)]"
-                              />
                               <span className="truncate">{inc.category || 'Lön'}</span>
                             </span>
                           </div>
@@ -364,11 +358,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                               {exp.name}
                             </span>
                             <span className="ui-row-subtitle flex items-center gap-1">
-                              <CategoryIcon
-                                category={exp.category || 'Räkningar'}
-                                size={11}
-                                className="shrink-0 text-[var(--text-secondary)]"
-                              />
                               <span className="truncate">{exp.category || 'Räkningar'}</span>
                             </span>
                           </div>
@@ -470,11 +459,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                                   )}
                                 </span>
                                 <span className="ui-row-subtitle flex items-center gap-1">
-                                  <CategoryIcon
-                                    category={tx.category}
-                                    size={11}
-                                    className="shrink-0 text-[var(--text-secondary)]"
-                                  />
                                   <span className="truncate">{tx.category}</span>
                                 </span>
                               </div>

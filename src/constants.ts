@@ -2,7 +2,7 @@ export const DEFAULT_EXPENSE_CATEGORIES = [
   { id: 'mat-dryck', name: 'Mat & dryck', icon: 'cart', color: '#D66B42' },
   { id: 'boende', name: 'Boende', icon: 'house', color: '#5B69B1' },
   { id: 'rakningar', name: 'Räkningar', icon: 'receipt', color: '#6366F1' },
-  { id: 'abonnemang', name: 'Abonnemang', icon: 'broadcast', color: '#8C755F' },
+  { id: 'abonnemang', name: 'Abonnemang', icon: 'broadcast', color: '#D9A21B' },
   { id: 'transport', name: 'Transport', icon: 'car', color: '#3089B8' },
   { id: 'shopping', name: 'Shopping', icon: 'shopping-bag', color: '#BD6197' },
   { id: 'noje', name: 'Nöje', icon: 'film', color: '#8B6AC8' },

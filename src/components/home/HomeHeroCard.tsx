@@ -191,7 +191,7 @@ export const HomeHeroCard: React.FC<HomeHeroCardProps> = ({
                     {isInitialLoading && accounts.length === 0 ? (
                       <div className="h-5 w-16 rounded-md bg-[var(--surface-raised)] animate-pulse mt-0.5" />
                     ) : (
-                      <span className="ui-stat-value text-positive">
+                      <span className="ui-stat-value text-[var(--text-primary)]">
                         {signed('+', totalIncome, formatKr)}
                       </span>
                     )}

@@ -135,10 +135,8 @@ describe('historiken', () => {
     expect(screen.getByText('Inga köp än')).toBeTruthy();
   });
 
-  test('"Lägg till" finns bara när det går att lägga till', async () => {
-    const onAddTransaction = vi.fn();
-    const { user } = renderTab({ onAddTransaction });
-    await user.click(screen.getByRole('button', { name: /Lägg till/ }));
-    expect(onAddTransaction).toHaveBeenCalledOnce();
+  test('ingen egen "Lägg till"-knapp i huvudet – plusknappen i menyn räcker', () => {
+    renderTab();
+    expect(screen.queryByRole('button', { name: /Lägg till/ })).toBeNull();
   });
 });

@@ -24,7 +24,7 @@ export const AnalysisPeriodNav: React.FC<AnalysisPeriodNavProps> = ({
       type="button"
       onClick={() => setPeriodOffset((prev) => Math.max(-5, prev - 1))}
       disabled={periodOffset <= -5}
-      className="w-10 h-10 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] flex items-center justify-center text-[var(--text-primary)] disabled:opacity-0 disabled:pointer-events-none transition-all cursor-pointer shrink-0 active:scale-95"
+      className="w-10 h-10 rounded-full bg-[var(--btn-secondary-fill)] flex items-center justify-center text-[var(--text-primary)] disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer shrink-0 active:scale-95"
       title="Föregående period"
     >
       <CaretLeft size={16} weight="bold" />
@@ -33,7 +33,7 @@ export const AnalysisPeriodNav: React.FC<AnalysisPeriodNavProps> = ({
     <button
       type="button"
       onClick={onOpenMenu}
-      className="h-10 px-4 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] active:scale-[0.97] transition-all cursor-pointer inline-flex items-center justify-center gap-2"
+      className="h-10 px-4 rounded-full bg-[var(--btn-secondary-fill)] active:scale-[0.97] transition-all cursor-pointer inline-flex items-center justify-center gap-2"
     >
       <span className="font-display font-semibold text-callout text-[var(--text-primary)] tabular-nums">
         {period.startLabel} – {period.endLabel}
@@ -50,7 +50,7 @@ export const AnalysisPeriodNav: React.FC<AnalysisPeriodNavProps> = ({
       type="button"
       onClick={() => setPeriodOffset((prev) => Math.min(0, prev + 1))}
       disabled={periodOffset >= 0}
-      className="w-10 h-10 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] flex items-center justify-center text-[var(--text-primary)] disabled:opacity-0 disabled:pointer-events-none transition-all cursor-pointer shrink-0 active:scale-95"
+      className="w-10 h-10 rounded-full bg-[var(--btn-secondary-fill)] flex items-center justify-center text-[var(--text-primary)] disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer shrink-0 active:scale-95"
       title="Nästa period"
     >
       <CaretRight size={16} weight="bold" />

@@ -1,5 +1,5 @@
 import { useApp } from '../AppContext';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BottomNav } from '../../components/BottomNav';
 import { AddEntrySheet, isVoiceEntrySupported } from '../../components/VoiceEntry';
 import { BalanceSheet } from '../../components/BalanceSheet';
@@ -21,6 +21,19 @@ export const AppSheetsAndModals: React.FC = () => {
     setSettingsSubView,
     setActiveTab,
   } = useApp();
+  // Undersidor med tillbakaknapp (inställningar, sparmål, kvitton, paket, juridik) visar ingen
+  // bottenmeny – som i iOS. Sidan får då mindre luft i nederkant (se html[data-tabbar] i index.css).
+  const isPushedPage =
+    activeTab === 'settings' ||
+    activeTab === 'goals' ||
+    activeTab === 'packages' ||
+    activeTab === 'receipts';
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isPushedPage) root.setAttribute('data-tabbar', 'hidden');
+    else root.removeAttribute('data-tabbar');
+    return () => root.removeAttribute('data-tabbar');
+  }, [isPushedPage]);
   return (
       <>
         <BalanceSheet
@@ -54,6 +67,7 @@ export const AppSheetsAndModals: React.FC = () => {
           }}
         />
 
+        {!isPushedPage && (
         <BottomNav
           activeTab={activeTab}
           onAddTransaction={() => {
@@ -70,6 +84,7 @@ export const AppSheetsAndModals: React.FC = () => {
             setActiveTab(tab);
           }}
         />
+        )}
       </>
   );
 };

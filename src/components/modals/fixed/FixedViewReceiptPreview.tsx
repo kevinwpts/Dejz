@@ -29,21 +29,21 @@ export const FixedViewReceiptPreview: React.FC<FixedViewReceiptPreviewProps> = (
   <>
     {subView === 'receipt-preview' && previewReceipt && (
       <div className={`${slideAnimClass} space-y-4`}>
-        <SheetHeader title={previewReceipt.name || 'Kvitto'} onBack={() => navigateSubView(pickerReturnView, 'back')} onClose={onClose} flush />
+        <SheetHeader title={displayName ? `Kvitto · ${displayName}` : 'Kvitto'} onBack={() => navigateSubView(pickerReturnView, 'back')} onClose={onClose} flush />
 
-        <div className="rounded-card-nested bg-[var(--fill-grouped)] p-2 overflow-hidden flex items-center justify-center max-h-[60dvh]">
+        <div className="ui-receipt-frame">
           {previewReceipt.url.startsWith('data:image/') ||
           /\.(png|jpe?g|webp|gif)$/i.test(previewReceipt.url) ? (
             <img
               src={previewReceipt.url}
-              alt={previewReceipt.name || 'Kvitto'}
-              className="max-h-[56dvh] w-auto object-contain rounded-xl"
+              alt={displayName ? `Kvitto · ${displayName}` : 'Kvitto'}
+              className="ui-receipt-image"
             />
           ) : (
             <iframe
               src={previewReceipt.url}
-              title={previewReceipt.name || 'Kvitto'}
-              className="w-full h-[52dvh] rounded-xl border-0"
+              title={displayName ? `Kvitto · ${displayName}` : 'Kvitto'}
+              className="ui-receipt-pdf"
             />
           )}
         </div>

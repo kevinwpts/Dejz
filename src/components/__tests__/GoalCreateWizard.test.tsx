@@ -47,10 +47,9 @@ describe('nytt sparmål', () => {
     expect(bodyText()).toContain('25 000kr');
     await user.click(continueBtn());
 
-    expect(heading()).toBe('Hur vill du följa sparandet?');
-    await user.click(continueBtn()); // "Eget valt belopp" är förvalt
-
+    // Utan konton finns bara "Eget valt belopp" – steget "Hur vill du följa sparandet?" hoppas över
     expect(heading()).toBe('Hur mycket har du sparat hittills?');
+    expect(screen.getByRole('progressbar').getAttribute('aria-label')).toBe('Steg 4 av 5');
     await typeDigits(user, '5000');
     await user.click(continueBtn());
 
@@ -80,7 +79,6 @@ describe('nytt sparmål', () => {
     await user.click(continueBtn());
     await typeDigits(user, '10000');
     await user.click(continueBtn());
-    await user.click(continueBtn());
     // Steg 5: hoppa över "sparat hittills" → 0 kr
     await user.click(screen.getByRole('button', { name: 'Hoppa över' }));
     expect(heading()).toBe('Hur mycket sparar du varje månad?');
@@ -101,6 +99,9 @@ describe('nytt sparmål', () => {
     await typeDigits(user, '20000');
     await user.click(continueBtn());
 
+    // Med ett konto finns något att välja – steget visas och räknas i stegmätaren
+    expect(heading()).toBe('Hur vill du följa sparandet?');
+    expect(screen.getByRole('progressbar').getAttribute('aria-label')).toBe('Steg 4 av 6');
     await user.click(screen.getByText('Sparkonto'));
     await user.click(screen.getByRole('button', { name: 'Skapa sparmål' }));
 
@@ -141,7 +142,7 @@ describe('nytt sparmål', () => {
     // Inledande nollor försvinner: 0012 → 12 → 1 → 15000
     expect(bodyText()).toContain('15 000kr');
     await user.keyboard('{Enter}');
-    expect(heading()).toBe('Hur vill du följa sparandet?');
+    expect(heading()).toBe('Hur mycket har du sparat hittills?');
   });
 
   test('beloppet stannar vid nio siffror', async () => {

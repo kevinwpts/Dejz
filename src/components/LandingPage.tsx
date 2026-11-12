@@ -31,9 +31,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     return (
       <div className="min-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] flex flex-col justify-between max-w-md mx-auto px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-[calc(1.75rem+env(safe-area-inset-bottom,0px))] font-sans select-none overflow-x-hidden">
         {/* Top Bar */}
-        <header className="flex items-center justify-between h-12">
+        {/* Tillbaka · logga i mitten · tom kolumn (samma huvud som inloggningsarket i appen) */}
+        <header className="grid grid-cols-[2.25rem_1fr_2.25rem] items-center h-12">
           {nativeApp && !resetEmailSent && view !== 'forgot_password' ? (
-            <span className="w-[34px]" aria-hidden="true" />
+            <span aria-hidden="true" />
           ) : (
           <button
             type="button"
@@ -55,7 +56,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </button>
           )}
 
-          <BrandLogo className="h-5 text-[var(--accent-color)]" />
+          <BrandLogo className="h-6 justify-self-center text-[var(--accent-color)]" />
+          <span aria-hidden="true" />
         </header>
 
         {/* Main Content Area */}

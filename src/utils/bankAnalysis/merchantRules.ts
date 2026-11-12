@@ -757,6 +757,17 @@ const ACRONYM_BRANDS: Record<string, string> = {
   se: 'SE',
 };
 
+/** Rätt skrivsätt för kända varumärken i fritext: "ica maxi" → "ICA maxi", "Ikea" → "IKEA". */
+export function applyKnownBrandCasing(text: string): string {
+  return text
+    .split(' ')
+    .map((word) => {
+      const key = word.toLowerCase();
+      return key !== 'se' && ACRONYM_BRANDS[key] ? ACRONYM_BRANDS[key] : word;
+    })
+    .join(' ');
+}
+
 const LOWERCASE_JOINERS = new Set(['och', 'i', 'på', 'av', 'af', 'von', 'de', 'la', 'the', 'of', 'and']);
 
 const SWEDISH_ASCII_PLACE_AND_WORD_MAP: Record<string, string> = {

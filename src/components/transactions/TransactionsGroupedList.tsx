@@ -3,7 +3,6 @@ import React from 'react';
 import { Receipt, MagnifyingGlass, Package, Heart, Paperclip } from '@phosphor-icons/react';
 import { type FixedExpenseItem, type IncomeItem, type TransactionItem, getTransactionTime } from '../../app/models';
 import { ItemLogo } from '../ItemLogo';
-import { CategoryIcon } from '../CategoryIcon';
 import { SwipeableTxRow } from '../ui/SwipeableTxRow';
 import { getItemReceipts } from '../../utils/swedishDate';
 import { checkIsRecurringTransaction } from '../../utils/recurring/checkRecurring';
@@ -147,11 +146,6 @@ export const TransactionsGroupedList: React.FC<TransactionsGroupedListProps> = (
                           {tx.title}
                         </span>
                         <span className="ui-row-subtitle">
-                          <CategoryIcon
-                            category={tx.category}
-                            size={11}
-                            className="shrink-0"
-                          />
                           <span className="truncate">{tx.category}</span>
                           {tx.isHearted && (
                             <Heart

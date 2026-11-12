@@ -1,8 +1,8 @@
 import type { SetStateAction } from 'react';
 import React from 'react';
-import { Check, Copy, PencilSimple, X } from '@phosphor-icons/react';
+import { Check, Copy, X } from '@phosphor-icons/react';
+import { formatAccountNumberShort } from '../../utils/accountDisplay';
 import { ItemLogo } from '../ItemLogo';
-import { CategoryIcon } from '../CategoryIcon';
 import { BottomSheet } from '../ui/BottomSheet';
 import { formatSwedishDateHeading } from '../../utils/swedishDate';
 import { checkIsRecurringTransaction } from '../../utils/recurring/checkRecurring';
@@ -96,7 +96,7 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
                       });
                       setIsEditingAccountName(false);
                     }}
-                    className="w-8 h-8 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] flex items-center justify-center shrink-0 cursor-pointer"
+                    className="w-8 h-8 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] flex items-center justify-center shrink-0 cursor-pointer active:scale-95 transition-transform"
                     title="Spara namn"
                   >
                     <Check size={14} weight="bold" />
@@ -105,7 +105,7 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
                     aria-label="Avbryt"
                     type="button"
                     onClick={() => setIsEditingAccountName(false)}
-                    className="w-8 h-8 rounded-xl bg-[var(--surface-raised)] text-[var(--text-secondary)] flex items-center justify-center shrink-0 cursor-pointer"
+                    className="ui-icon-btn"
                     title="Avbryt"
                   >
                     <X size={14} />
@@ -122,7 +122,6 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
                   title="Byt namn på kontot"
                 >
                   <span>{activeModalAccount.name}</span>
-                  <PencilSimple size={14} className="text-[var(--text-muted)]" />
                 </button>
               )}
 
@@ -140,7 +139,7 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
                       Kontonummer
                     </span>
                     <span className="text-subhead font-medium text-[var(--text-primary)] tabular-nums">
-                      {activeModalAccount.accountNumber}
+                      {formatAccountNumberShort(activeModalAccount.accountNumber)}
                     </span>
                   </div>
                   <button
@@ -154,7 +153,7 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
                         setTimeout(() => setCopiedAccountNumber(false), 2000);
                       }
                     }}
-                    className="ui-pill-btn bg-[var(--surface-color)] shrink-0"
+                    className="ui-pill-btn shrink-0"
                   >
                     {copiedAccountNumber ? (
                       <>
@@ -257,11 +256,6 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
                           <div className="min-w-0 flex-1">
                             <span className="ui-row-title">{tx.title}</span>
                             <span className="ui-row-subtitle">
-                              <CategoryIcon
-                                category={tx.category}
-                                size={11}
-                                className="shrink-0"
-                              />
                               <span className="truncate">{tx.category}</span>
                             </span>
                           </div>

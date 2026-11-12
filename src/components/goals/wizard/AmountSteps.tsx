@@ -1,23 +1,23 @@
 // Beloppsstegen i "Nytt sparmål": målbelopp (steg 3), sparat hittills (steg 5) och per månad (steg 6).
 import React from 'react';
-import { formatInputThousands } from '../goalHelpers';
+import { formatInputThousands } from '../../../utils/format';
 import { WizardNumpad } from './WizardNumpad';
 
 const CTA_CLASS = 'ui-btn-primary';
 
-/** Stora siffror med "kr" efter, gråa när beloppet är 0. */
-const AmountDisplay: React.FC<{ value: string }> = ({ value }) => (
-  <div className="flex items-baseline justify-center gap-2.5 font-display font-bold text-5xl sm:text-6xl tracking-tight tabular-nums">
-    <span
-      className={
-        Number(value) > 0 ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]/50'
-      }
-    >
-      {Number(value) > 0 ? formatInputThousands(value) : '0'}
-    </span>
-    <span className="text-[var(--text-muted)]">kr</span>
-  </div>
-);
+/** Stora siffror med "kr" efter. Tomt: en mindre, grå nolla som platshållare. */
+const AmountDisplay: React.FC<{ value: string }> = ({ value }) =>
+  Number(value) > 0 ? (
+    <div className="flex items-baseline justify-center gap-2 font-display font-bold text-5xl tracking-tight tabular-nums text-[var(--text-primary)]">
+      <span>{formatInputThousands(value)}</span>
+      <span className="text-[var(--text-muted)]">kr</span>
+    </div>
+  ) : (
+    <div className="flex items-baseline justify-center gap-2 font-display font-semibold text-4xl tracking-tight tabular-nums text-[var(--text-muted)] opacity-60">
+      <span>0</span>
+      <span>kr</span>
+    </div>
+  );
 
 interface AmountStepBaseProps {
   animClass: string;
@@ -33,7 +33,7 @@ export const StepTargetAmount: React.FC<AmountStepBaseProps & { onContinue: () =
   onContinue,
 }) => (
   <div className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${animClass}`}>
-    <div className="my-auto py-4 flex items-center justify-center">
+    <div className="flex-1 min-h-[96px] flex items-center justify-center">
       <AmountDisplay value={value} />
     </div>
 
@@ -66,7 +66,7 @@ export const StepCurrentAmount: React.FC<GuardedStepProps & { onContinue: () => 
   onContinue,
 }) => (
   <div className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${animClass}`}>
-    <div className="my-auto py-4 flex items-center justify-center">
+    <div className="flex-1 min-h-[96px] flex items-center justify-center">
       <AmountDisplay value={value} />
     </div>
 
@@ -97,7 +97,7 @@ export const StepMonthlyAmount: React.FC<StepMonthlyAmountProps> = ({
   onSave,
 }) => (
   <div className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${animClass}`}>
-    <div className="my-auto py-4 flex flex-col items-center justify-center gap-2">
+    <div className="flex-1 min-h-[96px] flex flex-col items-center justify-center gap-2">
       <AmountDisplay value={value} />
       {Number(value) > 0 && Number(goalTargetInput) > 0 && (
         <span className="text-subhead text-[var(--text-secondary)]">

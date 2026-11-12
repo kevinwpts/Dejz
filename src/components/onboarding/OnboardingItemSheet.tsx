@@ -12,6 +12,7 @@ import {
   SheetEditorState,
 } from './onboardingConfig';
 import { SheetHeader } from '../ui/SheetHeader';
+import { formatInputThousands } from '../../utils/format';
 
 export interface OnboardingItemSheetProps {
   sheetEditor: SheetEditorState | null;
@@ -254,7 +255,7 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
                         required
                         autoFocus={sheetEditor.mode === 'add' && !!sheetEditor.name}
                         placeholder="0"
-                        value={sheetEditor.amount}
+                        value={formatInputThousands(sheetEditor.amount)}
                         onChange={(e) =>
                           setSheetEditor((prev) =>
                             prev
@@ -265,11 +266,7 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
                               : prev
                           )
                         }
-                        className={`w-full bg-transparent border-0 p-0 font-display font-bold text-2xl sm:text-3xl tabular-nums focus:outline-none placeholder-[var(--text-muted)]/40 ${
-                          sheetEditor.type === 'income'
-                            ? 'text-positive'
-                            : 'text-[var(--text-primary)]'
-                        }`}
+                        className="ui-amount-input"
                       />
                       <span className="font-display font-semibold text-sm text-[var(--text-muted)] shrink-0">
                         kr/mån
@@ -280,7 +277,7 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
               </div>
 
               {/* Valbara rader för Kategori, Betalsätt och Dag */}
-              <div className="ui-sheet-group text-callout sm:text-sm">
+              <div className="ui-sheet-group">
 
                 <button
                   type="button"
@@ -290,15 +287,15 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
                   }}
                   className="ui-row-btn"
                 >
-                  <span className="text-[var(--text-muted)] shrink-0">Kategori</span>
-                  <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
+                  <span className="ui-info-label">Kategori</span>
+                  <span className="ui-info-value flex items-center gap-1.5">
                     <CategoryIcon
                       category={
                         sheetEditor.category ||
                         (sheetEditor.type === 'income' ? 'Lön' : 'Räkningar')
                       }
                       size={13}
-                      className="shrink-0 text-[var(--text-secondary)]"
+                      className="shrink-0"
                     />
                     <span>
                       {sheetEditor.category ||
@@ -317,8 +314,8 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
                     }}
                     className="ui-row-btn"
                   >
-                    <span className="text-[var(--text-muted)] shrink-0">Betalsätt</span>
-                    <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
+                    <span className="ui-info-label">Betalsätt</span>
+                    <span className="ui-info-value flex items-center gap-1.5">
                       <PaymentMethodIcon method={sheetEditor.paymentMethod || 'Autogiro'} size={15} />
                       <span>{sheetEditor.paymentMethod || 'Autogiro'}</span>
                       <CaretRight size={12} className="text-[var(--text-muted)]" />
@@ -334,10 +331,10 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
                   }}
                   className="ui-row-btn"
                 >
-                  <span className="text-[var(--text-muted)] shrink-0">
+                  <span className="ui-info-label">
                     {sheetEditor.type === 'income' ? 'Utbetalningsdag' : 'Förfallodag'}
                   </span>
-                  <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 tabular-nums">
+                  <span className="ui-info-value flex items-center gap-1.5 tabular-nums">
                     <span>Den {sheetEditor.day}:e</span>
                     <CaretRight size={12} className="text-[var(--text-muted)]" />
                   </span>

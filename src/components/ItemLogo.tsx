@@ -9,6 +9,11 @@ import {
 } from '../utils/logo';
 import { CategoryIcon, categoryColorStyle } from './CategoryIcon';
 import { SwishLogo } from './SwishLogo';
+import { MonogramTile, LOGO_TILE_SIZE_CLASSES } from './MonogramTile';
+import { findBankMark } from '../utils/bankMarks';
+
+/** Bilder som redan laddats och godkänts – visas direkt utan reservruta (ingen blinkning vid flikbyte). */
+const verifiedLogoSrcs = new Set<string>();
 
 interface ItemLogoProps {
   name: string;
@@ -45,7 +50,11 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
     return () => window.removeEventListener('dejz-logo-pref-changed', handlePrefChange);
   }, [name, logoUrl]);
 
+  // Banker: en lokal appikon per bank (eller bokstavsruta) – aldrig favicons/ordbilder från nätet
+  const bankMark = preferCatIcon ? undefined : findBankMark(name);
+
   const isSwish =
+    !bankMark &&
     !preferCatIcon &&
     ((category || '').toLowerCase() === 'swish' ||
       (name || '').toLowerCase().includes('swish') ||
@@ -53,9 +62,12 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
 
   const resolvedSrc = preferCatIcon
     ? undefined
-    : sanitizeLogoUrl(logoUrl, name, category) || getLogoUrl(name, category);
+    : bankMark
+      ? bankMark.icon
+      : sanitizeLogoUrl(logoUrl, name, category) || getLogoUrl(name, category);
   const [currentSrc, setCurrentSrc] = useState<string | undefined>(resolvedSrc);
   const [imgFailed, setImgFailed] = useState(false);
+  const [loadedSrc, setLoadedSrc] = useState<string | undefined>(undefined);
 
   // Börja om med rätt bild när butik, kategori eller logga ändras (justeras direkt under render)
   const [srcInputs, setSrcInputs] = useState({ name, category, logoUrl, preferCatIcon });
@@ -72,7 +84,7 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
 
   // Ingen känd logga: leta upp en via nätet (lite fördröjt så att snabb scrollning inte skickar anrop)
   useEffect(() => {
-    if (preferCatIcon || resolvedSrc || !name || name.trim().length < 3 || isSwish) return;
+    if (preferCatIcon || bankMark || resolvedSrc || !name || name.trim().length < 3 || isSwish) return;
     let cancelled = false;
     const timer = window.setTimeout(() => {
       fetchLogoForName(name, category)
@@ -89,10 +101,10 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [name, category, logoUrl, isSwish, preferCatIcon, resolvedSrc]);
+  }, [name, category, logoUrl, isSwish, preferCatIcon, resolvedSrc, bankMark]);
 
   const handleError = () => {
-    const fallback = getFallbackLogoUrl(currentSrc, name, category);
+    const fallback = bankMark ? undefined : getFallbackLogoUrl(currentSrc, name, category);
     if (fallback && fallback !== currentSrc) {
       setCurrentSrc(fallback);
     } else {
@@ -102,20 +114,25 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
 
   const handleLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const img = e.currentTarget;
+    const w = img.naturalWidth;
+    const h = img.naturalHeight;
+    const ratio = h > 0 ? w / h : 0;
     if (
-      (img.naturalWidth <= 1 && img.naturalHeight <= 1) ||
-      (currentSrc && currentSrc.includes('sz=128') && img.naturalWidth <= 16 && img.naturalHeight <= 16)
+      (w <= 1 && h <= 1) ||
+      (currentSrc && currentSrc.includes('sz=128') && w <= 16 && h <= 16) ||
+      // Ordbild (t.ex. en bred banklogga) blir oläslig i en kvadrat → bokstavsruta i stället
+      (!currentSrc?.startsWith('data:') && (ratio > 1.6 || ratio < 0.6))
     ) {
       handleError();
+      return;
+    }
+    if (currentSrc) {
+      verifiedLogoSrcs.add(currentSrc);
+      setLoadedSrc(currentSrc);
     }
   };
 
-  const sizeClasses = {
-    sm: 'w-8 h-8 rounded-xl',
-    md: 'w-10 h-10 rounded-xl',
-    lg: 'w-11 h-11 rounded-2xl',
-    xl: 'w-14 h-14 rounded-2xl',
-  }[size];
+  const sizeClasses = LOGO_TILE_SIZE_CLASSES[size];
 
   const iconSize = {
     sm: 24,
@@ -151,29 +168,53 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
     }
 
     if (!preferCatIcon && currentSrc && !imgFailed) {
+      // Tills bilden har laddats och godkänts visas bokstavsrutan – aldrig en tom vit ruta
+      const isVerified =
+        loadedSrc === currentSrc ||
+        currentSrc.startsWith('data:') ||
+        verifiedLogoSrcs.has(currentSrc);
       const isFullBleedTile =
+        Boolean(bankMark) ||
         currentSrc.includes('img.logo.dev/') ||
         currentSrc.startsWith('data:image/jpeg') ||
         (currentSrc.startsWith('data:image/svg+xml') && currentSrc.includes('viewBox=%270%200%20120%20120%27')) ||
         (currentSrc.startsWith('data:image/svg+xml') && currentSrc.includes("viewBox='0 0 120 120'"));
+      const img = (
+        <img
+          src={currentSrc}
+          alt={name}
+          onLoad={handleLoad}
+          onError={handleError}
+          className={
+            isVerified
+              ? isFullBleedTile
+                ? 'w-full h-full object-cover scale-[1.04]'
+                : 'w-[70%] h-[70%] object-contain'
+              : 'absolute w-px h-px opacity-0 pointer-events-none'
+          }
+          loading="lazy"
+        />
+      );
+      if (!isVerified) {
+        return (
+          <div className="relative shrink-0 inline-flex">
+            <MonogramTile name={name} size={size} tint={bankMark?.tint} />
+            {img}
+          </div>
+        );
+      }
       return (
         <div
           className={`${sizeClasses} ui-logo-tile flex items-center justify-center overflow-hidden shrink-0`}
         >
-          <img
-            src={currentSrc}
-            alt={name}
-            onLoad={handleLoad}
-            onError={handleError}
-            className={
-              isFullBleedTile
-                ? 'w-full h-full object-cover scale-[1.04]'
-                : 'w-[70%] h-[70%] object-contain'
-            }
-            loading="lazy"
-          />
+          {img}
         </div>
       );
+    }
+
+    // En bank eller en logga som inte gick att visa: bokstavsruta (aldrig en tom vit ruta)
+    if (!preferCatIcon && (bankMark || imgFailed)) {
+      return <MonogramTile name={name} size={size} tint={bankMark?.tint} />;
     }
 
     return (

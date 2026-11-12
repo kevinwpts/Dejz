@@ -2,12 +2,20 @@ import { appOrigin } from '../../utils/platform';
 import { signInWithProvider } from '../../utils/nativeAuth';
 import { friendlyAuthError } from '../../utils/authErrors';
 import React, { useState, useEffect } from 'react';
-import { SpinnerGap, Eye, EyeSlash, EnvelopeSimple, WarningCircle, PaperPlaneTilt } from '@phosphor-icons/react';
+import {
+  SpinnerGap,
+  Eye,
+  EyeSlash,
+  EnvelopeSimple,
+  WarningCircle,
+  PaperPlaneTilt,
+  CaretLeft,
+  X,
+} from '@phosphor-icons/react';
 import { supabase, isSupabaseConfigured } from '../../supabaseClient';
 import { BottomSheet } from '../ui/BottomSheet';
-import { SheetHeader } from '../ui/SheetHeader';
-
-const APPLE_SIGNIN_ENABLED = import.meta.env.VITE_ENABLE_APPLE_SIGNIN === 'true';
+import { BrandLogo } from '../BrandLogo';
+import { SocialSignInButtons } from '../landing/SocialSignInButtons';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -17,6 +25,18 @@ interface AuthModalProps {
 }
 
 type AuthView = 'login' | 'register' | 'forgot_password';
+
+// Samma rubriker och undertexter som inloggningssidan (landing/AuthFormView)
+const AUTH_TITLES: Record<AuthView, string> = {
+  login: 'Logga in',
+  register: 'Skapa konto',
+  forgot_password: 'Glömt lösenord',
+};
+const AUTH_SUBTITLES: Record<AuthView, string> = {
+  login: 'Välkommen tillbaka.',
+  register: 'Gratis – och klart på två minuter.',
+  forgot_password: 'Skriv din e-post så skickar vi en länk där du väljer ett nytt lösenord.',
+};
 
 /** Registrering är öppen – Dejz är en gratis betaversion. */
 const SIGNUPS_OPEN = true;
@@ -189,49 +209,62 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
+  const isSubView = view === 'forgot_password' || resetEmailSent;
+  const goBackToLogin = () => {
+    setView('login');
+    handleReset();
+  };
+  const switchTo = (next: AuthView) => {
+    setView(next);
+    handleReset();
+  };
+
   return (
     <BottomSheet
       isOpen={isOpen}
       onClose={onClose}
+      surfaceClass="bg-[var(--bg-color)]"
       contentClassName="px-5 pt-1 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] overflow-y-auto"
     >
-      {/* Top Header */}
-      <SheetHeader
-        title={
-          view === 'forgot_password' || resetEmailSent
-            ? resetEmailSent
-              ? 'Kolla inkorgen'
-              : 'Återställ lösenord'
-            : view === 'login'
-            ? 'Logga in'
-            : 'Skapa konto'
-        }
-        onBack={
-          view === 'forgot_password' || resetEmailSent
-            ? () => {
-                setView('login');
-                handleReset();
-              }
-            : undefined
-        }
-        onClose={onClose}
-      />
+      {/* Samma utseende som inloggningssidan: logga i mitten, stor rubrik, vita fältkort */}
+      <header className="grid grid-cols-[2.25rem_1fr_2.25rem] items-center h-10">
+        {isSubView ? (
+          <button
+            type="button"
+            onClick={goBackToLogin}
+            className="ui-header-btn"
+            aria-label="Tillbaka"
+            title="Tillbaka"
+          >
+            <CaretLeft size={16} weight="bold" />
+          </button>
+        ) : (
+          <span aria-hidden="true" />
+        )}
+        <BrandLogo className="h-6 justify-self-center text-[var(--accent-color)]" />
+        <button
+          type="button"
+          onClick={onClose}
+          className="ui-header-btn"
+          aria-label="Stäng"
+          title="Stäng"
+        >
+          <X size={15} weight="bold" />
+        </button>
+      </header>
 
       {resetEmailSent ? (
-        /* Modern "Check your inbox" screen in modal */
-        <div className="py-6 text-center space-y-5 animate-scale-in">
-          <span className="ui-empty-badge" aria-hidden="true">
-            <EnvelopeSimple size={26} weight="regular" />
+        <div className="pt-8 pb-2 text-center space-y-5 animate-scale-in">
+          <span className="ui-auth-icon-tile mx-auto" aria-hidden="true">
+            <EnvelopeSimple size={28} weight="regular" />
           </span>
 
           <div className="space-y-2 px-2">
-            <h2 className="font-display font-semibold text-xl sm:text-2xl tracking-[-0.012em] text-[var(--text-primary)]">
-              Kolla din inkorg
-            </h2>
+            <h2 className="ui-step-title">Kolla din inkorg</h2>
             <p className="text-callout text-[var(--text-secondary)]">
               Vi har skickat en återställningslänk till:
             </p>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--fill-grouped)] text-callout font-semibold text-[var(--text-primary)] max-w-full">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-callout font-semibold text-[var(--text-primary)] max-w-full">
               <span className="truncate max-w-[240px]">{email.trim()}</span>
             </div>
             <p className="text-footnote text-[var(--text-secondary)] pt-1 leading-relaxed max-w-xs mx-auto">
@@ -252,7 +285,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               type="button"
               disabled={resendCooldown > 0 || resending}
               onClick={handleResendReset}
-              className="text-footnote font-semibold text-[var(--text-primary)] hover:opacity-75 disabled:opacity-40 transition-all cursor-pointer flex items-center gap-1.5"
+              className="text-footnote font-semibold text-[var(--accent-color)] hover:opacity-75 disabled:opacity-40 transition-all cursor-pointer flex items-center gap-1.5"
             >
               {resending && <SpinnerGap size={12} className="animate-spin" />}
               {resendCooldown > 0 ? `Skicka igen om ${resendCooldown}s` : 'Skicka igen'}
@@ -260,111 +293,34 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         </div>
       ) : (
-        <>
-          {/* View Switcher (Login / Register) */}
-          {SIGNUPS_OPEN && view !== 'forgot_password' && (
-            <div className="ui-segmented grid-cols-2 mb-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setView('login');
-                  handleReset();
-                }}
-                className={view === 'login' ? 'ui-segmented-tab-active' : 'ui-segmented-tab'}
-              >
-                Logga in
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setView('register');
-                  handleReset();
-                }}
-                className={view === 'register' ? 'ui-segmented-tab-active' : 'ui-segmented-tab'}
-              >
-                Skapa konto
-              </button>
-            </div>
-          )}
+        <div key={`auth-modal-${view}`} className="pt-6 space-y-6 animate-fade-in">
+          <div>
+            <h2 className="ui-step-title">{AUTH_TITLES[view]}</h2>
+            <p className="ui-onb-subtitle">{AUTH_SUBTITLES[view]}</p>
+          </div>
 
-          {/* General Non-Password Error Notice */}
-          {errorMsg && !hasPasswordError && (
-            <div className="mb-4 p-3 rounded-card-nested bg-negative-solid/10 text-negative text-footnote animate-scale-in flex items-start gap-2">
-              <WarningCircle size={15} className="shrink-0 mt-0.5" />
-              <span>{errorMsg}</span>
-            </div>
-          )}
-
-          {/* Google Sign In Button */}
           {view !== 'forgot_password' && (
-            <>
-              {APPLE_SIGNIN_ENABLED && (
-                <button
-                  type="button"
-                  onClick={() => handleGoogleSignIn('apple')}
-                  disabled={googleLoading || loading}
-                  className="w-full h-[48px] mb-3 rounded-full bg-black text-white dark:bg-white dark:text-black font-semibold text-callout flex items-center justify-center gap-2.5 active:scale-[0.98] disabled:opacity-40 cursor-pointer"
-                >
-                  <svg className="w-[14px] h-[17px] shrink-0" viewBox="0 0 814 1000" fill="currentColor" aria-hidden="true">
-                    <path d="M788 341c-6 4-108 62-108 190 0 148 130 200 134 202-1 3-21 72-69 142-43 62-88 124-156 124s-86-40-165-40c-77 0-104 41-166 41s-106-57-156-128C44 790 0 671 0 558 0 377 118 281 234 281c62 0 113 41 152 41 37 0 95-43 165-43 27 0 123 2 187 96zM557 159c29-35 50-83 50-131 0-7-1-13-2-19-47 2-104 32-138 72-27 30-52 79-52 127 0 7 1 15 2 17 3 0 8 1 13 1 43 0 96-28 127-67z" />
-                  </svg>
-                  <span>Fortsätt med Apple</span>
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => handleGoogleSignIn('google')}
-                disabled={googleLoading || loading}
-                className="ui-btn-secondary mb-4 gap-2.5"
-              >
-                {googleLoading ? (
-                  <SpinnerGap size={16} className="animate-spin text-[var(--text-primary)]" />
-                ) : (
-                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                    <path
-                      fill="#4285F4"
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    />
-                    <path
-                      fill="#34A853"
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    />
-                    <path
-                      fill="#FBBC05"
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                    />
-                    <path
-                      fill="#EA4335"
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                    />
-                  </svg>
-                )}
-                <span>Fortsätt med Google</span>
-              </button>
-
-              <div className="relative my-4 text-center">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-[var(--separator)]" />
-                </div>
-                <span className="relative px-3 bg-[var(--surface-color)] text-footnote text-[var(--text-secondary)]">
-                  eller med e-post
-                </span>
-              </div>
-            </>
+            <SocialSignInButtons
+              disabled={googleLoading || loading}
+              googleLoading={googleLoading}
+              onSignIn={(provider) => handleGoogleSignIn(provider)}
+            />
           )}
 
-          {/* Email & Password Form */}
+          {errorMsg && !hasPasswordError && (
+            <div className="ui-auth-alert animate-scale-in">
+              <WarningCircle size={18} weight="fill" className="shrink-0 mt-px" />
+              <span className="min-w-0 flex-1">{errorMsg}</span>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div
               key={shakeTrigger}
-              className={`ui-sheet-group transition-all ${
-                hasPasswordError ? 'ring-[1.5px] ring-negative-solid animate-shake' : ''
-              }`}
+              className={`ui-auth-field-card ${hasPasswordError ? 'ui-auth-field-card-error animate-shake' : ''}`}
             >
               <label className="px-4 py-3.5 block cursor-text">
-                <span className="ui-field-label block mb-1">
-                  E-postadress
-                </span>
+                <span className="ui-field-label block mb-1">E-postadress</span>
                 <input
                   type="email"
                   required
@@ -379,16 +335,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </label>
 
               {view !== 'forgot_password' && (
-                <div className="px-4 py-3.5">
+                <div className="ui-auth-field-divider px-4 py-3.5">
                   <div className="flex items-center justify-between mb-1">
                     <span className="ui-field-label">Lösenord</span>
                     {view === 'login' && (
                       <button
                         type="button"
-                        onClick={() => {
-                          setView('forgot_password');
-                          handleReset();
-                        }}
+                        onClick={() => switchTo('forgot_password')}
                         className="text-footnote font-medium text-[var(--accent-color)] hover:opacity-80 cursor-pointer"
                       >
                         Glömt lösenord?
@@ -420,15 +373,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </div>
               )}
 
-              {/* Inline Password Error micro-banner */}
               {hasPasswordError && (
-                <div className="px-4 py-3 flex items-center gap-2 text-footnote text-negative font-medium animate-scale-in">
+                <div className="ui-auth-field-divider px-4 py-3 flex items-center gap-2 text-footnote text-negative font-medium animate-scale-in">
                   <WarningCircle size={16} weight="fill" className="shrink-0" />
                   <span>Fel e-post eller lösenord. Försök igen.</span>
                 </div>
               )}
             </div>
-
 
             <button
               type="submit"
@@ -443,13 +394,38 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 'Skapa konto'
               ) : (
                 <>
-                  <span>Skicka återställningslänk</span>
-                  <PaperPlaneTilt size={15} weight="bold" />
+                  <span>Skicka länk</span>
+                  <PaperPlaneTilt size={16} weight="bold" />
                 </>
               )}
             </button>
           </form>
-        </>
+
+          {/* Byt mellan logga in / skapa konto – samma länk som på inloggningssidan */}
+          <p className="text-center text-callout text-[var(--text-secondary)]">
+            {view === 'login' && SIGNUPS_OPEN && (
+              <>
+                Inget konto än?{' '}
+                <button type="button" onClick={() => switchTo('register')} className="ui-auth-footer-link">
+                  Skapa konto
+                </button>
+              </>
+            )}
+            {view === 'register' && (
+              <>
+                Har du redan ett konto?{' '}
+                <button type="button" onClick={() => switchTo('login')} className="ui-auth-footer-link">
+                  Logga in
+                </button>
+              </>
+            )}
+            {view === 'forgot_password' && (
+              <button type="button" onClick={goBackToLogin} className="ui-auth-footer-link">
+                Tillbaka till inloggning
+              </button>
+            )}
+          </p>
+        </div>
       )}
     </BottomSheet>
   );

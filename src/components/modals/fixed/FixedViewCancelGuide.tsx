@@ -1,4 +1,5 @@
 import type { CancelGuideData, ModalSubView } from './shared';
+import { getProviderName } from './shared';
 import type { SetStateAction } from 'react';
 import React from 'react';
 import { Trash, ArrowSquareOut, Sparkle, Info } from '@phosphor-icons/react';
@@ -43,11 +44,14 @@ export const FixedViewCancelGuide: React.FC<FixedViewCancelGuideProps> = ({
   setShowDeleteConfirm,
   showDeleteConfirm,
   handleDelete,
-}) => (
+}) => {
+  // Företaget, inte abonnemangsnivån: "Logga in hos Netflix", inte "… hos Netflix Standard HD"
+  const provider = getProviderName(displayName);
+  return (
   <>
     {subView === 'cancel-guide' && (
       <div className={`${slideAnimClass} space-y-4`}>
-        <SheetHeader title={<>Säg upp {displayName}</>} onBack={() => navigateSubView('details', 'back')} onClose={onClose} flush />
+        <SheetHeader title={<>Säg upp {provider}</>} onBack={() => navigateSubView('details', 'back')} onClose={onClose} flush />
 
         {/* Sammanfattningskort med årlig besparing */}
         <div className="px-4 py-3 rounded-card-nested bg-[var(--fill-grouped)] flex items-center justify-between gap-3">
@@ -80,7 +84,7 @@ export const FixedViewCancelGuide: React.FC<FixedViewCancelGuideProps> = ({
           <div className="rounded-card-nested bg-[var(--fill-grouped)] p-5 space-y-3.5 animate-pulse">
             <div className="flex items-center gap-2 text-footnote text-[var(--text-secondary)]">
               <Sparkle size={14} weight="fill" className="text-[var(--text-primary)] animate-spin" />
-              <span>Tar fram uppsägningsguide för {displayName}...</span>
+              <span>Tar fram uppsägningsguide för {provider} …</span>
             </div>
             <div className="h-3.5 w-3/4 rounded bg-[var(--surface-raised)]" />
             <div className="space-y-2.5 pt-1">
@@ -92,19 +96,22 @@ export const FixedViewCancelGuide: React.FC<FixedViewCancelGuideProps> = ({
         ) : (
           (() => {
             const guide: CancelGuideData = cancelGuide || {
-              serviceName: displayName,
-              noticePeriod: 'Kontrollera uppsägningstid på Mina Sidor',
+              serviceName: provider,
+              noticePeriod: '',
               steps: [
-                `Logga in på Mina Sidor hos ${displayName}.`,
+                `Logga in på ditt konto hos ${provider}.`,
                 'Gå till Abonnemang eller Medlemskap och välj Avsluta.',
-                'Kontrollera att du får en bekräftelse på uppsägningen via e-post.',
+                'Spara bekräftelsen du får via e-post.',
               ],
               cancelUrl: `https://www.google.com/search?q=${encodeURIComponent(
-                `${displayName} säga upp abonnemang`
+                `${provider} säga upp abonnemang`
               )}`,
-              cancelUrlLabel: `Gå till ${displayName}`,
-              tip: 'Låt eventuellt autogiro ligga kvar tills sista fakturan under uppsägningstiden är betald.',
+              cancelUrlLabel: `Gå till ${provider}`,
+              tip: 'Låt autogirot ligga kvar tills sista fakturan är betald.',
             };
+            // Visa uppsägningstid bara när den säger något ("1 månad"), inte "Kontrollera på Mina Sidor"
+            const noticePeriod = (guide.noticePeriod || '').trim();
+            const showNoticePeriod = noticePeriod !== '' && !/^kontrollera|mina sidor/i.test(noticePeriod);
 
             return (
               <div className="space-y-3.5">
@@ -134,10 +141,12 @@ export const FixedViewCancelGuide: React.FC<FixedViewCancelGuideProps> = ({
                     ))}
                   </ol>
 
-                  <div className="pt-3 border-t border-[var(--separator)] text-footnote leading-snug">
-                    <span className="text-[var(--text-secondary)]">Uppsägningstid: </span>
-                    <span className="text-[var(--text-primary)]">{guide.noticePeriod}</span>
-                  </div>
+                  {showNoticePeriod && (
+                    <div className="pt-3 border-t border-[var(--separator)] text-footnote leading-snug">
+                      <span className="text-[var(--text-secondary)]">Uppsägningstid: </span>
+                      <span className="text-[var(--text-primary)]">{noticePeriod}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Tips */}
@@ -190,3 +199,4 @@ export const FixedViewCancelGuide: React.FC<FixedViewCancelGuideProps> = ({
     )}
   </>
 );
+};

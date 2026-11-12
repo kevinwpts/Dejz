@@ -6,6 +6,7 @@ import { ConfirmDialog } from './ui/ConfirmDialog';
 import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../constants';
 import { getStoredExpenseCategories, saveStoredExpenseCategories, getStoredIncomeCategories, saveStoredIncomeCategories, propagateCategoryChangeInCache, clearCategoryRemap } from '../utils/cache/categories';
 import { CategoryIcon, AVAILABLE_CATEGORY_ICONS } from './CategoryIcon';
+import { IconPickerGrid } from './settings/IconPickerGrid';
 import { TransactionItem, FixedExpenseItem, IncomeItem } from '../app/models';
 import { SheetHeader } from './ui/SheetHeader';
 
@@ -307,7 +308,6 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
           title="Återställ standardkategorier?"
           description="Dina egna kategorier ersätts med standarduppsättningen."
           confirmLabel="Återställ"
-          variant="primary"
           onConfirm={handleResetToDefaults}
           onCancel={() => setShowResetConfirm(false)}
         />
@@ -361,28 +361,14 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
             <span className="px-1 ui-field-label block">
               Välj ikon
             </span>
-            <div className="ui-sheet-box grid grid-cols-6 gap-1.5 p-2.5 max-h-56 overflow-y-auto">
-              {AVAILABLE_CATEGORY_ICONS.map((item) => {
-                const isSelected = formIcon === item.id;
-                return (
-                  <button
-                    aria-label={item.label}
-                    aria-pressed={isSelected}
-                    key={item.id}
-                    type="button"
-                    title={item.label}
-                    onClick={() => setFormIcon(item.id)}
-                    className={`h-11 rounded-xl flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
-                      isSelected
-                        ? 'bg-[var(--surface-color)] shadow-[var(--segment-thumb-shadow)] ring-2 ring-[var(--text-primary)]'
-                        : 'bg-transparent'
-                    }`}
-                  >
-                    <CategoryIcon iconId={item.id} size={22} badge={false} />
-                  </button>
-                );
-              })}
-            </div>
+            <IconPickerGrid
+              options={AVAILABLE_CATEGORY_ICONS}
+              value={formIcon}
+              onChange={setFormIcon}
+              renderIcon={(id) => (
+                <CategoryIcon iconId={id} size={22} muted className="!opacity-100" />
+              )}
+            />
           </div>
 
           <div className="space-y-2.5">

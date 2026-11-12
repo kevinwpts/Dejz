@@ -103,7 +103,7 @@ export const FixedViewSimilar: React.FC<FixedViewSimilarProps> = ({
                           onMarkAsFixed(tx, 'expense');
                         }}
                         title="Lägg till detta belopp som egen fast utgift"
-                        className="ui-btn-sm !bg-[var(--surface-color)]"
+                        className="ui-btn-sm"
                       >
                         <Plus size={12} weight="bold" />
                         <span>Fast</span>

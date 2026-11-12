@@ -3,7 +3,7 @@ import type { SimilarTransactionsSummary } from '../../../utils/recurring/simila
 import type { ModalSubView } from './shared';
 import type { RefObject, SetStateAction } from 'react';
 import React from 'react';
-import { PencilSimple, Trash, CaretRight, Paperclip, ClockCounterClockwise, Scissors } from '@phosphor-icons/react';
+import { PencilSimple, Trash, CaretRight, Paperclip, Scissors } from '@phosphor-icons/react';
 import { FixedExpenseItem, formatFixedCancellationBadge } from '../../../app/models';
 import { CategoryIcon, PaymentMethodIcon } from '../../CategoryIcon';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
@@ -106,17 +106,12 @@ export const FixedViewDetails: React.FC<FixedViewDetailsProps> = ({
           <button
             type="button"
             onClick={() => navigateSubView('edit', 'forward')}
-            className="group flex items-center justify-center gap-1.5 px-3 max-w-md mx-auto cursor-pointer"
+            className="block w-full px-2 max-w-md mx-auto cursor-pointer"
             aria-label={`Byt namn på ${name || displayName}`}
           >
-            <h2 className="font-display font-semibold text-xl tracking-[-0.02em] text-[var(--text-primary)] text-center truncate">
+            <h2 className="ui-detail-title">
               {name || displayName}
             </h2>
-            <PencilSimple
-              size={14}
-              weight="bold"
-              className="shrink-0 text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
-            />
           </button>
 
           <div className="mt-1.5 flex items-baseline justify-center font-display font-bold text-[34px] leading-tight tracking-[-0.04em] text-[var(--text-primary)] tabular-nums">
@@ -142,17 +137,15 @@ export const FixedViewDetails: React.FC<FixedViewDetailsProps> = ({
 
         <div className="space-y-3.5">
           {/* 1. Kompakta snabbåtgärder (Apple Wallet / Revolut-stil) */}
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={() => navigateSubView('cancel-picker', 'forward')}
               className="ui-action-tile group"
             >
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center group-hover:scale-105 transition-transform ${
-                  activeExpense?.isCancelled
-                    ? 'bg-caution-solid/15 text-caution-solid'
-                    : 'bg-[var(--surface-color)] text-[var(--text-primary)]'
+                className={`ui-action-tile-icon ${
+                  activeExpense?.isCancelled ? 'bg-caution-solid/15 text-caution-solid' : ''
                 }`}
               >
                 <Scissors size={16} />
@@ -174,7 +167,7 @@ export const FixedViewDetails: React.FC<FixedViewDetailsProps> = ({
               }}
               className="ui-action-tile group relative"
             >
-              <div className="w-8 h-8 rounded-full bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] group-hover:scale-105 transition-transform relative">
+              <div className="ui-action-tile-icon relative">
                 <Paperclip size={16} weight="regular" />
                 {draftReceipts.length > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-positive-solid ring-2 ring-[var(--bg-color)]" />
@@ -185,22 +178,22 @@ export const FixedViewDetails: React.FC<FixedViewDetailsProps> = ({
               </span>
             </button>
 
-            <button
-              type="button"
-              onClick={() => navigateSubView('similar', 'forward')}
-              className="ui-action-tile group"
-            >
-              <div className="w-8 h-8 rounded-full bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] group-hover:scale-105 transition-transform">
-                <ClockCounterClockwise size={16} />
-              </div>
-              <span className="ui-action-tile-label">
-                {similarInfo.transactions.length > 0 ? `${similarInfo.transactions.length} dragningar` : 'Historik'}
-              </span>
-            </button>
           </div>
 
           {/* 2. Ett enda sammanhållet detaljkort */}
           <div className="ui-sheet-group">
+            <button
+              type="button"
+              onClick={() => navigateSubView('similar', 'forward')}
+              className="ui-row-btn"
+            >
+              <span className="ui-info-label">Tidigare dragningar</span>
+              <span className="ui-info-value flex items-center gap-1.5 tabular-nums">
+                <span>{similarInfo.transactions.length}</span>
+                <CaretRight size={12} className="text-[var(--text-muted)]" />
+              </span>
+            </button>
+
             <button
               type="button"
               onClick={() => navigateSubView('category-picker', 'forward')}
@@ -296,10 +289,10 @@ export const FixedViewDetails: React.FC<FixedViewDetailsProps> = ({
                       </div>
                       <div className="min-w-0">
                         <span className="ui-list-row-title text-callout block group-hover:opacity-80">
-                          {rcpt.name || `Kvitto ${idx + 1}`}
+                          {draftReceipts.length > 1 ? `Kvitto ${idx + 1}` : 'Kvitto'}
                         </span>
                         <span className="text-footnote text-[var(--text-secondary)] block">
-                          Kvitto · tryck för att visa
+                          Tryck för att visa
                         </span>
                       </div>
                     </button>

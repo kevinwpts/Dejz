@@ -9,70 +9,77 @@ export interface GoalArtworkTheme {
   progressColor: string;
 }
 
+/**
+ * Alla bilder ligger på samma ljuslila ruta och alla förloppsstaplar är varumärkets lila
+ * (tokens i index.css) – illustrationen bär färgen, inte bakgrunden.
+ */
+const GOAL_ART_TILE_BG = 'var(--goal-art-bg)';
+const GOAL_PROGRESS_COLOR = 'var(--goal-progress)';
+
 export const GOAL_ARTWORKS: GoalArtworkTheme[] = [
   {
     id: 'piggy',
     label: 'Spargris & buffert',
     keywords: ['spargris', 'buffert', 'spara', 'pengar', 'mynt', 'allmänt', 'playstation', 'pryl'],
-    tileBg: '#0E4D42',
-    heroBg: 'linear-gradient(165deg, #134E43 0%, #0B332C 100%)',
-    progressColor: '#52B79A',
+    tileBg: GOAL_ART_TILE_BG,
+    heroBg: GOAL_ART_TILE_BG,
+    progressColor: GOAL_PROGRESS_COLOR,
   },
   {
     id: 'safe',
     label: 'Kassaskåp & trygghet',
     keywords: ['kassaskåp', 'trygghet', 'buffert', 'pension', 'säkerhet', 'bank', 'nödfond'],
-    tileBg: '#C4C9CE',
-    heroBg: 'linear-gradient(165deg, #374151 0%, #1F2937 100%)',
-    progressColor: '#94A3B8',
+    tileBg: GOAL_ART_TILE_BG,
+    heroBg: GOAL_ART_TILE_BG,
+    progressColor: GOAL_PROGRESS_COLOR,
   },
   {
     id: 'globe',
     label: 'Världen & storresa',
     keywords: ['världen', 'jorden', 'resa', 'utlandsresa', 'äventyr', 'flyg', 'glob'],
-    tileBg: '#0B1CF4',
-    heroBg: 'linear-gradient(165deg, #1E3A8A 0%, #0F1D4B 100%)',
-    progressColor: '#60A5FA',
+    tileBg: GOAL_ART_TILE_BG,
+    heroBg: GOAL_ART_TILE_BG,
+    progressColor: GOAL_PROGRESS_COLOR,
   },
   {
     id: 'beach',
     label: 'Semester & sol',
     keywords: ['semester', 'sol', 'strand', 'bad', 'sommar', 'parasoll', 'resa', 'spanien'],
-    tileBg: '#4294FF',
-    heroBg: 'linear-gradient(165deg, #1D4ED8 0%, #0F296B 100%)',
-    progressColor: '#38BDF8',
+    tileBg: GOAL_ART_TILE_BG,
+    heroBg: GOAL_ART_TILE_BG,
+    progressColor: GOAL_PROGRESS_COLOR,
   },
   {
     id: 'shopping',
     label: 'Shopping & kläder',
     keywords: ['shopping', 'kläder', 'present', 'mode', 'unna', 'butik', 'prylar'],
-    tileBg: '#5BB5FF',
-    heroBg: 'linear-gradient(165deg, #0284C7 0%, #0B3C5D 100%)',
-    progressColor: '#7DD3FC',
+    tileBg: GOAL_ART_TILE_BG,
+    heroBg: GOAL_ART_TILE_BG,
+    progressColor: GOAL_PROGRESS_COLOR,
   },
   {
     id: 'celebration',
     label: 'Firande & fest',
     keywords: ['tårta', 'födelsedag', 'fest', 'bröllop', 'kalas', 'fira', 'jubileum'],
-    tileBg: '#F4513E',
-    heroBg: 'linear-gradient(165deg, #991B1B 0%, #4C0D0D 100%)',
-    progressColor: '#F87171',
+    tileBg: GOAL_ART_TILE_BG,
+    heroBg: GOAL_ART_TILE_BG,
+    progressColor: GOAL_PROGRESS_COLOR,
   },
   {
     id: 'calendar',
     label: 'Framtida plan & datum',
     keywords: ['kalender', 'månad', 'plan', 'år', 'jul', 'högtid', 'framtid'],
-    tileBg: '#F4D8DC',
-    heroBg: 'linear-gradient(165deg, #831843 0%, #430C22 100%)',
-    progressColor: '#F472B6',
+    tileBg: GOAL_ART_TILE_BG,
+    heroBg: GOAL_ART_TILE_BG,
+    progressColor: GOAL_PROGRESS_COLOR,
   },
   {
     id: 'house',
     label: 'Boende & kontantinsats',
     keywords: ['hus', 'boende', 'lägenhet', 'kontantinsats', 'renovering', 'hem', 'stuga'],
-    tileBg: '#67DFAA',
-    heroBg: 'linear-gradient(165deg, #065F46 0%, #033024 100%)',
-    progressColor: '#6EE7B7',
+    tileBg: GOAL_ART_TILE_BG,
+    heroBg: GOAL_ART_TILE_BG,
+    progressColor: GOAL_PROGRESS_COLOR,
   },
 ];
 

@@ -23,7 +23,7 @@ export const AppearanceSettingsView: React.FC<AppearanceSettingsViewProps> = ({
     <div className="ui-page animate-slide-in-right">
       {/* Visual Preview Cards (like iOS / Revolut / Instagram) */}
       <div className="ui-card-p">
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2">
           {themeOptions.map((opt) => {
             const isSelected = themeMode === opt.id;
             return (
@@ -31,14 +31,13 @@ export const AppearanceSettingsView: React.FC<AppearanceSettingsViewProps> = ({
                 key={opt.id}
                 type="button"
                 onClick={() => applyTheme(opt.id)}
-                className="flex flex-col items-center gap-2.5 cursor-pointer group"
+                aria-pressed={isSelected}
+                className={`p-2 pb-2.5 rounded-card-nested flex flex-col items-center gap-2 cursor-pointer transition-all active:scale-[0.97] ${
+                  isSelected ? 'ui-selected' : 'text-[var(--text-secondary)]'
+                }`}
               >
                 <div
-                  className={`w-full aspect-[4/5] rounded-2xl p-2.5 border-2 transition-all overflow-hidden relative flex flex-col justify-between ${
-                    isSelected
-                      ? 'border-[var(--text-primary)]'
-                      : 'border-[var(--border-subtle)] opacity-80 group-hover:opacity-100'
-                  } ${
+                  className={`w-full aspect-[4/5] rounded-xl p-2.5 border border-[var(--border-control)] transition-all overflow-hidden relative flex flex-col justify-between ${
                     opt.id === 'light'
                       ? 'bg-stone-100'
                       : opt.id === 'dark'
@@ -98,24 +97,13 @@ export const AppearanceSettingsView: React.FC<AppearanceSettingsViewProps> = ({
                 </div>
 
                 <span
-                  className={`text-footnote ${
-                    isSelected
-                      ? 'font-semibold text-[var(--text-primary)]'
-                      : 'font-medium text-[var(--text-secondary)]'
+                  className={`text-callout flex items-center gap-1 ${
+                    isSelected ? 'font-semibold' : 'font-medium'
                   }`}
                 >
+                  {isSelected && <Check size={13} weight="bold" />}
                   {opt.label}
                 </span>
-
-                <div
-                  className={`w-[22px] h-[22px] rounded-full border-[1.5px] flex items-center justify-center transition-colors ${
-                    isSelected
-                      ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
-                      : 'border-[var(--border-control)] bg-transparent'
-                  }`}
-                >
-                  {isSelected && <Check size={12} weight="bold" />}
-                </div>
               </button>
             );
           })}

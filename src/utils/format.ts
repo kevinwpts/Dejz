@@ -52,3 +52,11 @@ export const serializeTransactionReceipts = (urls?: string[] | null, fallbackSin
   return JSON.stringify(normalized);
 };
 
+/** Siffror med mellanslag som tusentalsavgränsare medan man skriver: "24800" → "24 800". */
+export function formatInputThousands(rawDigits: string): string {
+  const digits = rawDigits.replace(/[^\d]/g, '');
+  if (!digits) return '';
+  const num = Number(digits);
+  if (!Number.isFinite(num)) return '';
+  return new Intl.NumberFormat('sv-SE').format(num);
+}

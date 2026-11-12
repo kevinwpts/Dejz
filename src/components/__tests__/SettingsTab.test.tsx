@@ -151,7 +151,7 @@ describe('inställningar – lönedag', () => {
     await user.click(screen.getByText('27', { selector: 'button > span' }));
     expect(props.onUpdatePayday).toHaveBeenCalledWith(27);
 
-    const weekend = screen.getByRole('switch', { name: /Helghantering/ });
+    const weekend = screen.getByRole('switch', { name: /Lön före helg/ });
     expect(weekend.getAttribute('aria-checked')).toBe('true');
     await user.click(weekend);
     expect(props.onUpdateWeekendHandling).toHaveBeenCalledWith('none');
@@ -160,7 +160,7 @@ describe('inställningar – lönedag', () => {
   test('utan styrning från föräldern byter listan själv till undersidan', async () => {
     const { user } = renderSettings({ onSubViewChange: undefined });
     await user.click(row('Lönedag'));
-    expect(screen.getByRole('switch', { name: /Helghantering/ })).toBeTruthy();
+    expect(screen.getByRole('switch', { name: /Lön före helg/ })).toBeTruthy();
     expect(screen.queryByText('Logga ut')).toBeNull();
   });
 });

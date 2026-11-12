@@ -39,10 +39,6 @@ export const TransactionsTabContent: React.FC = () => {
         setSelectedTransaction(tx ?? null);
         setIsTxModalOpen(true);
       }}
-      onAddTransaction={() => {
-        setSelectedTransaction(null);
-        setIsTxModalOpen(true);
-      }}
       onDeleteTransaction={handleDeleteTransaction}
       onToggleHeart={handleToggleHeart}
       onTogglePackage={handleTogglePackage}

@@ -59,6 +59,8 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   const [isClosing, setIsClosing] = useState(false);
   const [dragOffsetY, setDragOffsetY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  // Hårfin linje under arkets huvud när innehållet har scrollats in under det
+  const [bodyScrolled, setBodyScrolled] = useState(false);
 
   const sheetRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
@@ -74,6 +76,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
       setIsClosing(false);
       setDragOffsetY(0);
       setIsDragging(false);
+      setBodyScrolled(false);
     } else if (isRendered) {
       setIsClosing(true);
     }
@@ -228,9 +231,9 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
       >
         {/* Sticky Top Handle & Optional Header */}
         <div
-          className={`shrink-0 ${surfaceClass} z-20 ${
+          className={`shrink-0 ${surfaceClass} z-20 transition-shadow ${
             disablePadding ? '' : 'px-5 pt-2'
-          }`}
+          } ${title && bodyScrolled ? 'ui-header-scrolled' : ''}`}
         >
           <div
             className={
@@ -259,6 +262,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
         {/* Scrollable Middle Content */}
         <div
           ref={scrollBodyRef}
+          onScroll={title ? (e) => setBodyScrolled(e.currentTarget.scrollTop > 4) : undefined}
           className={`flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${effectivePaddingClass} ${
             title && !disablePadding ? 'pt-2' : ''
           }`}

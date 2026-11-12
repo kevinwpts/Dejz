@@ -3,7 +3,7 @@ import type { SimilarTransactionsSummary } from '../../../utils/recurring/simila
 import { ModalSubView, getDefaultPaymentMethodForTx } from './shared';
 import type { RefObject, SetStateAction } from 'react';
 import React from 'react';
-import { Heart, Package, Paperclip, Trash, ArrowsClockwise, CaretRight, PencilSimple, ClockCounterClockwise, Plus } from '@phosphor-icons/react';
+import { Heart, Package, Paperclip, Trash, ArrowsClockwise, CaretRight, PencilSimple, Plus } from '@phosphor-icons/react';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
 import { TransactionItem, FixedExpenseItem, IncomeItem } from '../../../app/models';
 import { CategoryIcon, PaymentMethodIcon } from '../../CategoryIcon';
@@ -113,44 +113,6 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
           onClose={onClose}
           actions={
             <>
-            {onToggleHeart && (
-              <button
-                aria-label="Spara köp"
-                aria-pressed={Boolean(activeTx.isHearted)}
-                type="button"
-                onClick={() => onToggleHeart(activeTx.id, !activeTx.isHearted)}
-                title="Spara köp"
-                className={`ui-icon-btn ${
-                  activeTx.isHearted ? 'text-negative-solid hover:text-negative' : ''
-                }`}
-              >
-                <Heart
-                  size={16}
-                  weight={activeTx.isHearted ? 'fill' : 'regular'}
-                  className={activeTx.isHearted ? 'text-negative-solid' : ''}
-                />
-              </button>
-            )}
-            {!isIncome && onTogglePackage && (
-              <button
-                aria-label="Väntar på paket"
-                aria-pressed={Boolean(activeTx.isWaitingForPackage)}
-                type="button"
-                onClick={() =>
-                  onTogglePackage(activeTx.id, !activeTx.isWaitingForPackage)
-                }
-                title="Väntar på paket"
-                className={`ui-icon-btn ${
-                  activeTx.isWaitingForPackage ? 'text-caution-solid hover:text-caution' : ''
-                }`}
-              >
-                <Package
-                  size={16}
-                  weight={activeTx.isWaitingForPackage ? 'fill' : 'regular'}
-                  className={activeTx.isWaitingForPackage ? 'text-caution-solid' : ''}
-                />
-              </button>
-            )}
               <button
                 type="button"
                 onClick={() => navigateSubView('edit', 'forward')}
@@ -178,17 +140,12 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
           <button
             type="button"
             onClick={() => navigateSubView('edit', 'forward')}
-            className="group flex items-center justify-center gap-1.5 px-3 max-w-md mx-auto cursor-pointer"
+            className="block w-full px-2 max-w-md mx-auto cursor-pointer"
             aria-label={`Byt namn på ${title || activeTx.title}`}
           >
-            <h2 className="font-display font-semibold text-xl tracking-[-0.02em] text-[var(--text-primary)] text-center truncate">
+            <h2 className="ui-detail-title">
               {title || activeTx.title}
             </h2>
-            <PencilSimple
-              size={14}
-              weight="bold"
-              className="shrink-0 text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
-            />
           </button>
 
           <div
@@ -212,7 +169,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
 
         <div className="space-y-3.5">
           {/* 1. Kompakta snabbåtgärder (Apple Wallet / Revolut-stil) */}
-          <div className="grid grid-cols-3 gap-2">
+          <div className={`grid gap-2 ${!isIncome && onTogglePackage ? 'grid-cols-4' : 'grid-cols-3'}`}>
             <button
               type="button"
               onClick={() => {
@@ -225,7 +182,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
               }}
               className="ui-action-tile group relative"
             >
-              <div className="w-8 h-8 rounded-full bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] group-hover:scale-105 transition-transform relative">
+              <div className="ui-action-tile-icon relative">
                 <Paperclip size={16} weight="regular" />
                 {draftReceipts.length > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-positive-solid ring-2 ring-[var(--bg-color)]" />
@@ -252,10 +209,8 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                 className="ui-action-tile group"
               >
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center group-hover:scale-105 transition-transform ${
-                    recurringStatus.isRecurring
-                      ? 'bg-positive-solid/15 text-positive'
-                      : 'bg-[var(--surface-color)] text-[var(--text-primary)]'
+                  className={`ui-action-tile-icon ${
+                    recurringStatus.isRecurring ? 'bg-positive-solid/15 text-positive' : ''
                   }`}
                 >
                   <ArrowsClockwise size={16} />
@@ -266,22 +221,63 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
               </button>
             )}
 
-            <button
-              type="button"
-              onClick={() => navigateSubView('similar', 'forward')}
-              className="ui-action-tile group"
-            >
-              <div className="w-8 h-8 rounded-full bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] group-hover:scale-105 transition-transform">
-                <ClockCounterClockwise size={16} />
-              </div>
-              <span className="ui-action-tile-label">
-                {similarInfo.transactions.length > 0 ? `${similarInfo.transactions.length} köp` : 'Historik'}
-              </span>
-            </button>
+            {onToggleHeart && (
+              <button
+                aria-label="Spara köp"
+                aria-pressed={Boolean(activeTx.isHearted)}
+                type="button"
+                onClick={() => onToggleHeart(activeTx.id, !activeTx.isHearted)}
+                className="ui-action-tile group"
+              >
+                <div
+                  className={`ui-action-tile-icon ${
+                    activeTx.isHearted ? 'bg-[var(--danger-container)] text-negative' : ''
+                  }`}
+                >
+                  <Heart size={16} weight={activeTx.isHearted ? 'fill' : 'regular'} />
+                </div>
+                <span className="ui-action-tile-label">
+                  {activeTx.isHearted ? 'Sparad' : 'Spara'}
+                </span>
+              </button>
+            )}
+
+            {!isIncome && onTogglePackage && (
+              <button
+                aria-label="Väntar på paket"
+                aria-pressed={Boolean(activeTx.isWaitingForPackage)}
+                type="button"
+                onClick={() => onTogglePackage(activeTx.id, !activeTx.isWaitingForPackage)}
+                className="ui-action-tile group"
+              >
+                <div
+                  className={`ui-action-tile-icon ${
+                    activeTx.isWaitingForPackage ? 'bg-[var(--warning-container)] text-caution' : ''
+                  }`}
+                >
+                  <Package size={16} weight={activeTx.isWaitingForPackage ? 'fill' : 'regular'} />
+                </div>
+                <span className="ui-action-tile-label">
+                  {activeTx.isWaitingForPackage ? 'Väntar' : 'Paket'}
+                </span>
+              </button>
+            )}
           </div>
 
           {/* 2. Ett enda sammanhållet detaljkort (allt i ett lugnt flöde) */}
           <div className="ui-sheet-group">
+            <button
+              type="button"
+              onClick={() => navigateSubView('similar', 'forward')}
+              className="ui-row-btn"
+            >
+              <span className="ui-info-label">{isIncome ? 'Tidigare inkomster' : 'Tidigare köp'}</span>
+              <span className="ui-info-value flex items-center gap-1.5 tabular-nums">
+                <span>{similarInfo.transactions.length}</span>
+                <CaretRight size={12} className="text-[var(--text-muted)]" />
+              </span>
+            </button>
+
             <button
               type="button"
               onClick={() => navigateSubView('category-picker', 'forward')}
@@ -356,10 +352,10 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                       </div>
                       <div className="min-w-0">
                         <span className="ui-list-row-title text-callout block group-hover:opacity-80">
-                          {rcpt.name || `Kvitto ${idx + 1}`}
+                          {draftReceipts.length > 1 ? `Kvitto ${idx + 1}` : 'Kvitto'}
                         </span>
                         <span className="text-footnote text-[var(--text-secondary)] block">
-                          Kvitto · tryck för att visa
+                          Tryck för att visa
                         </span>
                       </div>
                     </button>

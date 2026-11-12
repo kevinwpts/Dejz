@@ -1,5 +1,5 @@
 import type { RefObject, SetStateAction } from 'react';
-import React from 'react';
+import React, { useState } from 'react';
 import { isDemoMode } from '../../utils/demoUtils';
 import { EmailVerificationStatus } from '../EmailVerification';
 import { NewsletterToggle } from '../NewsletterToggle';
@@ -87,8 +87,22 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
   passwordStatus,
   passwordSaving,
 }) => {
+  // Sparat mobilnummer – jämförs med fältet så att "Spara uppgifter" bara går att trycka på efter en ändring
+  const [savedPhone, setSavedPhone] = useState(() => {
+    try {
+      return localStorage.getItem('dejz_user_phone') || '';
+    } catch {
+      return '';
+    }
+  });
+  const hasProfileChanges =
+    editName.trim() !== (userName || '').trim() ||
+    editEmail.trim() !== (userEmail || '').trim() ||
+    editPhone.trim() !== savedPhone.trim();
+
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!hasProfileChanges) return;
     if (onUpdateName) {
       onUpdateName(editName.trim());
     }
@@ -106,6 +120,7 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
     } catch {
       // ignore
     }
+    setSavedPhone(editPhone.trim());
     setProfileSaved(true);
     setTimeout(() => setProfileSaved(false), 1800);
   };
@@ -207,9 +222,6 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
         <span className="mt-3 font-display font-semibold text-xl tracking-[-0.02em] text-[var(--text-primary)] max-w-full truncate">
           {editName || userName || 'Mitt konto'}
         </span>
-        <span className="text-callout text-[var(--text-secondary)] max-w-full truncate">
-          {editEmail || userEmail || 'Ingen e-post angiven'}
-        </span>
         {userEmail && !isDemoMode() && <EmailVerificationStatus />}
 
         <div className="flex items-center justify-center gap-2 mt-3">
@@ -271,7 +283,7 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
             </label>
           </div>
 
-          <button type="submit" className="w-full ui-btn-primary">
+          <button type="submit" disabled={!hasProfileChanges && !profileSaved} className="w-full ui-btn-primary">
             {profileSaved ? (
               <>
                 <Check size={16} weight="bold" />

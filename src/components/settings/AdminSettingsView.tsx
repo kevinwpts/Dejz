@@ -25,7 +25,7 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
   onOpenPreviewTransactionModal,
 }) => {
   return (
-    <div className="pb-28 animate-slide-in-right">
+    <div className="pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] animate-slide-in-right">
       <AdminPanelView
         onRestartOnboarding={() => onStartOnboarding?.()}
         onStartCreateGoalWizard={() => onStartCreateGoalWizard?.()}

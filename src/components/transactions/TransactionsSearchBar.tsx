@@ -1,6 +1,6 @@
 // Sökfält, filterknapp, Alla/Utgifter/Inkomster-reglage, aktiva filterbrickor och live-summering överst i transaktionslistan.
 import React from 'react';
-import { MagnifyingGlass, X, Plus, SlidersHorizontal } from '@phosphor-icons/react';
+import { MagnifyingGlass, X, SlidersHorizontal } from '@phosphor-icons/react';
 import type { AccountItem } from '../../app/models';
 import { CategoryIcon } from '../CategoryIcon';
 import {
@@ -16,14 +16,12 @@ interface TransactionsSearchBarProps {
   filters: TransactionFiltersState;
   accounts: AccountItem[];
   onOpenFilter: () => void;
-  onAddTransaction?: () => void;
 }
 
 export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
   filters,
   accounts,
   onOpenFilter,
-  onAddTransaction,
 }) => {
   const {
     searchQuery,
@@ -90,17 +88,6 @@ export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
           )}
         </button>
 
-        {onAddTransaction && (
-          <button
-            type="button"
-            onClick={onAddTransaction}
-            title="Lägg till händelse"
-            className="h-11 px-3.5 rounded-xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-callout font-semibold text-[var(--text-primary)] flex items-center gap-1.5 active:scale-[0.96] transition-all cursor-pointer shrink-0"
-          >
-            <Plus size={16} weight="bold" />
-            <span>Lägg till</span>
-          </button>
-        )}
       </div>
 
       {/* Segmented Filter Control (Alla / Utgifter / Inkomster) */}

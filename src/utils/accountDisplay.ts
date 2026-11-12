@@ -32,3 +32,18 @@ export function describeAccount(raw: string, account: AccountItem | undefined): 
   const full = digits.length >= 7 ? source.replace(/^[•*\s·-]+/, '').trim() : masked;
   return { label, fullNumber: full, maskedNumber: masked };
 }
+
+/**
+ * Kort, läsbar form av ett kontonummer: clearingnummer + de fyra sista siffrorna.
+ * "83279123456789" → "8327-9 ··· 6789" (Swedbank har femsiffrigt clearing som börjar på 8),
+ * "50001234567" → "5000 ··· 4567". IBAN och korta nummer visas som "··· 6789".
+ */
+export function formatAccountNumberShort(raw: string): string {
+  const source = (raw || '').trim();
+  const digits = source.replace(/\D/g, '');
+  if (digits.length < 4) return source;
+  const last4 = digits.slice(-4);
+  if (/[a-z]/i.test(source) || digits.length < 9) return `··· ${last4}`;
+  const clearing = digits.startsWith('8') ? `${digits.slice(0, 4)}-${digits.slice(4, 5)}` : digits.slice(0, 4);
+  return `${clearing} ··· ${last4}`;
+}

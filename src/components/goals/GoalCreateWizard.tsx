@@ -15,6 +15,8 @@ export interface GoalCreateWizardProps {
   goalArtworkId: string;
   slideDir: "forward" | "back";
   wizardStep: 2 | 1 | 3 | 4 | 5 | 6;
+  /** Finns det något att välja i steg 4 (konton/saldo)? Annars hoppas steget över. */
+  hasTrackingChoice: boolean;
   navigateWizardStep: (next: CreateWizardStep, dir: "forward" | "back") => void;
   setIsCreateWizardOpen: (value: SetStateAction<boolean>) => void;
   goalTargetInput: string;
@@ -51,15 +53,16 @@ const STEP_HEADINGS: Record<CreateWizardStep, string> = {
   6: 'Hur mycket sparar du varje månad?',
 };
 
-/** Kort förklaring under rubriken – bara där steget behöver det. */
-const STEP_SUBTITLES: Partial<Record<CreateWizardStep, string>> = {
+/** En kort rad under varje rubrik – samma mönster i alla steg. */
+const STEP_SUBTITLES: Record<CreateWizardStep, string> = {
   1: 'Ge målet ett namn, t.ex. en resa eller en buffert.',
+  2: 'Bilden syns på målet. Du kan byta när du vill.',
+  3: 'Hela beloppet du vill nå. Går att ändra senare.',
   4: 'Välj ett konto så följer målet saldot automatiskt.',
   5: 'Har du inget sparat än hoppar du bara över.',
   6: 'Dras automatiskt från det du har kvar varje lönedag.',
 };
 
-const TOTAL_STEPS = 6;
 
 /** Guiden "Nytt sparmål" – skalet (ark, rubrik, tillbaka/hoppa över). Varje steg ligger i ./wizard/. */
 export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
@@ -67,6 +70,7 @@ export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
   goalArtworkId,
   slideDir,
   wizardStep,
+  hasTrackingChoice,
   navigateWizardStep,
   setIsCreateWizardOpen,
   goalTargetInput,
@@ -99,6 +103,11 @@ export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
     slideDir === 'forward' ? 'animate-page-forward' : 'animate-page-back';
   // Namn och målbelopp måste finnas innan målet kan sparas
   const canSave = Boolean(goalNameInput.trim()) && Number(goalTargetInput) > 0;
+
+  // Stegmätaren räknar bara de steg som faktiskt visas
+  const visibleSteps: CreateWizardStep[] = hasTrackingChoice ? [1, 2, 3, 4, 5, 6] : [1, 2, 3, 5, 6];
+  const totalSteps = visibleSteps.length;
+  const stepNumber = Math.max(1, visibleSteps.indexOf(wizardStep) + 1);
 
   const handleBackNavigation = () => {
     if (wizardStep === 6) {
@@ -153,16 +162,16 @@ export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
           <div
             className="flex-1 flex items-center gap-1"
             role="progressbar"
-            aria-label={`Steg ${wizardStep} av ${TOTAL_STEPS}`}
+            aria-label={`Steg ${stepNumber} av ${totalSteps}`}
             aria-valuemin={1}
-            aria-valuemax={TOTAL_STEPS}
-            aria-valuenow={wizardStep}
+            aria-valuemax={totalSteps}
+            aria-valuenow={stepNumber}
           >
-            {Array.from({ length: TOTAL_STEPS }, (_, i) => (
+            {Array.from({ length: totalSteps }, (_, i) => (
               <span
                 key={i}
                 className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
-                  i < wizardStep ? 'bg-[var(--cta-bg)]' : 'bg-[var(--segment-track)]'
+                  i < stepNumber ? 'bg-[var(--cta-bg)]' : 'bg-[var(--segment-track)]'
                 }`}
               />
             ))}
@@ -190,9 +199,7 @@ export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
           <h2 id="goal-wizard-title" className="ui-step-title">
             {STEP_HEADINGS[wizardStep]}
           </h2>
-          {subtitle && (
-            <p className="mt-2 text-subhead leading-snug text-[var(--text-secondary)]">{subtitle}</p>
-          )}
+          <p className="mt-2 text-subhead leading-snug text-[var(--text-secondary)]">{subtitle}</p>
         </div>
 
         {wizardStep === 1 && (

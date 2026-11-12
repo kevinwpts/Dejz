@@ -105,30 +105,30 @@ export const ReceiptPreviewSheet: React.FC<{
   <BottomSheet
     isOpen={Boolean(receipt)}
     onClose={onClose}
-    title="Kvitto"
+    title={receipt?.name ? `Kvitto · ${receipt.name}` : 'Kvitto'}
     zIndexClass="z-[190]"
   >
     {receipt && (
       <div className="space-y-4">
-        <div className="rounded-card-nested bg-[var(--fill-grouped)] p-3 overflow-hidden flex items-center justify-center max-h-[60dvh]">
+        <div className="ui-receipt-frame">
           {receipt.url.startsWith('data:image/') ||
           /\.(png|jpe?g|webp|gif)$/i.test(receipt.url) ? (
             <img
               src={receipt.url}
-              alt={receipt.name}
-              className="max-h-[56dvh] w-auto object-contain rounded-lg"
+              alt={receipt.name ? `Kvitto · ${receipt.name}` : 'Kvitto'}
+              className="ui-receipt-image"
             />
           ) : (
             <iframe
               src={receipt.url}
               title={receipt.name}
-              className="w-full h-[52dvh] rounded-xl border-0"
+              className="ui-receipt-pdf"
             />
           )}
         </div>
         <a
           href={receipt.url}
-          download={receipt.name || 'kvitto.jpg'}
+          download={receipt.name ? `Kvitto ${receipt.name}` : 'kvitto'}
           className="ui-btn-secondary"
         >
           <DownloadSimple size={18} weight="bold" />

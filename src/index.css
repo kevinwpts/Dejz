@@ -85,8 +85,9 @@
   --color-toast-action: var(--toast-action);
 
   /* Textskala (utan egen radhöjd, så att layouten inte flyttar sig) */
-  --text-micro: 10px;
-  --text-caption: 11px;
+  /* Golv: sekundärtext minst 12 px, radundertexter 13 px. 11 px bara för menyetiketter och märken. */
+  --text-micro: 11px;
+  --text-caption: 12px;
   --text-meta: 12px;
   --text-footnote: 13px;
   --text-callout: 14px;
@@ -483,7 +484,7 @@ h6 {
 }
 
 @utility text-micro-label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
   line-height: 1.38;
   letter-spacing: 0em;
@@ -778,6 +779,19 @@ h6 {
   --header-btn-bg: #FFFFFF;
   --logo-tile-ring: rgba(22, 20, 31, 0.06);
 
+  /* Valt läge i plattor, chips och dagrutnät: mjuk lila ton + lila text/ring.
+     (Segmentväljare är neutrala – se --segment-*; listor visar en bock.) */
+  --selected-bg: rgba(91, 61, 245, 0.10);
+  --selected-fg: #4224CC;
+  --selected-ring: rgba(91, 61, 245, 0.7);
+  /* Sekundär knapp: en neutral ton (iOS "gray") – samma på sida, kort och ark */
+  --btn-secondary-fill: rgba(118, 118, 128, 0.12);
+  /* Avstängd huvudknapp: lila med 40 % täckning och vit text, samma i båda teman */
+  --cta-disabled-bg: color-mix(in srgb, var(--cta-bg) 40%, transparent);
+  --cta-disabled-fg: #FFFFFF;
+  /* Röd knapp (bekräfta radering) */
+  --danger-btn-bg: #E5484D;
+
   /* Segmentväljare: grått spår, vit vald tumme */
   --segment-track: rgba(118, 118, 128, 0.12);
   --segment-thumb: #FFFFFF;
@@ -858,7 +872,7 @@ h6 {
   --scrim-color: rgba(22, 20, 31, 0.45);
 
   --nav-active-color: #5B3DF5;
-  --nav-inactive-color: #8E8E93;
+  --nav-inactive-color: #66647A;
   --nav-plus-bg: #5B3DF5;
   --nav-plus-color: #FFFFFF;
   --nav-plus-shadow: none;
@@ -870,9 +884,10 @@ h6 {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #5B3DF5;
-  --date-active-color: #FFFFFF;
-  --date-active-shadow: none;
+  /* Vald dag i tidslinjen = samma mjuka valda läge som plattor och dagrutnät */
+  --date-active-bg: var(--selected-bg);
+  --date-active-color: var(--selected-fg);
+  --date-active-shadow: inset 0 0 0 1.5px var(--selected-ring);
   --date-inactive-bg: transparent;
   --date-inactive-border: transparent;
   --date-inactive-color: #66647A;
@@ -1012,8 +1027,12 @@ h6 {
   --header-btn-bg: rgba(255, 255, 255, 0.08);
   --logo-tile-ring: transparent;
   --segment-track: rgba(118, 118, 128, 0.24);
-  --segment-thumb: #3A3946;
-  --segment-thumb-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  --segment-thumb: #5A5868;
+  --segment-thumb-shadow: 0 3px 8px rgba(0, 0, 0, 0.45), 0 1px 1px rgba(0, 0, 0, 0.3), inset 0 0.5px 0 rgba(255, 255, 255, 0.12);
+  --selected-bg: rgba(122, 99, 255, 0.20);
+  --selected-fg: #C4BAFF;
+  --selected-ring: rgba(167, 151, 255, 0.6);
+  --btn-secondary-fill: rgba(118, 118, 128, 0.24);
   --nav-glass-bg: rgba(30, 29, 38, 0.72);
   --nav-glass-border: rgba(255, 255, 255, 0.08);
   --nav-active-bg: rgba(167, 151, 255, 0.14);
@@ -1112,7 +1131,7 @@ h6 {
   --scrim-color: rgba(0, 0, 0, 0.68);
 
   --nav-active-color: #A797FF;
-  --nav-inactive-color: #6E6E73;
+  --nav-inactive-color: #A3A1B5;
   --nav-plus-bg: #7A63FF;
   --nav-plus-color: #FFFFFF;
   --nav-plus-shadow: none;
@@ -1124,9 +1143,10 @@ h6 {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #7A63FF;
-  --date-active-color: #FFFFFF;
-  --date-active-shadow: none;
+  /* Vald dag i tidslinjen = samma mjuka valda läge som plattor och dagrutnät */
+  --date-active-bg: var(--selected-bg);
+  --date-active-color: var(--selected-fg);
+  --date-active-shadow: inset 0 0 0 1.5px var(--selected-ring);
   --date-inactive-bg: transparent;
   --date-inactive-border: transparent;
   --date-inactive-color: #8E8E93;
@@ -1886,8 +1906,9 @@ b {
     @apply text-footnote font-normal text-[var(--text-secondary)] tabular-nums;
   }
 
+  /* Länk i sektionshuvudet ("Visa alla") – tertiär: bara text */
   .ui-section-action {
-    @apply h-8 px-3 rounded-full bg-[var(--accent-soft)] text-footnote font-semibold text-[var(--on-accent-container)] hover:opacity-85 active:scale-[0.97] transition-all flex items-center gap-1 cursor-pointer;
+    @apply h-8 px-1 -mr-1 rounded-full bg-transparent text-callout font-semibold text-[var(--accent-color)] hover:opacity-80 active:opacity-60 transition-all flex items-center gap-1 cursor-pointer;
   }
 
   .ui-date-header {
@@ -2138,15 +2159,16 @@ b {
 
   /* 6. Buttons – 52 px huvudknappar, röda åtgärder som ren text */
   .ui-btn-primary {
-    @apply w-full h-[52px] px-5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-subhead tracking-[-0.01em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.97] disabled:opacity-40 transition-all cursor-pointer;
+    @apply w-full h-[52px] px-5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-subhead tracking-[-0.01em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.97] transition-all cursor-pointer;
   }
 
   .ui-btn-primary-lg {
-    @apply w-full h-[52px] px-5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-subhead tracking-[-0.01em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.97] disabled:opacity-40 transition-all cursor-pointer;
+    @apply w-full h-[52px] px-5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-subhead tracking-[-0.01em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.97] transition-all cursor-pointer;
   }
 
+  /* Sekundär knapp: en neutral ton överallt (inte vit, inte mörk, inte lila) */
   .ui-btn-secondary {
-    @apply w-full h-[52px] px-5 rounded-full bg-[var(--fill-grouped)] text-subhead font-semibold text-[var(--text-primary)] hover:opacity-90 active:scale-[0.97] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
+    @apply w-full h-[52px] px-5 rounded-full bg-[var(--btn-secondary-fill)] text-subhead font-semibold text-[var(--text-primary)] hover:opacity-90 active:scale-[0.97] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
   }
 
   .ui-btn-danger {
@@ -2154,7 +2176,12 @@ b {
   }
 
   .ui-btn-sm {
-    @apply h-8 px-3 rounded-full bg-[var(--fill-grouped)] text-footnote font-semibold text-[var(--text-primary)] hover:opacity-85 active:scale-[0.96] flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0;
+    @apply h-8 px-3 rounded-full bg-[var(--btn-secondary-fill)] text-footnote font-semibold text-[var(--text-primary)] hover:opacity-85 active:scale-[0.96] flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0;
+  }
+
+  /* Tertiär knapp: bara lila text, ingen yta ("Hoppa över", "Visa alla") */
+  .ui-btn-tertiary {
+    @apply w-full h-11 px-4 rounded-full bg-transparent text-subhead font-semibold text-[var(--accent-color)] hover:opacity-80 active:opacity-60 disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
   }
 
   .ui-btn-sm-primary {
@@ -2191,7 +2218,15 @@ b {
   }
 
   .ui-chip-active {
-    @apply h-8 px-3 rounded-full text-footnote font-semibold transition-all cursor-pointer shrink-0 flex items-center gap-1.5 bg-[var(--text-primary)] text-[var(--bg-color)];
+    @apply h-8 px-3 rounded-full text-footnote font-semibold transition-all cursor-pointer shrink-0 flex items-center gap-1.5 bg-[var(--selected-bg)] text-[var(--selected-fg)] shadow-[inset_0_0_0_1.5px_var(--selected-ring)];
+  }
+
+  /* Valt läge för plattor, chips och rutnät (inte segmentväljare, inte listor):
+     mjuk lila ton + lila text och ring. Lägg på elementet i stället för egna färger. */
+  .ui-selected {
+    background-color: var(--selected-bg);
+    color: var(--selected-fg);
+    box-shadow: inset 0 0 0 1.5px var(--selected-ring);
   }
 
   .ui-search-box {
@@ -2278,7 +2313,7 @@ b {
   }
 
   .ui-day-btn-active {
-    @apply h-10 sm:h-11 rounded-xl font-display text-callout tabular-nums transition-all cursor-pointer flex items-center justify-center bg-[var(--text-primary)] text-[var(--bg-color)] font-semibold;
+    @apply h-10 sm:h-11 rounded-xl font-display text-callout tabular-nums transition-all cursor-pointer flex items-center justify-center bg-[var(--selected-bg)] text-[var(--selected-fg)] shadow-[inset_0_0_0_1.5px_var(--selected-ring)] font-semibold;
   }
 
   /* 8. Empty States */
@@ -2346,16 +2381,16 @@ b {
   .ui-dialog-btn-danger {
     @apply w-full h-12 px-4 rounded-full text-white text-subhead font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer;
     /* Riktigt rött (inte rosa) – samma i ljust och mörkt, vit text klarar kontrastkravet */
-    background: #E5484D;
+    background: var(--danger-btn-bg);
   }
   .ui-dialog-btn-secondary {
-    @apply w-full h-12 px-4 rounded-full bg-[color-mix(in_srgb,var(--text-primary)_8%,transparent)] text-subhead font-semibold text-[var(--text-primary)] hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer;
+    @apply w-full h-12 px-4 rounded-full bg-[var(--btn-secondary-fill)] text-subhead font-semibold text-[var(--text-primary)] hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer;
   }
   .ui-btn-primary-flow {
     @apply w-full h-[52px] rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-subhead flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.97] transition-all cursor-pointer;
   }
   .ui-pill-btn {
-    @apply h-8 px-3.5 rounded-full bg-[var(--fill-grouped)] text-footnote font-semibold text-[var(--text-primary)] inline-flex items-center gap-1.5 active:scale-[0.96] transition-all cursor-pointer;
+    @apply h-8 px-3.5 rounded-full bg-[var(--btn-secondary-fill)] text-footnote font-semibold text-[var(--text-primary)] inline-flex items-center gap-1.5 active:scale-[0.96] transition-all cursor-pointer;
   }
   .ui-text-btn {
     @apply w-16 h-8 text-left text-subhead font-normal text-[var(--accent-color)] hover:opacity-80 cursor-pointer;
@@ -2418,9 +2453,12 @@ b {
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14), var(--fab-shadow);
   }
   /* Mjuk övergång i nederkant så att listan tonar bort bakom menyn */
+  /* Täcker hela området bakom menyn (ca 100 px + hemindikatorn) så att ingen listtext syns
+     mellan menyn och plusknappen eller runt kanterna. Bara överkanten tonar. */
   .ui-tabbar-fade {
-    @apply fixed left-0 right-0 bottom-0 h-28 pointer-events-none z-30;
-    background: linear-gradient(to bottom, color-mix(in srgb, var(--bg-color) 0%, transparent), var(--bg-color) 78%);
+    @apply fixed left-0 right-0 bottom-0 pointer-events-none z-30;
+    height: calc(max(env(safe-area-inset-bottom, 0px), 8px) + 116px);
+    background: linear-gradient(to bottom, color-mix(in srgb, var(--bg-color) 0%, transparent) 0, var(--bg-color) 24px, var(--bg-color) 100%);
   }
 }
 
@@ -2523,11 +2561,12 @@ b {
   box-shadow: 0 1px 2px rgba(22, 20, 31, 0.12), 0 12px 32px -8px rgba(22, 20, 31, 0.4);
   animation: ui-toast-in 280ms cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
 }
-/* Mörkt läge: ljusare yta + hårfin kant, annars försvinner notisen mot bakgrunden */
+/* Mörkt läge: klart ljusare yta än alla kort och ark + tydlig skugga, annars försvinner notisen */
 .dark .ui-toast {
-  background: #2C2A37;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 16px 40px -8px rgba(0, 0, 0, 0.7);
+  background: #45434F;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 2px 6px rgba(0, 0, 0, 0.5), 0 18px 44px -8px rgba(0, 0, 0, 0.85);
 }
+.dark .ui-toast-action { color: #C4BAFF; }
 .ui-toast-action {
   flex-shrink: 0;
   min-height: 40px;
@@ -2658,7 +2697,7 @@ html.privacy-blur .ui-row-amount-income:not(.no-privacy-blur) {
     @apply p-4 rounded-card-nested bg-[var(--danger-container)] text-negative text-callout font-medium leading-snug flex items-start gap-2.5;
   }
   .ui-auth-alert-btn {
-    @apply mt-3 h-9 px-4 rounded-full bg-[var(--surface-color)] text-footnote font-semibold text-[var(--text-primary)] inline-flex items-center gap-2 active:scale-[0.97] transition-all cursor-pointer disabled:opacity-60;
+    @apply mt-3 h-9 px-4 rounded-full bg-[var(--btn-secondary-fill)] text-footnote font-semibold text-[var(--text-primary)] inline-flex items-center gap-2 active:scale-[0.97] transition-all cursor-pointer disabled:opacity-60;
   }
   .ui-auth-footer-link {
     @apply text-callout font-semibold text-[var(--accent-color)] hover:opacity-80 cursor-pointer;
@@ -2669,6 +2708,146 @@ html.privacy-blur .ui-row-amount-income:not(.no-privacy-blur) {
   }
   /* Sekundär knapp direkt på sidbakgrunden (vit yta, syns i ljust läge) */
   .ui-auth-btn-surface {
-    @apply w-full h-[52px] px-5 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-subhead font-semibold text-[var(--text-primary)] hover:opacity-90 active:scale-[0.97] disabled:opacity-50 flex items-center justify-center gap-2 transition-all cursor-pointer;
+    @apply w-full h-[52px] px-5 rounded-full bg-[var(--btn-secondary-fill)] text-subhead font-semibold text-[var(--text-primary)] hover:opacity-90 active:scale-[0.97] disabled:opacity-50 flex items-center justify-center gap-2 transition-all cursor-pointer;
   }
+}
+
+/* === review-fixes: svep, belopp, detaljvyer === */
+@layer components {
+  /* Dagslisten på hem: når skärmkanterna och tonar ut där, så inga halva dagar syns */
+  .ui-day-strip {
+    @apply -mx-4 px-6;
+    -webkit-mask-image: linear-gradient(to right, transparent 0, black 40px, black calc(100% - 40px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, black 40px, black calc(100% - 40px), transparent 100%);
+  }
+  /* Kvittovisning: bilden stor och direkt i arket – ingen ruta i rutan */
+  .ui-receipt-frame {
+    @apply overflow-hidden rounded-card-nested flex justify-center;
+  }
+  .ui-receipt-image {
+    @apply block w-full h-auto max-h-[68dvh] object-contain rounded-card-nested;
+  }
+  .ui-receipt-pdf {
+    @apply w-full h-[60dvh] border-0 rounded-card-nested bg-[var(--surface-color)];
+  }
+  /* Beloppsfält i formulär: neutral färg, mindre platshållare, tabellsiffror */
+  .ui-amount-input {
+    @apply w-full min-w-0 bg-transparent border-0 p-0 font-display font-bold text-2xl tracking-[-0.02em] text-[var(--text-primary)] tabular-nums focus:outline-none;
+  }
+  .ui-amount-input::placeholder {
+    @apply text-xl font-semibold text-[var(--text-muted)] opacity-60;
+  }
+  /* Rund ikon i snabbåtgärdsrutorna (Kvitto, Gör fast, Spara, Paket …) */
+  .ui-action-tile-icon {
+    @apply w-8 h-8 rounded-full bg-[var(--surface-color)] text-[var(--text-primary)] flex items-center justify-center group-hover:scale-105 transition-transform;
+  }
+  /* Namnet i detaljvyernas huvud: får två rader i stället för att klippas */
+  .ui-detail-title {
+    @apply font-display font-semibold text-xl leading-snug tracking-[-0.02em] text-[var(--text-primary)] text-center line-clamp-2 break-words;
+  }
+  /* Svepbar rad i listkort: når kortets kanter så att åtgärderna fyller hela raden */
+  .ui-swipe-row {
+    @apply relative overflow-hidden -mx-4;
+    --row-inset: 68px;
+  }
+  .ui-swipe-row-front {
+    @apply relative z-10 px-4 bg-[var(--surface-color)];
+  }
+  .ui-swipe-action {
+    @apply flex-1 flex flex-col items-center justify-center gap-1 text-footnote font-semibold active:opacity-70 transition-opacity cursor-pointer;
+  }
+  .ui-swipe-action-heart {
+    @apply bg-[var(--danger-container)] text-negative;
+  }
+  .ui-swipe-action-package {
+    @apply bg-[var(--warning-container)] text-caution;
+  }
+  .ui-swipe-action-exclude {
+    @apply bg-[var(--fill-grouped)] text-[var(--text-secondary)];
+  }
+}
+
+/* === Systemnivå (coordinator): avstängda knappar, fasta huvuden, dold meny på undersidor === */
+/* Avstängd huvudknapp: lila med 40 % täckning och vit text – samma i ljust och mörkt.
+   Utanför lager så att den vinner över enstaka disabled:-klasser i komponenterna. */
+.ui-btn-primary:disabled,
+.ui-btn-primary-lg:disabled,
+.ui-btn-primary-flow:disabled,
+.ui-btn-sm-primary:disabled,
+.ui-dialog-btn-primary:disabled {
+  opacity: 1;
+  background: var(--cta-disabled-bg);
+  color: var(--cta-disabled-fg);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+  scale: none;
+}
+/* Fast ark-/sidhuvud: alltid täckande, hårfin linje när innehållet har scrollats under det */
+.ui-sheet-header,
+.ui-sheet-sub-header {
+  transition: box-shadow 150ms ease;
+}
+.ui-header-scrolled {
+  box-shadow: 0 1px 0 var(--separator);
+}
+/* Undersidor (med tillbakaknapp) har ingen bottenmeny – mindre luft i nederkant */
+html[data-tabbar="hidden"] .ui-page {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 2.5rem);
+}
+html[data-tabbar="hidden"] .ui-toast-wrap {
+  bottom: calc(max(env(safe-area-inset-bottom, 0px), 8px) + 16px);
+}
+
+/* === Loggor, sparmål, ikonväljare (agent: visuella detaljer) === */
+:root {
+  /* Sparmål: alla bilder på samma ljuslila ruta, alla förlopp i varumärkets lila */
+  --goal-art-bg: #EEEBFF;
+  --goal-progress: var(--accent-color);
+  /* Bokstavsrutor (reservlogga): åtta toner, används som --cat i .ui-cat-tile */
+  --mono-1: #3E7BEA;
+  --mono-2: #5E63E0;
+  --mono-3: #8C5BE8;
+  --mono-4: #D2508F;
+  --mono-5: #E0604A;
+  --mono-6: #D4921C;
+  --mono-7: #2F9E62;
+  --mono-8: #14968E;
+}
+.dark {
+  --goal-art-bg: #262240;
+  --mono-1: #5A90F5;
+  --mono-2: #7A7EF2;
+  --mono-3: #A27BF5;
+  --mono-4: #E56FA6;
+  --mono-5: #F07A64;
+  --mono-6: #E6A93A;
+  --mono-7: #46B87A;
+  --mono-8: #2DB3A9;
+}
+/* Ikonväljare i ark: grå grupp, rutnätet scrollar inuti med mjuk tona i kanten */
+.dz-icon-picker {
+  border-radius: var(--radius-card-nested);
+  background-color: var(--fill-grouped);
+  padding: 8px;
+}
+.dz-icon-picker-scroll {
+  max-height: 226px; /* 4 hela rader + en halv som visar att det går att scrolla */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  --fade-top: 0px;
+  --fade-bottom: 0px;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent 100%);
+}
+.dz-icon-picker-scroll[data-fade-top] {
+  --fade-top: 20px;
+}
+.dz-icon-picker-scroll[data-fade-bottom] {
+  --fade-bottom: 28px;
+}
+.dz-icon-picker-selected {
+  background-color: var(--accent-soft);
+  color: var(--accent-color);
 }

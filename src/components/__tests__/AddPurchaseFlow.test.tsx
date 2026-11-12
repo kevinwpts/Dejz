@@ -135,12 +135,12 @@ describe('lägga till ett köp', () => {
 
     act(() => FakeSpeechRecognition.last?.say('Ica 143 kronor'));
 
-    expect((screen.getByPlaceholderText('Butik eller köp') as HTMLInputElement).value).toBe('Ica');
+    expect((screen.getByPlaceholderText('Butik eller köp') as HTMLInputElement).value).toBe('ICA');
     expect((screen.getByPlaceholderText('0') as HTMLInputElement).value).toBe('143');
     expect(onAdd).not.toHaveBeenCalled();
 
     await user.click(screen.getByRole('button', { name: /Spara (köp|inkomst)/ }));
-    expect(onAdd.mock.calls[0][0]).toMatchObject({ title: 'Ica', amount: 143 });
+    expect(onAdd.mock.calls[0][0]).toMatchObject({ title: 'ICA', amount: 143 });
   });
 });
 

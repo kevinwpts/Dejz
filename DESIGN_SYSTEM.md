@@ -20,6 +20,9 @@ Allt utseende i Dejz styrs från **ett ställe: `src/index.css`**. Komponenterna
 | Notiser | `--toast-bg`, `--toast-fg`, `--toast-action` | Ångra- och bekräftelsenotiser |
 | Grupper i ark, avdelare, tryck | `--fill-grouped`, `--separator`, `--press-overlay`, `--card-shadow` | Rader i ark, listkort, tryckkänsla |
 | Segmentväljare och reglage | `--segment-track`, `--segment-thumb`, `--segment-thumb-shadow` | Alla/Utgifter/Inkomster, Utgift/Inkomst, av-läge för reglage |
+| Valt läge (plattor, chips, dagar) | `--selected-bg`, `--selected-fg`, `--selected-ring` | Dagväljare, filterchips, ikonval, Utseende, val-kort |
+| Sekundära knappar | `--btn-secondary-fill` | Alla grå knappar (`ui-btn-secondary`, `ui-btn-sm`, `ui-pill-btn`, dialogernas Avbryt) |
+| Avstängd huvudknapp | `--cta-disabled-bg`, `--cta-disabled-fg` | Lila med 40 % täckning och vit text, samma i båda teman |
 | Bottenmenyn och plusknappen | `--nav-glass-bg`, `--nav-glass-border`, `--nav-active-bg`, `--fab-shadow` | Glasmenyn längst ner |
 | Toppradens knappar | `--header-btn-bg` | Sekretess, feedback, notiser, tillbaka |
 | Kategorirutor | `--cat-tile-mix`, `--cat-glyph-mix`, `--cat-glyph-base` | Hur starkt kategorifärgen tonar rutan och ikonen |
@@ -55,20 +58,41 @@ Använd alltid namnet för vad färgen **betyder**:
 
 ## Arkhuvud – alltid `<SheetHeader />`
 
-Alla ark och dialoger använder komponenten `src/components/ui/SheetHeader.tsx` (även `BottomSheet` med `title`):
+Alla ark och dialoger använder komponenten `src/components/ui/SheetHeader.tsx` (även `BottomSheet` med `title`). **Ett enda mönster:** `[‹] Rubrik` till vänster (17 px) · åtgärder till höger · rund ✕ sist. Huvudknappen ("Spara") ligger alltid längst ner i arket.
 
-- **Visa / välj / lägg till** (standard): `[‹] Rubrik` till vänster (17 px) · åtgärder till höger · rund stängknapp sist. `onBack` ger tillbakapil i undervyer.
-- **Redigera** (`variant="edit"`, när man kommer från en detaljvy): `Avbryt` · rubrik i mitten · valfri åtgärd.
-- Fristående formulär (ny kategori, nytt betalsätt, introduktionens ark) räknas som "lägg till" och har stängknapp.
+- `onBack` ger tillbakapil i undervyer.
+- `variant="edit"` (redigering från en detaljvy) ser likadan ut – ✕ avbryter då redigeringen utan att spara (tillgängligt namn "Avbryt").
+- Fasta huvuden är alltid täckande (ingen text syns igenom) och får en hårfin linje (`ui-header-scrolled`) när innehållet har scrollats under dem.
+
+## Bottenmenyn
+
+Menyn och plusknappen syns bara på de fyra flikarna (Hem, Historik, Analys, Fasta). **Undersidor med tillbakaknapp** (Inställningar och alla dess sidor, Sparmål, Kvitton, Paket, juridiska sidor) visar ingen meny – som i iOS. Då sätts `html[data-tabbar="hidden"]` och `ui-page` får mindre luft i nederkant. Bakom menyn ligger en täckande ton (`ui-tabbar-fade`, ca 100 px) så att ingen listtext syns runt den.
+
+## Valt läge – två sätt, inga fler
+
+- **Plattor, chips och rutnät** (dagväljare, filterchips, ikonval, Utseende, val-kort): `ui-selected` – mjuk lila ton + lila text och ring. Bildplattor (sparmålsbilder) får bara den lila ringen.
+- **Listor** (väljare i ark): en bock (✓) längst till höger på den valda raden.
+- **Segmentväljare** (`ui-segmented`) är undantaget: valt segment är neutralt – en ljusare upphöjd yta med skugga, ingen lila (se CLAUDE.md: "valda lägen (segment, dagar) är neutrala"). Dagrutnät och chips räknas som plattor och använder den mjuka lila tonen – den är dämpad nog att räknas som "neutral" men syns tydligt i båda teman.
+
+## Knappar – en stil per nivå
+
+| Nivå | Klass | Utseende |
+|---|---|---|
+| Primär | `ui-btn-primary` (+ `-flow`, `ui-dialog-btn-primary`, `ui-btn-sm-primary`) | Lila. Avstängd = lila 40 % + vit text |
+| Sekundär | `ui-btn-secondary`, `ui-btn-sm`, `ui-pill-btn`, `ui-dialog-btn-secondary` | Neutral grå ton (`--btn-secondary-fill`) – inga vita, mörka eller lila piller |
+| Tertiär | `ui-btn-tertiary`, `ui-section-action` | Bara lila text |
+| Farlig | `ui-btn-danger` | Röd text, centrerad, längst ner på detaljsidor ("Ta bort sparmål", "Koppla från …"). I bekräftelser: `ui-dialog-btn-danger` (röd fylld) – även för "Återställ …" |
+
+Rader i Inställningar ("Logga ut", "Radera konto") får vara röda rader.
 
 ## Textstorlekar
 
 | Klass | Storlek | Används till |
 |---|---|---|
-| `text-micro` | 10 px | Små märken |
-| `text-caption` | 11 px | Små etiketter, metadata |
-| `text-meta` | 12 px | Undertexter i rader |
-| `text-footnote` | 13 px | Radtitlar, länkar |
+| `text-micro` | 11 px | Bara menyetiketter (halvfet) och små märken |
+| `text-caption` | 12 px | Små etiketter, metadata |
+| `text-meta` | 12 px | Sekundärtext (golv: ingen sekundärtext under 12 px) |
+| `text-footnote` | 13 px | Radundertexter (golv för listor), länkar |
 | `text-callout` | 14 px | Knappar, brödtext i listor |
 | `text-subhead` | 15 px | Mellanrubriker |
 | `text-base` och uppåt | Tailwind | Rubriker och belopp |
@@ -77,7 +101,8 @@ Alla ark och dialoger använder komponenten `src/components/ui/SheetHeader.tsx` 
 
 Återkommande delar har **en** klass var. Byt deras utseende i `@layer components` i `index.css`:
 
-- **Knappar:** `ui-btn-primary` (huvudknapp, 52 px), `ui-btn-primary-flow` (introduktionen), `ui-btn-secondary` (grå), `ui-btn-danger` (röd text utan ram – "Ta bort …"), `ui-pill-btn` ("Redigera"), `ui-text-btn` ("Avbryt"), `ui-icon-btn` (grå rund, t.ex. stäng), `ui-header-btn` (toppraden), `ui-dialog-btn-primary` / `-secondary` (val i dialoger), `ui-clear-btn`
+- **Knappar:** `ui-btn-primary` (huvudknapp, 52 px), `ui-btn-primary-flow` (introduktionen), `ui-btn-secondary` (neutral ton), `ui-btn-tertiary` (bara text), `ui-btn-danger` (röd text utan ram – "Ta bort …"), `ui-pill-btn` ("Redigera"), `ui-icon-btn` (grå rund, t.ex. stäng), `ui-header-btn` (toppraden), `ui-dialog-btn-primary` / `-secondary` / `-danger` (val i dialoger), `ui-clear-btn`
+- **Valt läge:** `ui-selected` (plattor, chips), `ui-chip-active`, `ui-day-btn-active` – alla med samma mjuka lila ton
 - **Sidor och ark:** `ui-large-title` (stor rubrik på flikarna), `ui-sheet-header`, `ui-sheet-sub-header`, `ui-sheet-title`, `ui-sheet-group`, `ui-step-title`
 - **Bottenmeny:** `ui-tabbar`, `ui-tabbar-item` / `-active`, `ui-fab` (plusknappen), `ui-tabbar-fade`
 - **Listor och rader:** `ui-list-card`, `ui-inset-divide`, `ui-row`, `ui-row-btn`, `ui-row-title`, `ui-row-subtitle`, `ui-row-amount`, `ui-tx-row`, `ui-list-row-title`

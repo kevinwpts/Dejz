@@ -1,7 +1,7 @@
 // Steg 2 i "Nytt sparmål": välj bild till målet (live-kort, sök och rutnät med bilder).
 import type { RefObject } from 'react';
 import React from 'react';
-import { Check, MagnifyingGlass, ImageSquare, X } from '@phosphor-icons/react';
+import { MagnifyingGlass, ImageSquare, X } from '@phosphor-icons/react';
 import type { GoalArtworkTheme } from '../../ui/VisualArtwork';
 import { getGoalArtworkTheme, GoalArtworkIllustration } from '../../ui/VisualArtwork';
 
@@ -38,35 +38,25 @@ export const StepArtwork: React.FC<StepArtworkProps> = ({
       className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden pt-2 ${animClass}`}
     >
       <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-3 p-1 -mx-1">
-        <div
-          className="relative rounded-card-nested overflow-hidden px-4 py-4 min-h-[76px] flex items-center justify-between text-white transition-colors duration-200"
-          style={{
-            background: goalCustomImage ? '#111827' : activeTheme.heroBg,
-          }}
-        >
-          {goalCustomImage ? (
-            <>
+        {/* Förhandsvisning: samma rad som i målistan – bilden i sin ruta + namnet */}
+        <div className="rounded-card-nested bg-[var(--surface-color)] shadow-[var(--card-shadow)] px-4 py-3 flex items-center gap-3.5">
+          <div className="relative w-12 h-12 shrink-0 rounded-xl overflow-hidden bg-[var(--goal-art-bg)] flex items-center justify-center">
+            {goalCustomImage ? (
               <img
                 src={goalCustomImage}
                 alt={goalNameInput}
-                className="absolute inset-0 w-full h-full object-cover opacity-55"
+                className="absolute inset-0 w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-black/20" />
-            </>
-          ) : (
-            <div
-              className="absolute -right-5 -top-2 w-24 h-24 pointer-events-none select-none opacity-95"
-              aria-hidden="true"
-            >
-              <GoalArtworkIllustration artworkId={goalArtworkId} />
-            </div>
-          )}
-
-          <div className="relative z-10 min-w-0 max-w-[68%]">
-            <span className="font-display font-bold text-base sm:text-lg text-white block truncate">
-              {goalNameInput.trim() || 'Nytt sparmål'}
-            </span>
+            ) : (
+              <GoalArtworkIllustration
+                artworkId={activeTheme.id}
+                className="w-[88%] h-[88%]"
+              />
+            )}
           </div>
+          <span className="font-display font-semibold text-base text-[var(--text-primary)] min-w-0 truncate">
+            {goalNameInput.trim() || 'Nytt sparmål'}
+          </span>
         </div>
 
         <div className="ui-search-box shrink-0">
@@ -137,6 +127,8 @@ export const StepArtwork: React.FC<StepArtworkProps> = ({
                 type="button"
                 onClick={() => onPickArtwork(art.id)}
                 title={art.label}
+                aria-label={art.label}
+                aria-pressed={isSelected}
                 style={{ backgroundColor: art.tileBg }}
                 className={`aspect-square rounded-2xl p-2 flex items-center justify-center transition-all cursor-pointer relative overflow-hidden ${
                   isSelected
@@ -145,11 +137,6 @@ export const StepArtwork: React.FC<StepArtworkProps> = ({
                 }`}
               >
                 <GoalArtworkIllustration artworkId={art.id} className="w-full h-full" />
-                {isSelected && (
-                  <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] flex items-center justify-center">
-                    <Check size={11} weight="bold" />
-                  </div>
-                )}
               </button>
             );
           })}

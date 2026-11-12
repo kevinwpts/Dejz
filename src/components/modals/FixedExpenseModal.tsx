@@ -23,6 +23,7 @@ import { FixedViewCancelGuide } from './fixed/FixedViewCancelGuide';
 import { FixedViewCancelPicker } from './fixed/FixedViewCancelPicker';
 import { FixedViewSimilar } from './fixed/FixedViewSimilar';
 import type { CancelGuideData, ModalSubView } from './fixed/shared';
+import { getProviderName } from './fixed/shared';
 import { describeAccount } from '../../utils/accountDisplay';
 import { SheetHeader } from '../ui/SheetHeader';
 
@@ -230,7 +231,8 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
     }
 
     setIsLoadingCancelGuide(true);
-    const guide = await fetchCancelGuide(targetName, category);
+    // Fråga om företaget ("Netflix"), inte abonnemangsnivån ("Netflix Standard HD")
+    const guide = await fetchCancelGuide(getProviderName(targetName), category);
     if (guide) {
       cancelGuideCacheRef.current[cacheKey] = guide;
       setCancelGuide(guide);

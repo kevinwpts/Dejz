@@ -29,7 +29,10 @@ export const SwipeableTxRow: React.FC<SwipeableTxRowProps> = ({
   // Fingret ligger på raden: ingen animation, raden följer fingret direkt
   const [isTouching, setIsTouching] = useState(false);
 
-  const ACTION_WIDTH = onToggleExclude ? 148 : 100;
+  // iOS-stil: varje åtgärd är en egen färgad ruta i radens fulla höjd, med ikon och text
+  const ACTION_SLOT = 76;
+  const actionCount = [onToggleHeart, onTogglePackage, onToggleExclude].filter(Boolean).length;
+  const ACTION_WIDTH = actionCount * ACTION_SLOT;
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (!onToggleHeart && !onTogglePackage && !onToggleExclude) return;
@@ -75,6 +78,9 @@ export const SwipeableTxRow: React.FC<SwipeableTxRowProps> = ({
     }
   };
 
+  // Öppen rad vilar alltid exakt vid åtgärdernas bredd (även om antalet åtgärder ändras)
+  const translateX = isOpen && !isTouching ? -ACTION_WIDTH : offsetX;
+
   const closeActions = () => {
     setOffsetX(0);
     setIsOpen(false);
@@ -82,15 +88,15 @@ export const SwipeableTxRow: React.FC<SwipeableTxRowProps> = ({
 
   return (
     <div
-      className={`relative overflow-hidden ${className}`}
+      className={`ui-swipe-row ${className}`}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Bakgrundsknappar som visas vid svep åt vänster */}
+      {/* Åtgärderna ligger bakom raden och syns när raden glider åt vänster */}
       {(isOpen || offsetX < -4) && (
         <div
-          className="absolute inset-y-0 right-0 flex items-center justify-end gap-1.5 pr-2 z-0"
+          className="absolute inset-y-0 right-0 flex items-stretch z-0"
           style={{ width: `${ACTION_WIDTH}px` }}
         >
           {onToggleHeart && (
@@ -103,13 +109,10 @@ export const SwipeableTxRow: React.FC<SwipeableTxRowProps> = ({
                 closeActions();
               }}
               title={isHearted ? 'Ta bort sparat köp' : 'Spara köp'}
-              className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors cursor-pointer ${
-                isHearted
-                  ? 'bg-negative-solid text-white'
-                  : 'bg-[var(--bg-color)] border border-[var(--border-subtle)] text-negative-solid'
-              }`}
+              className="ui-swipe-action ui-swipe-action-heart"
             >
-              <Heart size={16} weight={isHearted ? 'fill' : 'bold'} />
+              <Heart size={20} weight="fill" />
+              <span>{isHearted ? 'Ta bort' : 'Spara'}</span>
             </button>
           )}
           {onTogglePackage && (
@@ -122,13 +125,10 @@ export const SwipeableTxRow: React.FC<SwipeableTxRowProps> = ({
                 closeActions();
               }}
               title={isWaitingForPackage ? 'Markera paket mottaget' : 'Väntar på paket'}
-              className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors cursor-pointer ${
-                isWaitingForPackage
-                  ? 'bg-caution-solid text-white'
-                  : 'bg-[var(--bg-color)] border border-[var(--border-subtle)] text-caution-solid'
-              }`}
+              className="ui-swipe-action ui-swipe-action-package"
             >
-              <Package size={16} weight={isWaitingForPackage ? 'fill' : 'bold'} />
+              <Package size={20} weight="fill" />
+              <span>{isWaitingForPackage ? 'Mottaget' : 'Paket'}</span>
             </button>
           )}
           {onToggleExclude && (
@@ -141,13 +141,10 @@ export const SwipeableTxRow: React.FC<SwipeableTxRowProps> = ({
                 closeActions();
               }}
               title={isExcluded ? 'Inkludera i budget' : 'Exkludera ur budget'}
-              className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors cursor-pointer ${
-                isExcluded
-                  ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
-                  : 'bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-secondary)]'
-              }`}
+              className="ui-swipe-action ui-swipe-action-exclude"
             >
-              {isExcluded ? <Eye size={16} weight="bold" /> : <EyeSlash size={16} weight="bold" />}
+              {isExcluded ? <Eye size={20} weight="fill" /> : <EyeSlash size={20} weight="fill" />}
+              <span>{isExcluded ? 'Räkna med' : 'Räkna inte'}</span>
             </button>
           )}
         </div>
@@ -162,10 +159,10 @@ export const SwipeableTxRow: React.FC<SwipeableTxRowProps> = ({
           }
         }}
         style={{
-          transform: offsetX !== 0 ? `translateX(${offsetX}px)` : undefined,
+          transform: translateX !== 0 ? `translateX(${translateX}px)` : undefined,
           transition: isTouching ? 'none' : 'transform 200ms cubic-bezier(0.16, 1, 0.3, 1)',
         }}
-        className="relative z-10 bg-[var(--surface-color)]"
+        className="ui-swipe-row-front"
       >
         {children}
       </div>

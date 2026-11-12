@@ -2,7 +2,6 @@ import type { SetStateAction } from 'react';
 import React from 'react';
 import { ArrowRight, Check, SpinnerGap } from '@phosphor-icons/react';
 import { ItemLogo } from '../ItemLogo';
-import { CategoryIcon } from '../CategoryIcon';
 
 export interface OnboardingStepIncomeListProps {
   step: 2 | 1 | 3 | 4 | 5 | 6 | 7;
@@ -93,29 +92,19 @@ export const OnboardingStepIncomeList: React.FC<OnboardingStepIncomeListProps> =
                   />
 
                   <div className="min-w-0 flex-1">
-                    <span className="ui-row-title">
+                    <span className="ui-row-title whitespace-normal line-clamp-2">
                       {item.name}
                     </span>
                     <span className="ui-row-subtitle flex items-center gap-1.5">
-                      <CategoryIcon
-                        category={item.category || 'Lön'}
-                        size={11}
-                        className="shrink-0 text-[var(--text-secondary)]"
-                      />
                       <span className="truncate">
-                        {item.category || 'Lön'}
+                        {`${item.category || 'Lön'} · den ${item.payday}:e`}
                       </span>
                     </span>
                   </div>
 
-                  <div className="text-right shrink-0">
-                    <span className="ui-row-amount ui-row-amount-income">
-                      +{formatKr(item.amount)}
-                    </span>
-                    <span className="ui-row-meta">
-                      Den {item.payday}:e
-                    </span>
-                  </div>
+                  <span className="ui-row-amount ui-row-amount-income shrink-0">
+                    +{formatKr(item.amount)}
+                  </span>
                 </button>
               </div>
             ))}

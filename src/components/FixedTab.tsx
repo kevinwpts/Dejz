@@ -3,7 +3,6 @@ import { Plus } from '@phosphor-icons/react';
 import { FixedExpenseItem, IncomeItem, TransactionItem, AccountItem, formatFixedCancellationBadge } from '../app/models';
 import { isFixedExpenseActiveInPeriod, getFixedExpenseAmountInPeriod, PeriodMatches } from '../utils/budgetEngine';
 import { ItemLogo } from './ItemLogo';
-import { CategoryIcon, PaymentMethodIcon } from './CategoryIcon';
 import {
   PeriodInfo,
   isDateInPeriod,
@@ -67,12 +66,6 @@ export const FixedTab: React.FC<FixedTabProps> = ({
   onOpenDiscover: _onOpenDiscover,
   periodMatches: periodMatchesFromApp,
 }) => {
-
-  const formatPaidDate = (iso?: string) => {
-    const d = new Date(`${(iso || '').slice(0, 10)}T12:00:00`);
-    if (isNaN(d.getTime())) return '';
-    return `${d.getDate()} ${['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'][d.getMonth()]}`;
-  };
 
   const formatKr = (amount: number) => {
     return new Intl.NumberFormat('sv-SE').format(Math.round(amount)) + ' kr';
@@ -208,7 +201,6 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                         {inc.name}
                       </span>
                       <span className="ui-row-subtitle min-w-0">
-                        <CategoryIcon category={catLabel} size={11} className="shrink-0" />
                         <span className="truncate">{catLabel}</span>
                       </span>
                     </div>
@@ -217,8 +209,8 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                     <span className="ui-row-amount-income">
                       +{formatKr(actualReceivedAmt)}
                     </span>
-                    <span className="ui-row-meta flex items-center justify-end gap-1">
-                      <span>Den {inc.payday || 25}:e</span>
+                    <span className="ui-row-meta">
+                      Den {inc.payday || 25}:e
                     </span>
                   </div>
                 </button>
@@ -266,7 +258,6 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                 const cancelBadge = formatFixedCancellationBadge(exp);
                 const isActiveInPeriod = isFixedExpenseActiveInPeriod(exp, period);
                 const displayAmt = actualPaidAmt;
-                const paymentMethodLabel = exp.paymentMethod || 'Autogiro';
 
                 return (
                   <button
@@ -288,14 +279,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                           {exp.name}
                         </span>
                         <span className="ui-row-subtitle min-w-0">
-                          <span className="inline-flex items-center gap-1.5 min-w-0 truncate">
-                            <CategoryIcon
-                              category={exp.category || 'Räkningar'}
-                              size={11}
-                              className="shrink-0"
-                            />
-                            <span className="truncate">{exp.category || 'Räkningar'}</span>
-                          </span>
+                          <span className="truncate">{exp.category || 'Räkningar'}</span>
                           {linkedGoalName && (
                             <span className="truncate">· {linkedGoalName}</span>
                           )}
@@ -309,24 +293,17 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                           ? `${!matchedTx && variableExpenseIds.has(exp.id) ? '≈ ' : ''}−${formatKr(displayAmt)}`
                           : '0 kr'}
                       </span>
-                      <span className="ui-row-meta flex items-center justify-end gap-1">
-                        <span
-                          className="inline-flex shrink-0 text-[var(--text-muted)]"
-                          title={paymentMethodLabel}
-                          aria-label={paymentMethodLabel}
-                        >
-                          <PaymentMethodIcon method={paymentMethodLabel} size={11} />
-                        </span>
+                      <span className="ui-row-meta">
                         {cancelBadge ? (
                           <span className="text-caution font-medium">
                             {cancelBadge}
                           </span>
                         ) : matchedTx ? (
                           <span className="text-positive font-medium">
-                            Betald {formatPaidDate(matchedTx.date)}
+                            Betald ✓
                           </span>
                         ) : (
-                          <span>Den {exp.dueDay || 27}:e</span>
+                          <span>Dras {exp.dueDay || 27}:e</span>
                         )}
                       </span>
                     </div>

@@ -12,6 +12,7 @@ import { normalizeCategoryToValid } from '../../../utils/cache/categories';
 import { inferCategoryAndMethodFromName } from '../../../utils/bankAnalysis/existingBudget/manualCategory';
 import { cleanDisplayMerchantName } from '../../../utils/bankAnalysis/merchantRules';
 import { SheetHeader } from '../../ui/SheetHeader';
+import { formatInputThousands } from '../../../utils/format';
 
 export interface FixedViewEditProps {
   subView: "details" | "edit" | "category-picker" | "day-picker" | "payment-picker" | "goal-picker" | "receipt-preview" | "similar" | "cancel-picker" | "cancel-guide";
@@ -186,9 +187,9 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
                   type="text"
                   inputMode="numeric"
                   placeholder="0"
-                  value={amount}
+                  value={formatInputThousands(String(amount ?? ''))}
                   onChange={(e) => setAmount(e.target.value.replace(/[^\d]/g, ''))}
-                  className="w-full bg-transparent border-0 p-0 font-display font-bold text-2xl sm:text-3xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/40 tabular-nums focus:outline-none"
+                  className="ui-amount-input"
                 />
                 <span className="font-display font-semibold text-sm text-[var(--text-muted)] shrink-0">
                   kr/mån
@@ -285,7 +286,7 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
                 >
                   <Paperclip size={15} className="text-[var(--text-secondary)] shrink-0" />
                   <span className="ui-list-row-title text-callout">
-                    {rcpt.name || `Kvitto ${idx + 1}`}
+                    {draftReceipts.length > 1 ? `Kvitto ${idx + 1}` : 'Kvitto'}
                   </span>
                 </button>
                 <button

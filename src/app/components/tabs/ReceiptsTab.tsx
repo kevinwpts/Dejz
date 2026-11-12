@@ -111,7 +111,7 @@ export const ReceiptsTab: React.FC = () => {
                   setSelectedFixedExpense(exp ?? null);
                   setIsFixedModalOpen(true);
                 }}
-                onPreview={(r) => setPreviewReceipt({ url: r.url, name: r.name || exp.name || 'Kvitto' })}
+                onPreview={(r) => setPreviewReceipt({ url: r.url, name: exp.name || r.name || '' })}
               />
             ))}
           </div>
@@ -144,7 +144,7 @@ export const ReceiptsTab: React.FC = () => {
                     setSelectedTransaction(tx ?? null);
                     setIsTxModalOpen(true);
                   }}
-                  onPreview={(r) => setPreviewReceipt({ url: r.url, name: r.name || tx.title || 'Kvitto' })}
+                  onPreview={(r) => setPreviewReceipt({ url: r.url, name: tx.title || r.name || '' })}
                 />
               );
             })}

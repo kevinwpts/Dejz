@@ -456,7 +456,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               type="button"
               role="switch"
               aria-checked={isWeekendBeforeEnabled}
-              aria-label="Helghantering: fredagen före om lönedagen infaller på helg"
+              aria-label="Lön före helg"
               onClick={() =>
                 onUpdateWeekendHandling(isWeekendBeforeEnabled ? 'none' : 'before')
               }
@@ -627,7 +627,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   // ==========================================
   const initialChar = (userName || userEmail || '').trim().charAt(0);
   return (
-    <div className="space-y-6 pb-40 sm:pb-44 animate-slide-in-left">
+    <div className="space-y-6 pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] animate-slide-in-left">
       <SettingsMainList
         hiddenAvatarInput={hiddenAvatarInput}
         setSubView={setSubView}

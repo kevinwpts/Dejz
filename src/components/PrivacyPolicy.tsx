@@ -141,8 +141,9 @@ export const PrivacyPolicySheet: React.FC<{ open: boolean; onClose: () => void }
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-label="Integritetspolicy">
       <div className="absolute inset-0 bg-[var(--scrim-color)] animate-fade-in" onClick={onClose} />
-      <div className="relative w-full sm:max-w-lg max-h-[88dvh] overflow-y-auto bg-[var(--surface-color)] rounded-t-modal sm:rounded-modal px-5 sm:px-7 pt-5 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] shadow-[var(--shadow-modal)] animate-scale-in">
-        <SheetHeader title="Integritetspolicy" onClose={onClose} className="sm:-mx-7 sm:px-7" />
+      <div className="relative w-full sm:max-w-lg max-h-[88dvh] overflow-y-auto bg-[var(--surface-color)] rounded-t-modal sm:rounded-modal px-5 sm:px-7 pt-0 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] shadow-[var(--shadow-modal)] animate-scale-in">
+        {/* Huvudet ligger kant i kant med arkets överkant så att ingen text syns ovanför det */}
+        <SheetHeader title="Integritetspolicy" onClose={onClose} className="pt-5 sm:-mx-7 sm:px-7" />
         <PrivacyPolicyContent />
       </div>
     </div>

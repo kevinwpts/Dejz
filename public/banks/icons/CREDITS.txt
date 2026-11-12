@@ -1,0 +1,3 @@
+Appikoner (128 px) från respektive banks app i App Store. Varumärkena tillhör respektive bank
+och visas bara för att visa vilken bank som kopplas. Handelsbanken och Danske Bank visas som
+bokstavsruta eftersom deras appikoner inte går att känna igen i liten storlek.

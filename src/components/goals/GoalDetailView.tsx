@@ -1,5 +1,6 @@
 import type { RefObject, SetStateAction } from 'react';
-import { formatInputThousands, cleanActivityLabel } from './goalHelpers';
+import { cleanActivityLabel } from './goalHelpers';
+import { formatInputThousands } from '../../utils/format';
 import React from 'react';
 import {
   Plus,
@@ -146,52 +147,31 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
     <div className="ui-page animate-fade-in">
       {sharedHiddenFileInput}
 
-      {/* Top Colored Hero Card with Cropped Right Artwork & Inline Editable Name */}
-      <section
-        className="relative rounded-card overflow-hidden p-5 sm:p-6 min-h-[210px] flex flex-col justify-between text-white"
-        style={{
-          background: selectedGoal.customImageUrl
-            ? '#111827'
-            : theme.heroBg,
-        }}
-      >
-        {selectedGoal.customImageUrl ? (
-          <>
-            <img
-              src={selectedGoal.customImageUrl}
-              alt={selectedGoal.name}
-              className="absolute inset-0 w-full h-full object-cover opacity-55"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/20" />
-          </>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setIsArtworkPickerOpen(true)}
-            title="Byt bild"
-            aria-label="Byt bild"
-            className="absolute -right-12 top-3 w-52 h-52 sm:w-56 sm:h-56 select-none opacity-95 hover:scale-105 transition-transform cursor-pointer"
-          >
-            <GoalArtworkIllustration artworkId={selectedGoal.artworkId} />
-          </button>
-        )}
-
-        {/* Top Bar inside Hero: Quick Image/Theme button */}
-        <div className="relative z-10 flex items-center justify-end">
+      {/* Målkort: neutral yta, bilden i en egen ruta (samma ruta som i bildväljaren) och lila förlopp */}
+      <section className="rounded-card bg-[var(--surface-color)] shadow-[var(--card-shadow)] p-5 space-y-4">
+        <div className="flex items-center gap-4">
           <button
             type="button"
             onClick={() => setIsArtworkPickerOpen(true)}
             aria-label="Byt bild"
             title="Byt bild"
-            className="w-8 h-8 rounded-full bg-black/25 hover:bg-black/35 backdrop-blur-md flex items-center justify-center text-white transition-colors cursor-pointer"
+            className="relative w-[72px] h-[72px] shrink-0 rounded-2xl overflow-hidden bg-[var(--goal-art-bg)] flex items-center justify-center active:scale-95 transition-transform cursor-pointer"
           >
-            <ImageSquare size={15} weight="bold" />
+            {selectedGoal.customImageUrl ? (
+              <img
+                src={selectedGoal.customImageUrl}
+                alt={selectedGoal.name}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            ) : (
+              <GoalArtworkIllustration
+                artworkId={selectedGoal.artworkId}
+                className="w-[88%] h-[88%]"
+              />
+            )}
           </button>
-        </div>
 
-        {/* Bottom Goal Stats + Progress Bar inside Hero */}
-        <div className="relative z-10 mt-10 space-y-3">
-          <div className="max-w-[68%]">
+          <div className="min-w-0 flex-1">
             <input
               aria-label="Sparmålets namn"
               type="text"
@@ -202,18 +182,20 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                 updateSelectedGoal({ name: e.target.value });
               }}
               placeholder="Sparmålets namn"
-              className="w-full bg-transparent border-0 text-subhead font-semibold text-white placeholder-white/50 focus:outline-none focus:ring-0 transition-colors p-0"
+              className="w-full bg-transparent border-0 text-subhead font-semibold text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-0 p-0"
             />
-            <span className="font-display font-bold text-3xl sm:text-4xl text-white tabular-nums tracking-tight block mt-0.5">
+            <span className="font-display font-bold text-3xl text-[var(--text-primary)] tabular-nums tracking-tight block mt-0.5">
               {formatKr(effectiveSelectedAmount)}
             </span>
-            <span className="text-footnote text-white/80 tabular-nums block mt-1">
+            <span className="text-footnote text-[var(--text-secondary)] tabular-nums block mt-0.5 truncate">
               av {formatKr(selectedGoal.targetAmount)}
               {linkedLabel ? ` · ${linkedLabel}` : ''}
             </span>
           </div>
+        </div>
 
-          <div className="w-full h-1.5 rounded-full bg-black/30 overflow-hidden">
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-2 rounded-full bg-[var(--segment-track)] overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-300"
               style={{
@@ -222,6 +204,9 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               }}
             />
           </div>
+          <span className="text-footnote font-medium text-[var(--text-secondary)] tabular-nums shrink-0">
+            {pct} %
+          </span>
         </div>
       </section>
 
@@ -247,7 +232,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               setTransferAmountInput('');
               setTransferMode('withdraw');
             }}
-            className="ui-btn-secondary !h-12 !bg-[var(--surface-color)] shadow-[var(--card-shadow)] disabled:cursor-not-allowed"
+            className="ui-btn-secondary !h-12 disabled:cursor-not-allowed"
           >
             <Minus size={15} weight="bold" />
             <span>Ta ut</span>

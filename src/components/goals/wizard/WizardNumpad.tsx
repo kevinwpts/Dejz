@@ -8,7 +8,7 @@ interface WizardNumpadProps {
 }
 
 const KEY_CLASS =
-  'h-14 rounded-2xl font-display font-semibold text-2xl text-[var(--text-primary)] flex items-center justify-center hover:bg-[var(--surface-color)]/60 active:bg-[var(--surface-color)] active:scale-95 transition-all cursor-pointer';
+  'h-16 rounded-2xl font-display font-semibold text-2xl text-[var(--text-primary)] flex items-center justify-center hover:bg-[var(--surface-color)]/60 active:bg-[var(--surface-color)] active:scale-95 transition-all cursor-pointer';
 
 const DIGITS = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
@@ -25,7 +25,7 @@ export const WizardNumpad: React.FC<WizardNumpadProps> = ({ value, onChange }) =
   };
 
   return (
-    <div className="grid grid-cols-3 gap-y-1 gap-x-4 pb-3 select-none">
+    <div className="grid grid-cols-3 gap-y-1.5 gap-x-4 pb-4 select-none">
       {DIGITS.map((d) => (
         <button key={d} type="button" onClick={() => appendDigit(d)} className={KEY_CLASS}>
           {d}
@@ -45,7 +45,7 @@ export const WizardNumpad: React.FC<WizardNumpadProps> = ({ value, onChange }) =
         type="button"
         onClick={removeLastDigit}
         aria-label="Sudda"
-        className="h-14 rounded-2xl text-[var(--text-primary)] flex items-center justify-center hover:bg-[var(--surface-color)]/60 active:bg-[var(--surface-color)] active:scale-95 transition-all cursor-pointer"
+        className="h-16 rounded-2xl text-[var(--text-primary)] flex items-center justify-center hover:bg-[var(--surface-color)]/60 active:bg-[var(--surface-color)] active:scale-95 transition-all cursor-pointer"
       >
         <svg
           width="24"

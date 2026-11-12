@@ -117,17 +117,12 @@ export const IncomeViewDetails: React.FC<IncomeViewDetailsProps> = ({
         <button
           type="button"
           onClick={() => navigateSubView('edit', 'forward')}
-          className="group flex items-center justify-center gap-1.5 px-3 max-w-md mx-auto cursor-pointer"
+          className="block w-full px-2 max-w-md mx-auto cursor-pointer"
           aria-label={`Byt namn på ${name || displayName}`}
         >
-          <h2 className="font-display font-semibold text-xl tracking-[-0.02em] text-[var(--text-primary)] text-center truncate">
+          <h2 className="ui-detail-title">
             {name || displayName}
           </h2>
-          <PencilSimple
-            size={14}
-            weight="bold"
-            className="shrink-0 text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
-          />
         </button>
 
         <div className="mt-1.5 flex items-baseline justify-center font-display font-bold text-[34px] leading-tight tracking-[-0.04em] text-positive tabular-nums">

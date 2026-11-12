@@ -15,7 +15,6 @@ interface TransactionsTabProps {
   incomes?: IncomeItem[];
   totalVariableSpent?: number;
   onSelectTransaction: (tx: TransactionItem) => void;
-  onAddTransaction?: () => void;
   onDeleteTransaction?: (id: string) => void;
   onToggleHeart?: (id: string, isHearted: boolean) => void;
   onTogglePackage?: (id: string, isWaitingForPackage: boolean) => void;
@@ -33,7 +32,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
   fixedExpenses = [],
   incomes = [],
   onSelectTransaction,
-  onAddTransaction,
   onToggleHeart,
   onTogglePackage,
   onExcludeTransaction,
@@ -65,7 +63,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
         filters={filters}
         accounts={accounts}
         onOpenFilter={() => setIsFilterOpen(true)}
-        onAddTransaction={onAddTransaction}
       />
 
       {/* Filter Bottom Sheet */}

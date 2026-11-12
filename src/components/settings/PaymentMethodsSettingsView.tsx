@@ -7,6 +7,7 @@ import { DEFAULT_PAYMENT_METHODS } from '../../constants';
 import { BottomSheet } from '../ui/BottomSheet';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { PaymentMethodIcon, AVAILABLE_PAYMENT_METHOD_ICONS } from '../CategoryIcon';
+import { IconPickerGrid } from './IconPickerGrid';
 import { SheetHeader } from '../ui/SheetHeader';
 
 
@@ -158,7 +159,6 @@ export const PaymentMethodsSettingsView: React.FC<PaymentMethodsSettingsViewProp
           title="Återställ standardbetalsätt?"
           description="Dina egna betalsätt ersätts med standardvalen."
           confirmLabel="Återställ"
-          variant="primary"
           onConfirm={handleResetMethods}
           onCancel={() => setPmResetConfirm(false)}
         />
@@ -205,28 +205,12 @@ export const PaymentMethodsSettingsView: React.FC<PaymentMethodsSettingsViewProp
             <span className="px-1 ui-field-label block">
               Välj ikon
             </span>
-            <div className="ui-sheet-box grid grid-cols-6 gap-1.5 p-2.5">
-              {AVAILABLE_PAYMENT_METHOD_ICONS.map((item) => {
-                const isSelected = pmFormIcon === item.id;
-                return (
-                  <button
-                    aria-label={item.label}
-                    aria-pressed={isSelected}
-                    key={item.id}
-                    type="button"
-                    title={item.label}
-                    onClick={() => setPmFormIcon(item.id)}
-                    className={`h-11 rounded-xl flex items-center justify-center text-[var(--text-primary)] transition-all cursor-pointer active:scale-95 ${
-                      isSelected
-                        ? 'bg-[var(--surface-color)] shadow-[var(--segment-thumb-shadow)] ring-2 ring-[var(--text-primary)]'
-                        : 'bg-transparent'
-                    }`}
-                  >
-                    <PaymentMethodIcon iconId={item.id} size={22} />
-                  </button>
-                );
-              })}
-            </div>
+            <IconPickerGrid
+              options={AVAILABLE_PAYMENT_METHOD_ICONS}
+              value={pmFormIcon}
+              onChange={setPmFormIcon}
+              renderIcon={(id) => <PaymentMethodIcon iconId={id} size={22} />}
+            />
           </div>
 
           <div className="space-y-2.5">

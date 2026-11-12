@@ -212,7 +212,7 @@ export const FixedViewCancelPicker: React.FC<FixedViewCancelPickerProps> = ({
                         }}
                         className={`h-10 px-2 rounded-xl text-callout font-medium tabular-nums transition-all cursor-pointer ${
                           isSel
-                            ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
+                            ? 'ui-selected font-semibold'
                             : 'bg-[var(--surface-color)] text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
                         }`}
                       >

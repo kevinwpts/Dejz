@@ -170,10 +170,17 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     return null;
   };
 
-  const navigateWizardStep = (next: CreateWizardStep, dir: 'forward' | 'back') => {
-    setSlideDir(dir);
-    setWizardStep(next);
-  };
+  // Steg 4 ("Hur vill du följa sparandet?") har bara ett val utan konton/saldo → hoppa över det
+  const hasTrackingChoice = accounts.length > 0 || effectiveTotalBalance > 0;
+  const navigateWizardStep = useCallback(
+    (next: CreateWizardStep, dir: 'forward' | 'back') => {
+      const target: CreateWizardStep =
+        next === 4 && !hasTrackingChoice ? (dir === 'forward' ? 5 : 3) : next;
+      setSlideDir(dir);
+      setWizardStep(target);
+    },
+    [hasTrackingChoice]
+  );
 
   const openCreateGoal = () => {
     setGoalNameInput('');
@@ -315,7 +322,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isCreateWizardOpen, wizardStep, goalTargetInput, goalCurrentInput, goalMonthlyInput, goalNameInput, goalLinkedAccountId]);
+  }, [isCreateWizardOpen, wizardStep, goalTargetInput, goalCurrentInput, goalMonthlyInput, goalNameInput, goalLinkedAccountId, navigateWizardStep]);
 
   const selectedGoal = useMemo(
     () => savingsGoals.find((g) => g.id === selectedGoalId) || null,
@@ -424,6 +431,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
         goalArtworkId={goalArtworkId}
         slideDir={slideDir}
         wizardStep={wizardStep}
+        hasTrackingChoice={hasTrackingChoice}
         navigateWizardStep={navigateWizardStep}
         setIsCreateWizardOpen={setIsCreateWizardOpen}
         goalTargetInput={goalTargetInput}
@@ -515,7 +523,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                   className="w-full py-3.5 flex items-center gap-3 text-left active:opacity-60 transition-opacity cursor-pointer"
                 >
                   <div
-                    className="w-10 h-10 rounded-full overflow-hidden relative shrink-0"
+                    className="w-10 h-10 rounded-xl overflow-hidden relative shrink-0 flex items-center justify-center"
                     style={{
                       backgroundColor: goal.customImageUrl ? undefined : theme.tileBg,
                     }}
@@ -527,9 +535,10 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="absolute -right-2 top-0.5 w-10 h-10">
-                        <GoalArtworkIllustration artworkId={goal.artworkId} />
-                      </div>
+                      <GoalArtworkIllustration
+                        artworkId={goal.artworkId}
+                        className="w-[88%] h-[88%]"
+                      />
                     )}
                   </div>
 

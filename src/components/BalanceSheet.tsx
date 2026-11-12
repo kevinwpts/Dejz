@@ -70,7 +70,7 @@ export const BalanceSheet: React.FC<BalanceSheetProps> = ({
         <button
           type="submit"
           disabled={!valid}
-          className="w-full py-3.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-sm hover:opacity-90 active:scale-[0.99] disabled:opacity-35 transition-all cursor-pointer"
+          className="ui-btn-primary"
         >
           Spara saldo
         </button>
@@ -79,7 +79,7 @@ export const BalanceSheet: React.FC<BalanceSheetProps> = ({
           <button
             type="button"
             onClick={onClear}
-            className="w-full py-1 text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+            className="w-full min-h-11 px-4 text-footnote font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
           >
             Sluta använda saldo – räkna bara på inkomst och köp
           </button>

@@ -49,14 +49,6 @@ export function inferArtworkFromGoalName(rawName: string): string {
   return 'piggy';
 }
 
-export function formatInputThousands(rawDigits: string): string {
-  const digits = rawDigits.replace(/[^\d]/g, '');
-  if (!digits) return '';
-  const num = Number(digits);
-  if (!Number.isFinite(num)) return '';
-  return new Intl.NumberFormat('sv-SE').format(num);
-}
-
 export function cleanActivityLabel(text: string, hasAmount: boolean): string {
   if (!hasAmount) return text;
   if (/^satte in\s+[\d\s\u00A0]+kr$/i.test(text.trim())) {

@@ -35,6 +35,7 @@ import {
   Lightning,
   MaskHappy,
   Money,
+  MoneyWavy,
   MusicNotes,
   Package,
   PawPrint,
@@ -683,7 +684,83 @@ function resolvePaymentMethodIconId(method?: string, explicitIconId?: string): s
   return 'credit-card';
 }
 
+/* ---------- En tonformel för alla kategorier ----------
+ * Sparade färger kan vara gråbruna eller mörka (t.ex. gamla standardfärger). Vi behåller kulören
+ * men normaliserar ljushet och mättnad i OKLCH, så att alla rutor får samma tyngd i ljust och mörkt.
+ * Själva tonen i rutan och glyfen styrs sedan av --cat-tile-mix / --cat-glyph-mix i index.css. */
+const LEGACY_CATEGORY_COLORS: Record<string, string> = {
+  '#8c755f': '#d9a21b', // Abonnemang: gråbrun → bärnsten
+};
+
+const srgbToLinear = (c: number) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+const linearToSrgb = (c: number) => (c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055);
+
+function hexToOklch(hex: string): [number, number, number] | null {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  const r = srgbToLinear(((n >> 16) & 255) / 255);
+  const g = srgbToLinear(((n >> 8) & 255) / 255);
+  const b = srgbToLinear((n & 255) / 255);
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const mm = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  const L = 0.2104542553 * l + 0.793617785 * mm - 0.0040720468 * s;
+  const A = 1.9779984951 * l - 2.428592205 * mm + 0.4505937099 * s;
+  const B = 0.0259040371 * l + 0.7827717662 * mm - 0.808675766 * s;
+  const H = (Math.atan2(B, A) * 180) / Math.PI;
+  return [L, Math.sqrt(A * A + B * B), H < 0 ? H + 360 : H];
+}
+
+function oklchToRgb(L: number, C: number, H: number): [number, number, number] {
+  const a = C * Math.cos((H * Math.PI) / 180);
+  const b = C * Math.sin((H * Math.PI) / 180);
+  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
+  const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
+  const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
+  return [
+    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
+  ];
+}
+
+const normalizedColorCache = new Map<string, string>();
+
+/** Samma ljushet och mättnad för alla kulörer (gult lite ljusare, grått blir svagt blågrått). */
+function normalizeCategoryTint(color: string): string {
+  const key = color.trim().toLowerCase();
+  const cached = normalizedColorCache.get(key);
+  if (cached) return cached;
+  const source = LEGACY_CATEGORY_COLORS[key] || key;
+  const lch = hexToOklch(source);
+  if (!lch) return color;
+  const [, c0, h0] = lch;
+  const neutral = c0 < 0.045;
+  const hue = neutral ? 265 : h0;
+  const targetL = neutral ? 0.6 : hue >= 70 && hue <= 115 ? 0.76 : hue > 115 && hue <= 175 ? 0.66 : 0.62;
+  let chroma = neutral ? 0.03 : Math.min(Math.max(c0, 0.12), 0.17);
+  let rgb = oklchToRgb(targetL, chroma, hue);
+  // Minska mättnaden tills färgen ryms i sRGB
+  while (chroma > 0 && rgb.some((v) => v < -0.0005 || v > 1.0005)) {
+    chroma -= 0.005;
+    rgb = oklchToRgb(targetL, Math.max(chroma, 0), hue);
+  }
+  const out =
+    '#' +
+    rgb
+      .map((v) => Math.round(Math.min(1, Math.max(0, linearToSrgb(Math.min(1, Math.max(0, v))))) * 255))
+      .map((v) => v.toString(16).padStart(2, '0'))
+      .join('');
+  normalizedColorCache.set(key, out);
+  return out;
+}
+
 export function resolveCategoryColor(category?: string, explicitColor?: string): string {
+  return normalizeCategoryTint(resolveRawCategoryColor(category, explicitColor));
+}
+
+function resolveRawCategoryColor(category?: string, explicitColor?: string): string {
   if (explicitColor) return explicitColor;
   const raw = (category || '').trim().toLowerCase();
   if (raw) {
@@ -789,7 +866,8 @@ const GLYPHS: Record<GlyphKey, PhosphorIcon> = {
   'satellite-antenna': WifiHigh,
   'mobile-phone': DeviceMobile,
   'mobile-phone-with-arrow': DeviceMobileCamera,
-  'money-bag': Coins,
+  // Sedel med våg: läsbar även i 16 px (Coins blev en klump)
+  'money-bag': MoneyWavy,
   coin: Coin,
   'dollar-banknote': Money,
   purse: Wallet,

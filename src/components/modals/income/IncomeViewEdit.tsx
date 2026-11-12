@@ -7,6 +7,7 @@ import { CategoryIcon } from '../../CategoryIcon';
 import { inferCategoryAndMethodFromName } from '../../../utils/bankAnalysis/existingBudget/manualCategory';
 import type { ModalSubView, NavigateSubView, SlideAnimClass } from './shared';
 import { SheetHeader } from '../../ui/SheetHeader';
+import { formatInputThousands } from '../../../utils/format';
 
 export interface IncomeViewEditProps {
   subView: ModalSubView;
@@ -98,9 +99,9 @@ export const IncomeViewEdit: React.FC<IncomeViewEditProps> = ({
                 type="text"
                 inputMode="numeric"
                 placeholder="0"
-                value={amount}
+                value={formatInputThousands(String(amount ?? ''))}
                 onChange={(e) => setAmount(e.target.value.replace(/[^\d]/g, ''))}
-                className="w-full bg-transparent border-0 p-0 font-display font-bold text-2xl sm:text-3xl text-positive placeholder-[var(--text-muted)]/40 tabular-nums focus:outline-none"
+                className="ui-amount-input"
               />
               <span className="font-display font-semibold text-sm text-[var(--text-muted)] shrink-0">
                 kr/mån

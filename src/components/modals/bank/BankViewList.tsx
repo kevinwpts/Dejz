@@ -1,10 +1,10 @@
 // "Anslut bank" steg 1: anslutna banker, sökfält och lista med banker att välja.
 import React, { useState } from 'react';
 import { getConnectionDaysLeft } from '../../../services/bank/connectionExpiry';
-import { Bank, MagnifyingGlass, SpinnerGap, ArrowClockwise, CaretRight } from '@phosphor-icons/react';
+import { MagnifyingGlass, SpinnerGap, ArrowClockwise, CaretRight } from '@phosphor-icons/react';
 import type { SetStateAction } from 'react';
 import type { BankAspsp, BankConnection } from '../../../services/bank/types';
-import { ItemLogo } from '../../ItemLogo';
+import { BankLogo } from '../../BankLogo';
 
 export interface BankViewListProps {
   connections: BankConnection[];
@@ -56,11 +56,7 @@ export const BankViewList: React.FC<BankViewListProps> = ({
                     onClick={() => onOpenExistingAccountSelection(conn)}
                     className="flex items-center gap-3 min-w-0 flex-1 text-left cursor-pointer"
                   >
-                    <ItemLogo
-                      name={conn.aspsp_name}
-                      logoUrl={conn.aspsp_logo || undefined}
-                      size="sm"
-                    />
+                    <BankLogo name={conn.aspsp_name} />
                     <div className="min-w-0">
                       <span className="ui-row-title">
                         {conn.aspsp_name}
@@ -153,17 +149,7 @@ export const BankViewList: React.FC<BankViewListProps> = ({
               className="ui-row-btn"
             >
               <div className="flex items-center gap-3 min-w-0">
-                {bank.logo ? (
-                  <img
-                    src={bank.logo}
-                    alt={bank.name}
-                    className="w-9 h-9 rounded-xl object-contain ui-logo-tile p-1 shrink-0"
-                  />
-                ) : (
-                  <div className="w-9 h-9 rounded-xl bg-[var(--surface-color)] flex items-center justify-center shrink-0">
-                    <Bank size={16} className="text-[var(--text-secondary)]" />
-                  </div>
-                )}
+                <BankLogo name={bank.name} />
                 <span className="ui-row-title">
                   {bank.name}
                 </span>

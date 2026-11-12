@@ -54,7 +54,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                   className={isActive ? 'ui-tabbar-item-active' : 'ui-tabbar-item'}
                 >
                   <Icon size={22} weight={isActive ? 'fill' : 'regular'} />
-                  <span className="text-caption tracking-normal leading-none whitespace-nowrap">
+                  <span className="text-micro font-semibold tracking-normal leading-none whitespace-nowrap">
                     {tab.label}
                   </span>
                 </button>

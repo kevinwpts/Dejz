@@ -106,7 +106,7 @@ export const TxViewDatePicker: React.FC<TxViewDatePickerProps> = ({
                       }}
                       className={`px-3 py-2.5 rounded-card-nested text-left transition-all cursor-pointer active:scale-[0.98] ${
                         isSel
-                          ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
+                          ? 'ui-selected'
                           : 'bg-[var(--fill-grouped)] hover:opacity-90 text-[var(--text-primary)]'
                       }`}
                     >

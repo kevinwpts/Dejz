@@ -168,7 +168,7 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
               type="button"
               onClick={onSyncBank}
               disabled={syncingBank}
-              className="ui-btn-secondary bg-[var(--surface-color)] shadow-[var(--card-shadow)]"
+              className="ui-btn-secondary"
             >
               <ArrowClockwise size={16} className={syncingBank ? 'animate-spin' : ''} />
               <span>{syncingBank ? 'Synkar…' : 'Synka nu'}</span>
@@ -184,8 +184,8 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
             </button>
           </div>
 
-          {/* Koppla från ligger för sig själv – en riskabel handling ska inte sitta bredvid "Välj konton" */}
-          <div className="ui-admin-card">
+          {/* Koppla från längst ner som röd textknapp – samma som "Ta bort …" i alla detaljvyer */}
+          <div>
             {(connections.length > 0
               ? connections.map((c) => ({ id: c.id, name: c.aspsp_name }))
               : [{ id: '__default__', name: connectedBank || 'banken' }]
@@ -194,9 +194,9 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
                 key={c.id}
                 type="button"
                 onClick={() => setDisconnectConfirmConnId(c.id)}
-                className="ui-admin-row justify-center"
+                className="ui-btn-danger"
               >
-                <span className="ui-list-row-title text-negative">Koppla från {c.name}</span>
+                <span className="truncate">Koppla från {c.name}</span>
               </button>
             ))}
           </div>

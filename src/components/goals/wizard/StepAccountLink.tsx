@@ -20,9 +20,10 @@ interface StepAccountLinkProps {
   onSave: () => void;
 }
 
+// Valt kort: samma mjuka lila ton + ring som alla andra valda plattor (ui-selected)
 const cardClass = (selected: boolean) =>
-  `ui-option-card bg-[var(--surface-color)] shadow-[var(--card-shadow)] ${
-    selected ? 'border-[var(--cta-bg)]' : 'border-transparent'
+  `ui-option-card border-transparent ${
+    selected ? 'ui-selected' : 'bg-[var(--surface-color)] shadow-[var(--card-shadow)]'
   }`;
 
 const checkboxClass = (selected: boolean) =>

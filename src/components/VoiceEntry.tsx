@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Microphone, Keyboard } from '@phosphor-icons/react';
 import { BottomSheet } from './ui/BottomSheet';
 import { parseQuickEntry } from '../utils/quickEntry';
+import { applyKnownBrandCasing } from '../utils/bankAnalysis/merchantRules';
 import { SheetHeader } from './ui/SheetHeader';
 
 /**
@@ -62,7 +63,7 @@ function toResult(text: string): VoiceResult | null {
   if (/^\d+([.,]\d{1,2})?$/.test(onlyNumber)) {
     return { title: '', amount: Math.round(Number(onlyNumber.replace(',', '.'))) };
   }
-  return { title: clean.charAt(0).toUpperCase() + clean.slice(1) };
+  return { title: applyKnownBrandCasing(clean.charAt(0).toUpperCase() + clean.slice(1)) };
 }
 
 export const AddEntrySheet: React.FC<AddEntrySheetProps> = ({

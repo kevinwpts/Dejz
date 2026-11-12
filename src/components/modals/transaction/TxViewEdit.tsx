@@ -10,6 +10,7 @@ import { CategoryIcon, PaymentMethodIcon } from '../../CategoryIcon';
 import { formatSwedishFullDate, ReceiptAttachment } from '../../../utils/swedishDate';
 import { inferCategoryAndMethodFromName } from '../../../utils/bankAnalysis/existingBudget/manualCategory';
 import { SheetHeader } from '../../ui/SheetHeader';
+import { formatInputThousands } from '../../../utils/format';
 
 export interface TxViewEditProps {
   subView: "details" | "edit" | "category-picker" | "payment-picker" | "date-picker" | "link-fixed-picker" | "similar" | "swish" | "receipt-preview";
@@ -218,13 +219,9 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
                       type="text"
                       inputMode="numeric"
                       placeholder="0"
-                      value={amount}
+                      value={formatInputThousands(String(amount ?? ''))}
                       onChange={(e) => setAmount(e.target.value.replace(/[^\d]/g, ''))}
-                      className={`w-full bg-transparent border-0 p-0 font-display font-bold text-2xl sm:text-3xl placeholder-[var(--text-muted)]/40 tabular-nums focus:outline-none ${
-                        isIncome
-                          ? 'text-positive'
-                          : 'text-[var(--text-primary)]'
-                      }`}
+                      className="ui-amount-input"
                     />
                     <span className="font-display font-semibold text-subhead text-[var(--text-muted)] shrink-0">
                       kr
@@ -332,7 +329,7 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
                     >
                       <Paperclip size={15} className="text-[var(--text-secondary)] shrink-0" />
                       <span className="ui-list-row-title text-callout">
-                        {rcpt.name || `Kvitto ${idx + 1}`}
+                        {draftReceipts.length > 1 ? `Kvitto ${idx + 1}` : 'Kvitto'}
                       </span>
                     </button>
                     <button

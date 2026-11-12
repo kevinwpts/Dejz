@@ -6,6 +6,7 @@ import type { AccountItem } from '../../../app/models';
 import { BottomSheet } from '../../ui/BottomSheet';
 import { ItemLogo } from '../../ItemLogo';
 import { formatKr } from './formatKr';
+import { formatAccountNumberShort } from '../../../utils/accountDisplay';
 
 interface BankAccountDetailSheetProps {
   editingAccount: AccountItem | null;
@@ -84,7 +85,7 @@ export const BankAccountDetailSheet: React.FC<BankAccountDetailSheetProps> = ({
             <div className="ui-row">
               <span className="text-[var(--text-secondary)] shrink-0">Kontonummer</span>
               <span className="font-medium text-[var(--text-primary)] tabular-nums">
-                {editingAccount.accountNumber}
+                {formatAccountNumberShort(editingAccount.accountNumber)}
               </span>
             </div>
           )}

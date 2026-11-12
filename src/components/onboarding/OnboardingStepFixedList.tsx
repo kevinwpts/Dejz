@@ -2,7 +2,6 @@ import type { SetStateAction } from 'react';
 import React from 'react';
 import { ArrowRight, Check, SpinnerGap } from '@phosphor-icons/react';
 import { ItemLogo } from '../ItemLogo';
-import { CategoryIcon } from '../CategoryIcon';
 
 export interface OnboardingStepFixedListProps {
   step: 2 | 1 | 3 | 4 | 5 | 6 | 7;
@@ -93,29 +92,20 @@ export const OnboardingStepFixedList: React.FC<OnboardingStepFixedListProps> = (
                   />
 
                   <div className="min-w-0 flex-1">
-                    <span className="ui-row-title">
+                    {/* Namnet får två rader i stället för att klippas ("iCloud 200 GB Lagring") */}
+                    <span className="ui-row-title whitespace-normal line-clamp-2">
                       {item.name}
                     </span>
                     <span className="ui-row-subtitle flex items-center gap-1.5">
-                      <CategoryIcon
-                        category={item.category || 'Räkningar'}
-                        size={11}
-                        className="shrink-0 text-[var(--text-secondary)]"
-                      />
                       <span className="truncate">
-                        {item.category || 'Räkningar'}
+                        {`${item.category || 'Räkningar'} · den ${item.dueDay}:e`}
                       </span>
                     </span>
                   </div>
 
-                  <div className="text-right shrink-0">
-                    <span className="ui-row-amount">
-                      −{formatKr(item.amount)}
-                    </span>
-                    <span className="ui-row-meta">
-                      {`Den ${item.dueDay}:e`}
-                    </span>
-                  </div>
+                  <span className="ui-row-amount shrink-0">
+                    −{formatKr(item.amount)}
+                  </span>
                 </button>
               </div>
             ))}

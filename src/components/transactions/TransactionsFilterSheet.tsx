@@ -47,11 +47,11 @@ const ATTRIBUTE_OPTIONS: {
   { id: 'large', label: 'Över 500 kr', icon: Receipt },
 ];
 
-/** Ett utseende för alla val-brickor i arket. Valt läge är neutralt (mörk/ljus bricka), inte lila. */
+/** Ett utseende för alla val-brickor i arket. Valt läge = mjuk lila ton + lila text (ui-selected). */
 const chipClass = (isSel: boolean) =>
   `h-9 px-3 rounded-full text-footnote flex items-center gap-1.5 transition-all cursor-pointer active:scale-[0.97] ${
     isSel
-      ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-medium'
+      ? 'ui-selected font-semibold'
       : 'bg-[var(--fill-grouped)] text-[var(--text-primary)] font-normal'
   }`;
 
@@ -209,7 +209,7 @@ export const TransactionsFilterSheet: React.FC<TransactionsFilterSheetProps> = (
                   onClick={() => setDateRange(opt.id)}
                   className={`h-11 px-3.5 rounded-xl text-footnote text-left transition-all cursor-pointer active:scale-[0.98] flex items-center justify-between gap-1.5 ${
                     isSel
-                      ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-medium'
+                      ? 'ui-selected font-semibold'
                       : 'bg-[var(--fill-grouped)] text-[var(--text-primary)] font-normal'
                   }`}
                 >

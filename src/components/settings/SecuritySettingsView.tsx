@@ -81,11 +81,6 @@ export const SecuritySettingsView: React.FC<SecuritySettingsViewProps> = ({
             </span>
             <span className="ui-list-row-title text-negative">Radera konto</span>
           </div>
-          <div className="ui-admin-right">
-            <span className="ui-admin-chevron">
-              <CaretRight size={13} />
-            </span>
-          </div>
         </button>
       </div>
 

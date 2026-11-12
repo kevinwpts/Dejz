@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { CaretLeft, X } from '@phosphor-icons/react';
 
 /**
@@ -6,7 +6,8 @@ import { CaretLeft, X } from '@phosphor-icons/react';
  *
  * - variant "view" (standard – detaljvyer, väljare, lägg till):
  *   [‹ tillbaka] Rubrik (vänster, 17 px)  ·····  [åtgärder] [✕]
- * - variant "edit" (redigering): Avbryt · Rubrik (centrerad) · [åtgärd]
+ * - variant "edit" (redigering): samma utseende – rubrik till vänster och ✕ som avbryter
+ *   (onCancel, tillgängligt namn "Avbryt"). Spara-knappen ligger längst ner i arket.
  */
 interface SheetHeaderProps {
   title: React.ReactNode;
@@ -17,7 +18,7 @@ interface SheetHeaderProps {
   onBack?: () => void;
   /** Den runda stängknappen längst till höger (variant "view") */
   onClose?: () => void;
-  /** "Avbryt" till vänster (variant "edit") */
+  /** ✕-knappen i variant "edit": avbryter redigeringen utan att spara */
   onCancel?: () => void;
   cancelLabel?: string;
   /** Knappar till höger – före stängknappen (view) eller i högerfältet (edit) */
@@ -40,28 +41,18 @@ export const SheetHeader: React.FC<SheetHeaderProps> = ({
   flush = false,
   className = '',
 }) => {
-  const base = `${flush ? 'ui-sheet-sub-header' : 'ui-sheet-header'} ${className}`;
+  const rootRef = useRef<HTMLDivElement>(null);
+  const scrolled = useScrolledUnder(rootRef);
+  const base = `${flush ? 'ui-sheet-sub-header' : 'ui-sheet-header'} ${
+    scrolled ? 'ui-header-scrolled' : ''
+  } ${className}`;
 
-  if (variant === 'edit') {
-    return (
-      <div className={`${base} !grid grid-cols-[1fr_auto_1fr] gap-2`}>
-        <div className="flex items-center justify-start min-w-0">
-          {onCancel && (
-            <button type="button" onClick={onCancel} className="ui-text-btn">
-              {cancelLabel}
-            </button>
-          )}
-        </div>
-        <h2 id={titleId} className="ui-sheet-title text-center max-w-[220px]">
-          {title}
-        </h2>
-        <div className="flex items-center justify-end gap-2 min-w-0">{actions}</div>
-      </div>
-    );
-  }
+  // Redigering ser ut som alla andra ark: rubrik till vänster + ✕ (som avbryter utan att spara).
+  const closeAction = variant === 'edit' ? onCancel : onClose;
+  const closeLabel = variant === 'edit' ? cancelLabel : 'Stäng';
 
   return (
-    <div className={`${base} gap-2`}>
+    <div ref={rootRef} className={`${base} gap-2`}>
       <div className="flex items-center gap-2.5 min-w-0 flex-1">
         {onBack && (
           <button
@@ -85,11 +76,17 @@ export const SheetHeader: React.FC<SheetHeaderProps> = ({
           )}
         </div>
       </div>
-      {(actions || onClose) && (
+      {(actions || closeAction) && (
         <div className="flex items-center gap-2 shrink-0">
           {actions}
-          {onClose && (
-            <button type="button" onClick={onClose} aria-label="Stäng" className="ui-icon-btn">
+          {closeAction && (
+            <button
+              type="button"
+              onClick={closeAction}
+              aria-label={closeLabel}
+              title={closeLabel}
+              className="ui-icon-btn"
+            >
               <X size={14} weight="bold" />
             </button>
           )}
@@ -98,3 +95,26 @@ export const SheetHeader: React.FC<SheetHeaderProps> = ({
     </div>
   );
 };
+
+/** Sant när innehållet i närmaste scrollbara förälder har scrollats in under huvudet (för hårfin linje). */
+function useScrolledUnder(ref: React.RefObject<HTMLElement | null>): boolean {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof window === 'undefined') return;
+    // Bara fasta (sticky) huvuden behöver linjen
+    if (window.getComputedStyle(el).position !== 'sticky') return;
+    let scroller: HTMLElement | null = el.parentElement;
+    while (scroller) {
+      const oy = window.getComputedStyle(scroller).overflowY;
+      if (oy === 'auto' || oy === 'scroll') break;
+      scroller = scroller.parentElement;
+    }
+    if (!scroller) return;
+    const target = scroller;
+    const update = () => setScrolled(target.scrollTop > 4);
+    target.addEventListener('scroll', update, { passive: true });
+    return () => target.removeEventListener('scroll', update);
+  }, [ref]);
+  return scrolled;
+}

@@ -3,7 +3,7 @@ import type React from 'react';
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { PeriodInfo, isDateInPeriod } from '../../utils/periodEngine';
 import { deduplicateTransactions } from '../../utils/transactionDedup';
-import { formatSwedishDateHeading, getSwedishDateStr } from '../../utils/swedishDate';
+import { formatSwedishDateHeading, getSwedishDateStr, SHORT_WEEKDAYS_SV } from '../../utils/swedishDate';
 import type { reconcilePeriodRecurringMatches } from '../../utils/recurring/periodReconcile';
 import { type FixedExpenseItem, type IncomeItem, type TransactionItem, compareTransactionsChronologically } from '../../app/models';
 
@@ -90,13 +90,8 @@ export function useHomeTimeline({
       const dd = String(dObj.getUTCDate()).padStart(2, '0');
       const dateStr = `${yyyy}-${mm}-${dd}`;
 
-      let weekdayShort = new Intl.DateTimeFormat('sv-SE', {
-        timeZone: 'Europe/Stockholm',
-        weekday: 'short',
-      })
-        .format(dObj)
-        .replace('.', '');
-      weekdayShort = weekdayShort.charAt(0).toUpperCase() + weekdayShort.slice(1);
+      // Samma förkortningar i hela appen: Mån, Tis, Ons, Tor … (inte "Tors")
+      const weekdayShort = SHORT_WEEKDAYS_SV[dObj.getUTCDay()] || '';
 
       const dayNum = String(dObj.getUTCDate());
       const shortMonth = new Intl.DateTimeFormat('sv-SE', {
