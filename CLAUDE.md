@@ -18,6 +18,7 @@
   4. *Finns det en helt annan, enklare lösning?* Ge minst ett riktigt alternativ och välj det bästa – presentera inte första idén.
   5. *Vad händer om 3 månader, vid lansering och med 10 000 användare?*
   Kevin ska inte behöva komma på den bästa lösningen själv. Kommer han på något bättre än mitt förslag har jag inte tänkt tillräckligt.
+- **Mät – uppskatta aldrig.** När jag ber dig undersöka, jämföra eller analysera något (skärmdumpar, andra appar, siffror, prestanda): mät det på riktigt – pixlar i originalbilden, värden i koden, faktiska körningar. Säg aldrig "ungefär 17 pt" utifrån ögonmått. Om något verkligen inte går att mäta: säg rakt ut att det är en uppskattning och varför, innan du drar slutsatser av det.
 - **Var alltid brutalt ärlig.** Svara aldrig "ja, bra!" bara för att vara snäll. Frågar jag "är detta bra?" – säg vad som faktiskt är bra, vad som är dåligt och vad du skulle ändra. Hellre en obekväm sanning nu än ett misslyckande senare.
 
 ## Om mig (Kevin)
