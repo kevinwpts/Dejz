@@ -180,7 +180,7 @@ export const HomeTimeline: React.FC<HomeTimelineProps> = ({
         </div>
 
         {/* Vald dags händelser samlade i ett enhetligt listkort med generöst mellanrum till tidslinjen */}
-        <div className="mt-3.5 sm:mt-4 space-y-1.5">
+        <div className="mt-1.5 sm:mt-2 space-y-1.5">
           {!isInitialLoading && (
             <div className="ui-date-header px-1">
               <div className="flex items-center gap-2 min-w-0">

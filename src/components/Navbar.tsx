@@ -8,6 +8,8 @@ interface NavbarProps {
   userName?: string | null;
   userAvatar?: string | null;
   pageTitle?: string | null;
+  /** Flikens rubrik (Historik, Analys, Fasta) – visas som h1 bredvid profilbilden. Hem har ingen. */
+  tabTitle?: string | null;
   navigationKey?: string;
   hasUnreadNotifications?: boolean;
   hideActions?: boolean;
@@ -24,6 +26,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   userName,
   userAvatar,
   pageTitle,
+  tabTitle,
   navigationKey,
   hasUnreadNotifications = false,
   hideActions = false,
@@ -182,30 +185,33 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="w-10 shrink-0" aria-hidden="true" />
             </>
           ) : (
-            <button
-              type="button"
-              onClick={onProfileClick}
-              title={userName || userEmail || 'Profil & inställningar'}
-              aria-label="Profil & inställningar"
-              className="flex items-center gap-2.5 py-1 pr-1 focus:outline-none hover:opacity-90 active:scale-95 transition-all cursor-pointer group shrink-0"
-            >
-              <span className="w-10 h-10 rounded-full bg-[var(--header-btn-bg)] text-[var(--text-primary)] flex items-center justify-center overflow-hidden shrink-0">
-                {userAvatar && !imgError ? (
-                  <img
-                    src={userAvatar}
-                    alt="Profilbild"
-                    className="w-full h-full object-cover"
-                    onError={() => setImgError(true)}
-                  />
-                ) : initialChar ? (
-                  <span className="font-display font-semibold text-callout uppercase text-[var(--text-primary)]">
-                    {initialChar}
-                  </span>
-                ) : (
-                  <UserCircle size={22} className="text-[var(--text-secondary)]" />
-                )}
-              </span>
-            </button>
+            <div className="flex items-center gap-2 min-w-0">
+              <button
+                type="button"
+                onClick={onProfileClick}
+                title={userName || userEmail || 'Profil & inställningar'}
+                aria-label="Profil & inställningar"
+                className="flex items-center gap-2.5 py-1 pr-1 focus:outline-none hover:opacity-90 active:scale-95 transition-all cursor-pointer group shrink-0"
+              >
+                <span className="w-10 h-10 rounded-full bg-[var(--header-btn-bg)] text-[var(--text-primary)] flex items-center justify-center overflow-hidden shrink-0">
+                  {userAvatar && !imgError ? (
+                    <img
+                      src={userAvatar}
+                      alt="Profilbild"
+                      className="w-full h-full object-cover"
+                      onError={() => setImgError(true)}
+                    />
+                  ) : initialChar ? (
+                    <span className="font-display font-semibold text-callout uppercase text-[var(--text-primary)]">
+                      {initialChar}
+                    </span>
+                  ) : (
+                    <UserCircle size={22} className="text-[var(--text-secondary)]" />
+                  )}
+                </span>
+              </button>
+              {tabTitle && <h1 className="ui-header-title">{tabTitle}</h1>}
+            </div>
           )}
 
           {/* Höger: Rena ikonknappar utan vit cirkelbakgrund (döljs på undersidor med pageTitle) */}

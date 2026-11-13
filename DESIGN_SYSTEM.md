@@ -51,7 +51,7 @@ Använd alltid namnet för vad färgen **betyder**:
 - **Kort har inga kantlinjer.** Vit yta (`--surface-color`) på grå bakgrund + mycket mjuk skugga (`--card-shadow`). I mörkt läge: ljusare yta mot nästan svart bakgrund, ingen skugga.
 - **Inga avdelare mellan rader** (som Revolut/iOS 18). Rader skiljs åt av luft: listrader (`ui-tx-row`) är minst 72 px, inställningsrader (`ui-admin-row`) 56 px. Kortet behåller sin rundade yta.
 - **Grupper inne i ark** (`ui-sheet-group`, `ui-field-card`, `ui-action-tile`) har grå fyllning `--fill-grouped` – aldrig kantlinje. Skriv `bg-[var(--fill-grouped)]` för egna rutor i ark, inte `bg-[var(--bg-color)] border …`.
-- **Tre textnivåer:** sidrubrik (`ui-large-title`, 30 px fet) · radtext (`ui-row-title`, 15 px **normal vikt**) · sekundärtext (`ui-row-subtitle`, 13 px). Belopp i rader: `ui-row-amount` (15 px, normal vikt, inkomster gröna). Fet/halvfet bara för rubriker, datumrubriker, stora belopp (hemkortet 46 px, detaljvyer 34 px) och huvudknappar. Belopp alltid `tabular-nums`.
+- **Tre textnivåer:** flikrubrik (`ui-header-title`, 20 px halvfet, i övre raden bredvid profilbilden) · radtext (`ui-row-title`, 15 px **normal vikt**) · sekundärtext (`ui-row-subtitle`, 13 px). Belopp i rader: `ui-row-amount` (15 px, normal vikt, inkomster gröna). Fet/halvfet bara för rubriker, datumrubriker, stora belopp (hemkortet 46 px, detaljvyer 34 px) och huvudknappar. Belopp alltid `tabular-nums`.
 - **Etiketter skrivs i vanlig skiftläge** ("Namn", "Belopp") – inga VERSALER.
 - **Tryckkänsla:** knappar krymper lite (`active:scale-[0.97]`), rader får en svag ton (`active:bg-[var(--press-overlay)]`). Allt stängs av vid "Reducera rörelse".
 - **Loggor och kategoriikoner är runda** – samma cirkel överallt (40 px i listor, 64 px i detaljvyer). Butikslogor (`.ui-logo-tile`) fyller cirkeln på vit botten utan kant; ordbilder och okända får en bokstavscirkel (`MonogramTile`). Kategoriikoner (Phosphor, fylld) ligger i en cirkel tonad med kategorins färg (`.ui-cat-tile` + `categoryColorStyle()`).
@@ -105,7 +105,7 @@ Rader i Inställningar ("Logga ut", "Radera konto") får vara röda rader.
 
 - **Knappar:** `ui-btn-primary` (huvudknapp, 52 px), `ui-btn-primary-flow` (introduktionen), `ui-btn-secondary` (neutral ton), `ui-btn-tertiary` (bara text), `ui-btn-danger` (röd text utan ram – "Ta bort …"), `ui-pill-btn` ("Redigera"), `ui-icon-btn` (grå rund, t.ex. stäng), `ui-header-btn` (toppraden), `ui-dialog-btn-primary` / `-secondary` / `-danger` (val i dialoger), `ui-clear-btn`
 - **Valt läge:** `ui-selected` (plattor, chips), `ui-chip-active`, `ui-day-btn-active` – alla med samma mjuka lila ton
-- **Sidor och ark:** `ui-large-title` (stor rubrik på flikarna), `ui-sheet-header`, `ui-sheet-sub-header`, `ui-sheet-title`, `ui-sheet-group`, `ui-step-title`
+- **Sidor och ark:** `ui-header-title` (flikrubrik i övre raden, h1), `ui-sheet-header`, `ui-sheet-sub-header`, `ui-sheet-title`, `ui-sheet-group`, `ui-step-title`
 - **Bottenmeny:** `ui-tabbar`, `ui-tabbar-item` / `-active`, `ui-fab` (plusknappen), `ui-tabbar-fade`
 - **Listor och rader:** `ui-list-card`, `ui-row`, `ui-row-btn`, `ui-row-title`, `ui-row-subtitle`, `ui-row-amount`, `ui-tx-row`, `ui-list-row-title`
 - **Detaljvyer:** `ui-detail-hero`, `ui-detail-title`, `ui-detail-amount` (+ `-income`), `ui-detail-meta`, `ui-detail-card`, `ui-detail-row`, `ui-detail-label`, `ui-detail-value`, `ui-detail-value-link`, `ui-detail-stack`

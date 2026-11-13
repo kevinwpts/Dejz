@@ -1878,14 +1878,17 @@ b {
    ========================================================================== */
 @layer components {
   /* 1. Page & Section Structure */
+  /* Kompakt: 16 px mellan sektioner. Luft i nederkant = menyns område (se .ui-tabbar-fade) + 24 px,
+     så att sista raden kan scrollas helt fram ovanför menyn. */
   .ui-page {
-    @apply space-y-6 pb-40 sm:pb-44;
+    @apply space-y-4;
+    padding-bottom: calc(max(env(safe-area-inset-bottom, 0px), 8px) + 84px + 24px);
     animation: fadeIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
 
-  /* Stor sidrubrik överst på flikarna (iOS "Large Title") */
-  .ui-large-title {
-    @apply font-display text-[30px] font-bold leading-[1.1] tracking-[-0.03em] text-[var(--text-primary)] px-1 pt-1 pb-4;
+  /* Flikrubrik i övre raden bredvid profilbilden (Historik, Analys, Fasta) – sparar en hel rad */
+  .ui-header-title {
+    @apply font-display text-[20px] font-semibold leading-tight tracking-[-0.02em] text-[var(--text-primary)] truncate min-w-0;
   }
 
   .ui-section {
@@ -1910,7 +1913,7 @@ b {
   }
 
   .ui-date-header {
-    @apply flex items-center justify-between gap-2 px-1 pb-2 pt-1 text-callout;
+    @apply flex items-center justify-between gap-2 px-1 pb-1.5 pt-0.5 text-callout;
   }
 
   /* 2. Cards & Grouped Containers – inga kantlinjer, bara yta + mjuk skugga */
@@ -1939,17 +1942,17 @@ b {
     @apply bg-[var(--surface-color)] rounded-card shadow-[var(--card-shadow)] overflow-hidden;
   }
 
-  /* Inställningslistor — 56 px rader, inga avdelare */
+  /* Inställningslistor — 50 px rader, inga avdelare */
   .ui-admin-card {
     @apply bg-[var(--surface-color)] rounded-card shadow-[var(--card-shadow)] overflow-hidden;
   }
 
   .ui-admin-row {
-    @apply relative w-full px-4 py-3 min-h-[56px] flex items-center justify-between gap-3 text-subhead font-normal text-left text-[var(--text-primary)] active:bg-[var(--press-overlay)] transition-colors cursor-pointer;
+    @apply relative w-full px-4 py-2.5 min-h-[50px] flex items-center justify-between gap-3 text-subhead font-normal text-left text-[var(--text-primary)] active:bg-[var(--press-overlay)] transition-colors cursor-pointer;
   }
 
   .ui-admin-row-static {
-    @apply relative w-full px-4 py-3 min-h-[56px] flex items-center justify-between gap-3 text-subhead font-normal text-left text-[var(--text-primary)];
+    @apply relative w-full px-4 py-2.5 min-h-[50px] flex items-center justify-between gap-3 text-subhead font-normal text-left text-[var(--text-primary)];
   }
 
   .ui-admin-icon-slot {
@@ -1983,11 +1986,11 @@ b {
 
   /* 3. List Rows & Transaction Rows */
   .ui-tx-row {
-    @apply w-full min-h-[72px] py-3 flex items-center justify-between gap-3 text-subhead text-left transition-opacity active:opacity-60 cursor-pointer;
+    @apply w-full min-h-[58px] py-1.5 flex items-center justify-between gap-3 text-subhead text-left transition-opacity active:opacity-60 cursor-pointer;
   }
 
   .ui-tx-row-static {
-    @apply w-full min-h-[72px] py-3 flex items-center justify-between gap-3 text-subhead text-left;
+    @apply w-full min-h-[58px] py-1.5 flex items-center justify-between gap-3 text-subhead text-left;
   }
 
   .ui-row {
@@ -2394,20 +2397,20 @@ b {
 
   /* 9. Bottenmeny – iOS-glas (genomskinlig med oskärpa) och plusknapp i samma höjd */
   .ui-tabbar {
-    @apply flex-1 h-16 rounded-full px-1.5 flex items-center justify-around;
+    @apply flex-1 h-14 rounded-full px-1 flex items-center justify-around;
     background: var(--nav-glass-bg);
     -webkit-backdrop-filter: saturate(180%) blur(24px);
     backdrop-filter: saturate(180%) blur(24px);
     box-shadow: inset 0 0 0 1px var(--nav-glass-border), var(--shadow-nav);
   }
   .ui-tabbar-item {
-    @apply flex-1 h-[52px] rounded-full flex flex-col items-center justify-center gap-[3px] transition-colors duration-200 cursor-pointer text-[var(--nav-inactive-color)] font-medium;
+    @apply flex-1 h-12 rounded-full flex flex-col items-center justify-center gap-[3px] transition-colors duration-200 cursor-pointer text-[var(--nav-inactive-color)] font-medium;
   }
   .ui-tabbar-item-active {
-    @apply flex-1 h-[52px] rounded-full flex flex-col items-center justify-center gap-[3px] transition-colors duration-200 cursor-pointer text-[var(--nav-active-color)] font-semibold bg-[var(--nav-active-bg)];
+    @apply flex-1 h-12 rounded-full flex flex-col items-center justify-center gap-[3px] transition-colors duration-200 cursor-pointer text-[var(--nav-active-color)] font-semibold bg-[var(--nav-active-bg)];
   }
   .ui-fab {
-    @apply shrink-0 w-16 h-16 rounded-full flex items-center justify-center transition-transform duration-200 active:scale-[0.94] cursor-pointer;
+    @apply shrink-0 w-14 h-14 rounded-full flex items-center justify-center transition-transform duration-200 active:scale-[0.94] cursor-pointer;
     color: var(--cta-fg);
     background:
       radial-gradient(120% 120% at 30% 0%, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 55%),
@@ -2415,12 +2418,12 @@ b {
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14), var(--fab-shadow);
   }
   /* Mjuk övergång i nederkant så att listan tonar bort bakom menyn */
-  /* Täcker hela området bakom menyn (ca 100 px + hemindikatorn) så att ingen listtext syns
-     mellan menyn och plusknappen eller runt kanterna. Bara överkanten tonar. */
+  /* Täcker exakt menyns område (12 px luft + 56 px meny + hemindikatorn) och tonar 16 px ovanför,
+     så att ingen listtext syns mellan menyn och plusknappen eller runt kanterna. */
   .ui-tabbar-fade {
     @apply fixed left-0 right-0 bottom-0 pointer-events-none z-30;
-    height: calc(max(env(safe-area-inset-bottom, 0px), 8px) + 116px);
-    background: linear-gradient(to bottom, color-mix(in srgb, var(--bg-color) 0%, transparent) 0, var(--bg-color) 24px, var(--bg-color) 100%);
+    height: calc(max(env(safe-area-inset-bottom, 0px), 8px) + 84px);
+    background: linear-gradient(to bottom, color-mix(in srgb, var(--bg-color) 0%, transparent) 0, var(--bg-color) 16px, var(--bg-color) 100%);
   }
 }
 

@@ -73,7 +73,7 @@ export const TransactionsGroupedList: React.FC<TransactionsGroupedListProps> = (
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {groupedByDate.map((group) => (
         <div key={group.dateKey}>
           {/* Datumrubrik och dagssummering utanför listkortet */}

@@ -13,6 +13,7 @@ export const AppTopBar: React.FC = () => {
     activeTab,
     settingsSubView,
     selectedHistoryAccountId,
+    accounts,
     selectedGoalIdInView,
     setSelectedGoalIdInView,
     setSettingsSubView,
@@ -35,6 +36,19 @@ export const AppTopBar: React.FC = () => {
     kvarAttSpendera,
     dagsbudget,
   } = useApp();
+  // Flikrubrik i övre raden (Hem har hemkortet som rubrik).
+  // Historik för ett konto: kontots namn som rubrik.
+  const historyAccountName = selectedHistoryAccountId
+    ? accounts.find((a) => a.id === selectedHistoryAccountId)?.name
+    : undefined;
+  const tabTitle =
+    activeTab === 'transactions'
+      ? historyAccountName || 'Historik'
+      : activeTab === 'analysis'
+      ? 'Analys'
+      : activeTab === 'fixed'
+      ? 'Fasta'
+      : null;
   return (
       <>
         <Navbar
@@ -45,6 +59,7 @@ export const AppTopBar: React.FC = () => {
           hasUnreadNotifications={false}
           hideActions={activeTab === 'settings'}
           hideSearch
+          tabTitle={tabTitle}
           pageTitle={
             activeTab === 'settings'
               ? settingsSubView === 'main'

@@ -59,13 +59,13 @@ interface HomeTabProps {
   onOpenBalance?: () => void;
 }
 
-// Visa sparmål på Hem (standard: ja). Utanför komponenten – React Compiler kan inte optimera try/catch med villkor.
+// Sparmålen fällda ut på Hem (standard: nej – en rad, så att dagens köp syns tidigare).
+// Utanför komponenten – React Compiler kan inte optimera try/catch med villkor.
 function readShowGoalsOnHome(): boolean {
   try {
-    const saved = localStorage.getItem('dejz_show_goals_home');
-    return saved === null ? true : saved === 'true';
+    return localStorage.getItem('dejz_show_goals_home') === 'true';
   } catch {
-    return true;
+    return false;
   }
 }
 

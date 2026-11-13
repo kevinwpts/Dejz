@@ -75,7 +75,7 @@ const CategoryEntryRow: React.FC<CategoryEntryRowProps> = ({
           onSelectFixed(fixedExpenses.find((f) => f.id === subFixed.id) ?? subFixed);
         }
       }}
-      className="w-full pl-[68px] pr-4 sm:pr-5 py-3 flex items-center justify-between gap-3 text-left active:bg-[var(--press-overlay)] transition-colors cursor-pointer group"
+      className="w-full min-h-[52px] pl-[68px] pr-4 sm:pr-5 py-2 flex items-center justify-between gap-3 text-left active:bg-[var(--press-overlay)] transition-colors cursor-pointer group"
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <ItemLogo
@@ -189,7 +189,7 @@ export const AnalysisCategoryList: React.FC<AnalysisCategoryListProps> = ({
                     setSelectedSliceCategory(isExpanded ? null : item.category);
                   }
                 }}
-                className={`w-full px-4 sm:px-5 py-3.5 flex flex-col gap-2 text-left active:bg-[var(--press-overlay)] transition-colors cursor-pointer group ${
+                className={`w-full min-h-[58px] px-4 sm:px-5 py-2 flex flex-col justify-center gap-2 text-left active:bg-[var(--press-overlay)] transition-colors cursor-pointer group ${
                   isExpanded ? 'bg-[var(--fill-grouped)]' : ''
                 }`}
               >

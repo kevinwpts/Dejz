@@ -119,7 +119,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
       />
 
       {/* Sektion 1: Sammanhållen 3-kolumns Översikt (Inkomst · Utgifter · Kvar) */}
-      <section className="ui-card-p">
+      <section className="ui-card px-4 py-3">
         <div className="ui-stat-grid">
           <div className="pr-3 min-w-0">
             <span className="ui-stat-label">

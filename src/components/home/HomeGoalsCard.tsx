@@ -46,7 +46,8 @@ export const HomeGoalsCard: React.FC<HomeGoalsCardProps> = ({
       )}
 
       {onNavigateToGoals && savingsGoals.length > 0 && (
-        <section className="bg-[var(--surface-color)] shadow-[var(--card-shadow)] rounded-card px-4 py-4 sm:px-5">
+        // Hopfällt som standard: en enda rad (Sparmål · summa), så att dagens köp syns tidigare
+        <section className="bg-[var(--surface-color)] shadow-[var(--card-shadow)] rounded-card px-4 sm:px-5">
           <button
             type="button"
             onClick={() => {
@@ -58,24 +59,18 @@ export const HomeGoalsCard: React.FC<HomeGoalsCardProps> = ({
                 // ignore
               }
             }}
-            className="w-full flex items-center justify-between gap-3 text-left cursor-pointer group focus:outline-none"
+            className="w-full min-h-[52px] py-3 flex items-center justify-between gap-3 text-left cursor-pointer group focus:outline-none"
             aria-expanded={showGoals}
             title={showGoals ? 'Dölj sparmål' : 'Visa sparmål'}
           >
-            <div className="min-w-0">
-              <span className="text-footnote text-[var(--text-secondary)] font-normal block">
-                Sparmål
-              </span>
-              <div className="font-display text-[20px] sm:text-[20px] font-semibold tracking-[-0.015em] leading-tight text-[var(--text-primary)] tabular-nums mt-0.5">
-                {formatKr(totalSavedInGoals)}
-              </div>
-            </div>
+            <span className="ui-row-title">Sparmål</span>
 
-            <span className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-muted)] group-hover:text-[var(--text-primary)] group-hover:bg-[var(--bg-color)] transition-all shrink-0">
+            <span className="flex items-center gap-2 shrink-0">
+              <span className="ui-row-amount">{formatKr(totalSavedInGoals)}</span>
               <CaretDown
                 size={14}
                 weight="regular"
-                className={`transition-transform duration-200 ${
+                className={`text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-transform duration-200 ${
                   showGoals ? 'rotate-180' : ''
                 }`}
               />
@@ -83,8 +78,9 @@ export const HomeGoalsCard: React.FC<HomeGoalsCardProps> = ({
           </button>
 
           <div
+            inert={!showGoals}
             className={`grid transition-all duration-200 ease-out ${
-              showGoals ? 'grid-rows-[1fr] opacity-100 mt-3' : 'grid-rows-[0fr] opacity-0 mt-0'
+              showGoals ? 'grid-rows-[1fr] opacity-100 pb-3.5' : 'grid-rows-[0fr] opacity-0 pb-0'
             }`}
           >
             <div className="overflow-hidden">

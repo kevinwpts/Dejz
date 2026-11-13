@@ -115,7 +115,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
       {/* ============================================================== */}
       {/* TOPPÖVERSIKT: INKOMST · FASTA UTGIFTER · KVAR EFTER FASTA      */}
       {/* ============================================================== */}
-      <section className="ui-card-p">
+      <section className="ui-card px-4 py-3">
         <div className="ui-stat-grid">
           <div className="pr-3 min-w-0">
             <span className="ui-stat-label">
