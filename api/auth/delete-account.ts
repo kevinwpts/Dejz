@@ -53,6 +53,16 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       'savings_goals',
       'accounts',
       'feedback',
+      'incomes',
+      'monthly_savings',
+      'notifications',
+      'savings_pot_transactions',
+      'user_settings',
+      'email_verification',
+      'marketing_consent',
+      'user_activity',
+      // Sist: flera tabeller ovan pekar på profiles. Allt försvinner också när auth-användaren
+      // raderas nedan (on delete cascade), men vi städar uttryckligen ifall en koppling saknas.
       'profiles',
     ];
     

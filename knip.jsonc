@@ -19,6 +19,7 @@
     "supabase/functions/**/*.ts",
     "scripts/**/*.{js,cjs,mjs,ts}",
     "e2e/**/*.ts",
+    "tests/**/*.ts",
     "*.{ts,js}"
   ],
   // Capacitor-tillägg som iPhone-appen laddar in vid `npx cap sync ios`, utan import i koden
