@@ -82,7 +82,7 @@ Menyn och plusknappen syns bara på de fyra flikarna (Hem, Historik, Analys, Fas
 |---|---|---|
 | Primär | `ui-btn-primary` (+ `-flow`, `ui-dialog-btn-primary`, `ui-btn-sm-primary`) | Lila. Avstängd = lila 40 % + vit text |
 | Sekundär | `ui-btn-secondary`, `ui-btn-sm`, `ui-pill-btn`, `ui-dialog-btn-secondary` | Neutral grå ton (`--btn-secondary-fill`) – inga vita, mörka eller lila piller |
-| Tertiär | `ui-btn-tertiary`, `ui-section-action` | Bara lila text |
+| Tertiär | `ui-section-action` | Bara lila text |
 | Farlig | `ui-btn-danger` | Röd text, centrerad, längst ner på detaljsidor ("Ta bort sparmål", "Koppla från …"). I bekräftelser: `ui-dialog-btn-danger` (röd fylld) – även för "Återställ …" |
 
 Rader i Inställningar ("Logga ut", "Radera konto") får vara röda rader.
@@ -103,7 +103,7 @@ Rader i Inställningar ("Logga ut", "Radera konto") får vara röda rader.
 
 Återkommande delar har **en** klass var. Byt deras utseende i `@layer components` i `index.css`:
 
-- **Knappar:** `ui-btn-primary` (huvudknapp, 52 px), `ui-btn-primary-flow` (introduktionen), `ui-btn-secondary` (neutral ton), `ui-btn-tertiary` (bara text), `ui-btn-danger` (röd text utan ram – "Ta bort …"), `ui-pill-btn` ("Redigera"), `ui-icon-btn` (grå rund, t.ex. stäng), `ui-header-btn` (toppraden), `ui-dialog-btn-primary` / `-secondary` / `-danger` (val i dialoger), `ui-clear-btn`
+- **Knappar:** `ui-btn-primary` (huvudknapp, 52 px), `ui-btn-primary-flow` (introduktionen), `ui-btn-secondary` (neutral ton), `ui-btn-danger` (röd text utan ram – "Ta bort …"), `ui-pill-btn` ("Redigera"), `ui-icon-btn` (grå rund, t.ex. stäng), `ui-header-btn` (toppraden), `ui-dialog-btn-primary` / `-secondary` / `-danger` (val i dialoger), `ui-clear-btn`
 - **Valt läge:** `ui-selected` (plattor, chips), `ui-chip-active`, `ui-day-btn-active` – alla med samma mjuka lila ton
 - **Sidor och ark:** `ui-header-title` (flikrubrik i övre raden, h1), `ui-sheet-header`, `ui-sheet-sub-header`, `ui-sheet-title`, `ui-sheet-group`, `ui-step-title`
 - **Bottenmeny:** `ui-tabbar`, `ui-tabbar-item` / `-active`, `ui-fab` (plusknappen), `ui-tabbar-fade`
@@ -115,7 +115,9 @@ Rader i Inställningar ("Logga ut", "Radera konto") får vara röda rader.
 - **Kort och plattor:** `ui-card`, `ui-action-tile` (+ `-label`), `ui-shortcut-tile`, `ui-option-card`, `ui-chip`, `ui-chip-sm`
 - **Tomma lägen och sektioner:** `ui-empty-state`, `ui-section-header`, `ui-section-title`, `ui-stat-label`, `ui-stat-value`
 
-Ny komponent som ska finnas på flera ställen? Lägg en `ui-…`-klass i `index.css` i stället för att kopiera långa klasslistor.
+Ny komponent som ska finnas på flera ställen? Lägg en `ui-…`-klass i `index.css` i stället för att kopiera långa klasslistor – **i rätt familj** (rätt numrerat avsnitt i `@layer components`), inte sist i filen. Ändrar du en befintlig klass: ändra regeln där den står i stället för att lägga en ny regel längre ner som skriver över den.
+
+Några regler ligger **avsiktligt utanför lager** (avsnittet "Utanför lager" direkt efter komponentlagret): avstängd huvudknapp, notiser (`ui-toast…`), fasta huvuden (`ui-header-scrolled`). Oskiktade regler vinner alltid över Tailwind-klasser i komponenterna – flytta dem inte in i `@layer components`.
 
 ## Regler (stoppas av designvakten)
 

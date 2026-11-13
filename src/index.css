@@ -183,10 +183,6 @@ h6 {
   font-family: var(--font-unbounded) !important;
 }
 
-.font-unbounded {
-  font-family: var(--font-unbounded) !important;
-}
-
 @utility font-sans {
   font-family: var(--font-sans) !important;
 }
@@ -199,20 +195,7 @@ h6 {
   font-family: var(--font-barlow) !important;
 }
 
-.font-barlow,
-.font-barlow *,
-.font-barlow-standard,
-.font-barlow-standard *,
-[data-font="barlow"],
-[data-font="barlow"] * {
-  font-family: var(--font-barlow) !important;
-}
-
 @utility font-shoulders {
-  font-family: var(--font-display) !important;
-}
-
-.font-shoulders {
   font-family: var(--font-display) !important;
 }
 
@@ -220,17 +203,6 @@ h6 {
   font-family: var(--font-amount) !important;
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
-}
-
-.font-amount {
-  font-family: var(--font-amount) !important;
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-}
-
-.font-barlow .font-amount,
-.font-barlow-standard .font-amount {
-  font-family: var(--font-amount) !important;
 }
 
 @utility no-scrollbar {
@@ -242,10 +214,6 @@ h6 {
 }
 
 @utility font-editorial {
-  font-family: var(--font-editorial) !important;
-}
-
-.font-editorial {
   font-family: var(--font-editorial) !important;
 }
 
@@ -473,7 +441,6 @@ h6 {
   color: var(--text-secondary);
 }
 
-
 @utility text-metric-label {
   font-size: 12px;
   font-weight: 400;
@@ -551,23 +518,6 @@ h6 {
   }
 }
 
-.divide-subtle > :not(:last-child),
-:where(.divide-subtle > :not(:last-child)) {
-  position: relative;
-  border-bottom-width: 0 !important;
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 16px;
-    right: 16px;
-    height: 1px;
-    background-color: var(--border-divider);
-    pointer-events: none;
-    z-index: 20;
-  }
-}
-
 @utility divide-divider {
   & > :not(:last-child) {
     position: relative;
@@ -586,23 +536,6 @@ h6 {
   }
 }
 
-.divide-divider > :not(:last-child),
-:where(.divide-divider > :not(:last-child)) {
-  position: relative;
-  border-bottom-width: 0 !important;
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 16px;
-    right: 16px;
-    height: 1px;
-    background-color: var(--border-divider);
-    pointer-events: none;
-    z-index: 20;
-  }
-}
-
 @utility divide-menu {
   & > :not(:last-child) {
     position: relative;
@@ -618,23 +551,6 @@ h6 {
       pointer-events: none;
       z-index: 20;
     }
-  }
-}
-
-.divide-menu > :not(:last-child),
-:where(.divide-menu > :not(:last-child)) {
-  position: relative;
-  border-bottom-width: 0 !important;
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 16px;
-    right: 16px;
-    height: 1px;
-    background-color: var(--border-menu-divider);
-    pointer-events: none;
-    z-index: 20;
   }
 }
 
@@ -807,6 +723,19 @@ h6 {
   --cat-glyph-mix: 100%;
   --cat-glyph-base: #000000;
 
+  /* Sparmål: alla bilder på samma ljuslila ruta, alla förlopp i varumärkets lila */
+  --goal-art-bg: #EEEBFF;
+  --goal-progress: var(--accent-color);
+  /* Bokstavsrutor (reservlogga): åtta toner, används som --cat i .ui-cat-tile */
+  --mono-1: #3E7BEA;
+  --mono-2: #5E63E0;
+  --mono-3: #8C5BE8;
+  --mono-4: #D2508F;
+  --mono-5: #E0604A;
+  --mono-6: #D4921C;
+  --mono-7: #2F9E62;
+  --mono-8: #14968E;
+
   /* Custom Elevation Levels - Minimal Card Shadows, Discreet Nav & Menu Shadows */
   --shadow-level-1: 0 2px 10px -4px rgba(36, 24, 99, 0.04);
   --shadow-level-2: 0 8px 24px -6px rgba(36, 24, 99, 0.07);
@@ -953,55 +882,6 @@ h6 {
   --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-.black-theme {
-  --bg-top-color: #0A0A0C;
-  --bg-color: #0A0A0C;
-  --bg-secondary: #0A0A0C;
-  --bg-gradient: none;
-  --surface-color: #141417;
-  --surface-gradient: #141417;
-  --surface-solid: #141417;
-  --surface-raised: #1C1C21;
-  --surface-elevated: #1C1C21;
-  --surface-elevated-gradient: #1C1C21;
-  --modal-bg: var(--bg-color);
-  --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.8), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
-  --shadow-subtle: 0 8px 24px -6px rgba(0, 0, 0, 0.35);
-  --surface-high: #1C1C21;
-  --surface-muted: #1C1C21;
-  --surface-input: #1C1C21;
-  --surface-hover: #24242B;
-  --bg-hover: #24242B;
-  --transaction-bg: #141417;
-  --card-nested-bg: #1C1C21;
-  --surface-nested: #1C1C21;
-  --card-bg: var(--surface-color);
-  --bg-primary: var(--bg-color);
-  --chip-bg: #1C1C21;
-  --text-metric-label: #F5F5F7;
-  --border-subtle: rgba(255, 255, 255, 0.07);
-  --border-color: rgba(255, 255, 255, 0.07);
-  --border-control: #27272F;
-  --border-strong: #32323C;
-  --border-divider: rgba(255, 255, 255, 0.065);
-  --border-menu-divider: rgba(255, 255, 255, 0.065);
-  --input-bg: #1C1C21;
-  --accent-soft: rgba(255, 255, 255, 0.08);
-  --accent-container: rgba(255, 255, 255, 0.08);
-  --on-accent-container: #F5F5F7;
-  --accent-secondary-color: var(--accent-container);
-  --btn-primary-bg: #F5F5F7;
-  --btn-primary-text: #0A0A0C;
-  --btn-primary-hover: #E5E5EA;
-  --btn-primary-pressed: #D1D1D6;
-  --btn-secondary-bg: #1C1C21;
-
-  --success-container: rgba(16, 185, 129, 0.15);
-  --warning-container: rgba(245, 158, 11, 0.15);
-  --danger-container: rgba(239, 68, 68, 0.16);
-  --info-container: var(--surface-muted);
-}
-
 .dark {
   /* Obsidian Carbon Dark Theme */
   --bg-top-color: #0C0B11;
@@ -1038,6 +918,15 @@ h6 {
   --cat-tile-mix: 22%;
   --cat-glyph-mix: 78%;
   --cat-glyph-base: #FFFFFF;
+  --goal-art-bg: #262240;
+  --mono-1: #5A90F5;
+  --mono-2: #7A7EF2;
+  --mono-3: #A27BF5;
+  --mono-4: #E56FA6;
+  --mono-5: #F07A64;
+  --mono-6: #E6A93A;
+  --mono-7: #46B87A;
+  --mono-8: #2DB3A9;
   --modal-bg: var(--bg-color);
 
   /* Layer 3: Surface High (Fields inside modals, switch off, tooltip, toast, progress track) */
@@ -1150,56 +1039,6 @@ h6 {
   --date-inactive-color: #8E8E93;
 }
 
-/* Glass-Card Surface Utility (borderless translucent glass) */
-.glass-card,
-.surface-card {
-  background: rgba(255, 255, 255, 0.8) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-.dark .glass-card,
-.dark .surface-card {
-  background: #191919 !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-/* Glass-Navigation Utility */
-.glass-nav {
-  background: rgba(255, 255, 255, 0.75) !important;
-  backdrop-filter: blur(26px) !important;
-  -webkit-backdrop-filter: blur(26px) !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-.dark .glass-nav {
-  background: rgba(20, 20, 20, 0.94) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-/* Shared Fixed Dark Mode Background Layer */
-.dark-app-bg-layer {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  display: none;
-  background-color: var(--bg-color);
-  background-image: none;
-}
-
-.dark .dark-app-bg-layer {
-  display: block;
-}
-
 @layer base {
   html, body {
     @apply antialiased;
@@ -1259,15 +1098,12 @@ h6 {
   }
 
   .dark .app-header-top,
-  .black-theme .app-header-top,
-  .dark .app-header-scrolled,
-  .black-theme .app-header-scrolled {
+  .dark .app-header-scrolled {
     background-color: var(--bg-color);
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
-  .dark .app-header-scrolled,
-  .black-theme .app-header-scrolled {
+  .dark .app-header-scrolled {
     border-bottom-color: rgba(255, 255, 255, 0.08);
   }
 
@@ -1282,8 +1118,6 @@ h6 {
       --safe-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
     }
   }
-
-
 
   input,
   textarea,
@@ -1316,13 +1150,6 @@ h6 {
     opacity: 0.85;
   }
 
-  input.font-amount::placeholder,
-  input.text-section-title::placeholder {
-    font-size: inherit;
-    font-weight: 400;
-    opacity: 0.55;
-  }
-
   ::selection {
     background: var(--accent-soft);
     color: var(--text-primary);
@@ -1345,205 +1172,7 @@ h6 {
   }
 }
 
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-@layer components {
-  .module-surface {
-    border-radius: var(--radius-card);
-    background: var(--surface-gradient);
-    border: none;
-    box-shadow: none;
-  }
-
-  .card-surface {
-    border-radius: var(--radius-card);
-    background: var(--surface-color);
-    border: none;
-    box-shadow: none;
-  }
-
-  .card-surface-nested {
-    border-radius: var(--radius-card-nested);
-    background: var(--card-nested-bg);
-    border: none;
-    box-shadow: none;
-  }
-
-  .surface-card,
-  .glass-card {
-    border-radius: var(--radius-card);
-    background: var(--surface-gradient);
-    border: none;
-    box-shadow: none;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .profile-card {
-    border-radius: var(--radius-card);
-    background: var(--surface-gradient);
-    border: none;
-    box-shadow: none;
-    position: relative;
-    overflow: hidden;
-    transition: all var(--duration-normal) var(--ease-default);
-  }
-
-  .flat-card {
-    border-radius: var(--radius-card);
-    background: var(--surface-gradient);
-    border: none;
-    box-shadow: none;
-  }
-
-  .surface-elevated {
-    border-radius: var(--radius-card);
-    background: var(--surface-elevated-gradient);
-    border: none;
-    box-shadow: none;
-  }
-
-  .surface-solid {
-    border-radius: var(--radius-card);
-    background: var(--surface-gradient);
-    border: none;
-    box-shadow: none;
-  }
-
-  .surface-muted {
-    border-radius: var(--radius-card);
-    background: var(--surface-muted);
-    border: none;
-    box-shadow: none;
-  }
-
-  .accent-button {
-    @apply inline-flex items-center justify-center font-semibold px-5 transition-all;
-    border-radius: var(--radius-button);
-    min-height: var(--height-button-sm);
-    background: var(--btn-primary-bg);
-    color: var(--btn-primary-text);
-    border: none;
-    font-size: 0.875rem;
-    box-shadow: none;
-  }
-
-  .accent-button-full {
-    @apply inline-flex items-center justify-center font-semibold px-5 transition-all w-full;
-    border-radius: var(--radius-button);
-    min-height: var(--height-button);
-    background: var(--btn-primary-bg);
-    color: var(--btn-primary-text);
-    border: none;
-    font-size: 0.875rem;
-    letter-spacing: 0.02em;
-    box-shadow: none;
-  }
-  
-  .accent-button:hover,
-  .accent-button-full:hover {
-    background: var(--btn-primary-hover);
-    transform: none;
-    box-shadow: none;
-  }
-
-  .accent-button:active,
-  .accent-button-full:active {
-    background: var(--btn-primary-pressed);
-    scale: 0.96;
-    opacity: 0.95;
-    transition: all var(--duration-fast) var(--ease-spring);
-  }
-
-  .accent-button:disabled,
-  .accent-button-full:disabled {
-    @apply opacity-50 cursor-not-allowed transform-none scale-100;
-    background: var(--surface-muted);
-    color: var(--text-tertiary);
-    box-shadow: none;
-  }
-
-  .input-field {
-    @apply w-full font-medium px-4 py-3 border transition-all;
-    border-radius: var(--radius-input);
-    min-height: var(--height-input);
-    background: var(--surface-gradient);
-    border-color: var(--border-color);
-    color: var(--text-primary);
-    box-shadow: none;
-  }
-
-  .input-field:focus {
-    outline: none;
-    border-color: var(--accent-color);
-    background: var(--surface-color);
-    box-shadow: none;
-  }
-
-  .section-title {
-    @apply text-xl font-semibold tracking-tight mb-4;
-    color: var(--text-primary);
-  }
-
-  .section-subtitle,
-  .muted-text {
-    color: var(--text-secondary);
-    font-weight: 400;
-  }
-}
-
 @layer base {
-  .tertiary-text {
-    color: var(--text-tertiary);
-    font-weight: 400;
-  }
-
-  .divider {
-    width: 100%;
-    height: 1px;
-    background: var(--border-color);
-  }
-
-  .pill {
-    @apply inline-flex items-center justify-center;
-    border-radius: 9999px;
-    padding: 0.4rem 1rem;
-    background: var(--surface-muted);
-    color: var(--text-secondary);
-    font-size: 0.8rem;
-    font-weight: 600;
-  }
-
-  .topbar-blur {
-    background: var(--header-bg);
-  }
-
-  .modal-surface {
-    border-radius: var(--radius-modal);
-    background: var(--modal-bg, var(--bg-color));
-    box-shadow: none;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: var(--border-strong);
-    border-radius: 10px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: var(--text-tertiary);
-  }
-
   /* Custom Range Slider Styling */
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
@@ -1588,8 +1217,6 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   -webkit-tap-highlight-color: transparent !important;
 }
 
-
-
 /* Ensure smooth, native inertia scrolling on iOS and Android devices */
 html, body {
   overscroll-behavior-x: hidden;
@@ -1616,8 +1243,7 @@ html, body {
 }
 
 .dark .dejz-logo,
-html.dark .dejz-logo,
-.black-theme .dejz-logo {
+html.dark .dejz-logo {
   filter: brightness(0) invert(1) !important;
   -webkit-filter: brightness(0) invert(1) !important;
 }
@@ -1647,14 +1273,6 @@ input[data-variant="search"]::-webkit-input-placeholder {
   color: var(--text-tertiary) !important;
 }
 
-input.font-amount::placeholder,
-input.text-section-title::placeholder {
-  color: var(--text-tertiary);
-  font-size: inherit;
-  font-weight: 400;
-  opacity: 0.55;
-}
-
 @keyframes shimmer {
   0% {
     transform: translateX(-100%);
@@ -1662,48 +1280,6 @@ input.text-section-title::placeholder {
   100% {
     transform: translateX(100%);
   }
-}
-
-.font-unbounded {
-  font-family: var(--font-unbounded) !important;
-}
-
-
-
-
-
-.card-stack {
-  display: flex;
-  flex-direction: column;
-  gap: var(--card-gap);
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-}
-
-@keyframes pulseSubtle {
-  0%, 100% {
-    opacity: 0.9;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.75;
-    transform: scale(1.02);
-  }
-}
-
-@utility animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-@utility animate-pulse-subtle {
-  animation: pulseSubtle 8s ease-in-out infinite;
 }
 
 @keyframes sheetUp {
@@ -1816,8 +1392,6 @@ html[data-sheet-open="true"] .app-spatial-shell {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-float,
-  .animate-pulse-subtle,
   .animate-sheet-up,
   .animate-scale-in,
   .animate-slide-in-right,
@@ -1838,6 +1412,14 @@ html.privacy-blur .privacy-blur-amount:not(.no-privacy-blur) {
   user-select: none;
   transition: filter 180ms ease;
 }
+/* Dölj även hemkortets Inkomst/Fasta/Rörligt och radbelopp (läckte förut) */
+html.privacy-blur .ui-stat-value:not(.no-privacy-blur),
+html.privacy-blur .ui-row-amount:not(.no-privacy-blur),
+html.privacy-blur .ui-row-amount-income:not(.no-privacy-blur) {
+  filter: blur(8px) !important;
+  -webkit-filter: blur(8px) !important;
+  user-select: none;
+}
 
 /* ==========================================================================
    GLOBAL TYPOGRAPHY (Inter)
@@ -1846,10 +1428,6 @@ html.privacy-blur .privacy-blur-amount:not(.no-privacy-blur) {
    - 500 Medium för små rubriker och knapptext
    - 600 Semibold för sektionsrubriker, belopp och huvudsiffror
    ========================================================================== */
-.font-light {
-  font-weight: 300 !important;
-}
-
 .font-normal {
   font-weight: 400 !important;
 }
@@ -1863,11 +1441,6 @@ html.privacy-blur .privacy-blur-amount:not(.no-privacy-blur) {
 strong,
 b {
   font-weight: 600 !important;
-}
-
-.font-extrabold,
-.font-black {
-  font-weight: 700 !important;
 }
 
 /* ==========================================================================
@@ -1884,6 +1457,10 @@ b {
     @apply space-y-4;
     padding-bottom: calc(max(env(safe-area-inset-bottom, 0px), 8px) + 84px + 24px);
     animation: fadeIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  /* Undersidor (med tillbakaknapp) har ingen bottenmeny – mindre luft i nederkant */
+  html[data-tabbar="hidden"] .ui-page {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 2.5rem);
   }
 
   /* Flikrubrik i övre raden bredvid profilbilden (Historik, Analys, Fasta) – sparar en hel rad */
@@ -1942,6 +1519,16 @@ b {
     @apply bg-[var(--surface-color)] rounded-card shadow-[var(--card-shadow)] overflow-hidden;
   }
 
+  /* Gruppetikett ovanför ett listkort i Inställningar ("Ekonomi", "Personuppgifter") – samma överallt */
+  .ui-settings-label {
+    display: block;
+    padding: 0 16px 6px;
+    font-size: var(--text-footnote);
+    font-weight: 500;
+    line-height: 1.3;
+    color: var(--text-secondary);
+  }
+
   /* Inställningslistor — 50 px rader, inga avdelare */
   .ui-admin-card {
     @apply bg-[var(--surface-color)] rounded-card shadow-[var(--card-shadow)] overflow-hidden;
@@ -1993,12 +1580,29 @@ b {
     @apply w-full min-h-[58px] py-1.5 flex items-center justify-between gap-3 text-subhead text-left;
   }
 
-  .ui-row {
-    @apply w-full px-4 py-3 min-h-[52px] flex items-center justify-between gap-3 text-callout text-left;
+  /* Svepbar rad i listkort: når kortets kanter så att åtgärderna fyller hela raden */
+  .ui-swipe-row {
+    @apply relative overflow-hidden -mx-4;
+    --row-inset: 68px;
+  }
+  .ui-swipe-row-front {
+    @apply relative z-10 px-4 bg-[var(--surface-color)];
+  }
+  .ui-swipe-action {
+    @apply flex-1 flex flex-col items-center justify-center gap-1 text-footnote font-semibold active:opacity-70 transition-opacity cursor-pointer;
+  }
+  .ui-swipe-action-heart {
+    @apply bg-[var(--danger-container)] text-negative;
+  }
+  .ui-swipe-action-package {
+    @apply bg-[var(--warning-container)] text-caution;
+  }
+  .ui-swipe-action-exclude {
+    @apply bg-[var(--fill-grouped)] text-[var(--text-secondary)];
   }
 
-  .ui-locked-row {
-    @apply w-full px-4 py-3 min-h-[52px] flex items-center justify-between gap-3 text-callout text-left text-[var(--text-secondary)] select-none;
+  .ui-row {
+    @apply w-full px-4 py-3 min-h-[52px] flex items-center justify-between gap-3 text-callout text-left;
   }
 
   .ui-row-btn {
@@ -2050,11 +1654,7 @@ b {
     @apply font-display font-semibold text-subhead tracking-[-0.015em] text-[var(--text-primary)] tabular-nums block mt-0.5 truncate;
   }
 
-  .ui-stat-sub {
-    @apply text-caption font-normal text-[var(--text-muted)] tabular-nums block mt-0.5 truncate;
-  }
-
-  /* 5. BottomSheet Headers, Heroes & Icon Badges */
+  /* 5. BottomSheet Headers, ikonknappar, detaljvyer och ikonrutor */
   .ui-sheet-header {
     @apply sticky top-0 z-30 -mx-5 px-5 bg-[var(--surface-color)] pt-1 flex items-center justify-between pb-3 mb-4;
   }
@@ -2081,24 +1681,68 @@ b {
     @apply w-10 h-10 rounded-full bg-[var(--header-btn-bg)] text-[var(--text-primary)] active:scale-[0.92] transition-all flex items-center justify-center cursor-pointer shrink-0;
   }
 
-  .ui-hero-header {
-    @apply text-center pb-5;
-  }
-
   .ui-hero-icon {
     @apply w-15 h-15 rounded-2xl bg-[var(--fill-grouped)] flex items-center justify-center mx-auto mb-3 text-[var(--text-primary)] shrink-0;
   }
 
-  .ui-hero-amount {
-    @apply font-display font-bold text-[32px] leading-none text-[var(--text-primary)] tabular-nums tracking-[-0.035em];
+  /* Detaljvyer (köp, fast utgift, inkomst) – lugn design på Revolut-nivå.
+     Huvudet: logga, namn (grått), stort belopp, datum */
+  .ui-detail-hero {
+    @apply text-center pt-4 pb-6;
   }
-
-  .ui-hero-amount-income {
-    @apply font-display font-bold text-[32px] leading-none text-positive tabular-nums tracking-[-0.035em];
+  /* Namnet i huvudet: får två rader i stället för att klippas */
+  .ui-detail-title {
+    @apply font-sans font-normal text-[17px] leading-snug tracking-[-0.01em] text-[var(--text-secondary)] text-center line-clamp-2 break-words;
   }
-
-  .ui-icon-badge {
-    @apply w-9 h-9 rounded-xl bg-[var(--fill-grouped)] flex items-center justify-center text-[var(--text-primary)] shrink-0;
+  .ui-detail-amount {
+    @apply mt-1 font-display font-bold text-[34px] leading-tight tracking-[-0.04em] tabular-nums text-[var(--text-primary)] flex items-baseline justify-center;
+  }
+  .ui-detail-amount-income {
+    @apply mt-1 font-display font-bold text-[34px] leading-tight tracking-[-0.04em] tabular-nums text-positive flex items-baseline justify-center;
+  }
+  .ui-detail-amount-suffix {
+    @apply ml-1.5 font-sans font-normal text-base tracking-normal text-[var(--text-secondary)];
+  }
+  .ui-detail-meta {
+    @apply mt-1.5 text-footnote font-normal text-[var(--text-tertiary)] tabular-nums;
+  }
+  /* Infokort: varje logisk grupp är ett eget kort, luft mellan korten, inga avdelare */
+  .ui-detail-card {
+    @apply rounded-card-nested bg-[var(--fill-grouped)] py-1 overflow-hidden;
+  }
+  /* Kort rad: grå etikett till vänster, värde till höger */
+  .ui-detail-row {
+    @apply w-full px-4 min-h-[48px] py-2.5 flex items-center justify-between gap-4 text-callout text-left;
+  }
+  .ui-detail-row-btn {
+    @apply w-full px-4 min-h-[48px] py-2.5 flex items-center justify-between gap-4 text-callout text-left active:bg-[var(--press-overlay)] transition-colors cursor-pointer;
+  }
+  .ui-detail-label {
+    @apply text-callout font-normal text-[var(--text-secondary)] shrink-0;
+  }
+  .ui-detail-value {
+    @apply min-w-0 text-callout font-normal text-[var(--text-primary)] text-right truncate flex items-center justify-end gap-1.5;
+  }
+  /* Tryckbart värde (kategori, betalsätt, konto …): accentfärg, som i Revolut */
+  .ui-detail-value-link {
+    @apply min-w-0 text-callout font-normal text-[var(--accent-color)] text-right truncate flex items-center justify-end gap-1.5;
+  }
+  /* Lång text (anteckning, banktext): etikett överst, värdet under */
+  .ui-detail-stack {
+    @apply w-full px-4 py-2.5 flex flex-col items-stretch gap-0.5 text-left;
+  }
+  .ui-detail-stack-value {
+    @apply w-full min-w-0 bg-transparent border-0 p-0 text-callout font-normal leading-snug text-[var(--text-primary)] placeholder-[var(--text-muted)] break-words focus:outline-none;
+  }
+  /* Kvittovisning: bilden stor och direkt i arket – ingen ruta i rutan */
+  .ui-receipt-frame {
+    @apply overflow-hidden rounded-card-nested flex justify-center;
+  }
+  .ui-receipt-image {
+    @apply block w-full h-auto max-h-[68dvh] object-contain rounded-card-nested;
+  }
+  .ui-receipt-pdf {
+    @apply w-full h-[60dvh] border-0 rounded-card-nested bg-[var(--surface-color)];
   }
 
   /* Kategoriruta: tonad med kategorins färg (--cat sätts av CategoryIcon/categoryColorStyle) */
@@ -2130,10 +1774,6 @@ b {
     @apply w-full h-[52px] px-5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-subhead tracking-[-0.01em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.97] transition-all cursor-pointer;
   }
 
-  .ui-btn-primary-lg {
-    @apply w-full h-[52px] px-5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-subhead tracking-[-0.01em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.97] transition-all cursor-pointer;
-  }
-
   /* Sekundär knapp: en neutral ton överallt (inte vit, inte mörk, inte lila) */
   .ui-btn-secondary {
     @apply w-full h-[52px] px-5 rounded-full bg-[var(--btn-secondary-fill)] text-subhead font-semibold text-[var(--text-primary)] hover:opacity-90 active:scale-[0.97] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
@@ -2147,21 +1787,8 @@ b {
     @apply h-8 px-3 rounded-full bg-[var(--btn-secondary-fill)] text-footnote font-semibold text-[var(--text-primary)] hover:opacity-85 active:scale-[0.96] flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0;
   }
 
-  /* Tertiär knapp: bara lila text, ingen yta ("Hoppa över", "Visa alla") */
-  .ui-btn-tertiary {
-    @apply w-full h-11 px-4 rounded-full bg-transparent text-subhead font-semibold text-[var(--accent-color)] hover:opacity-80 active:opacity-60 disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
-  }
-
   .ui-btn-sm-primary {
     @apply h-8 px-3 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] text-footnote font-semibold hover:opacity-90 active:scale-[0.96] flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0;
-  }
-
-  .ui-confirm-danger {
-    @apply p-3 rounded-xl bg-[var(--fill-grouped)] flex items-center justify-between gap-3 text-xs;
-  }
-
-  .ui-confirm-neutral {
-    @apply p-3 rounded-xl bg-[var(--fill-grouped)] flex items-center justify-between gap-3 text-xs;
   }
 
   /* 7. Segmented Controls (iOS: grått spår, vit vald "tumme"), Chips, Switches, Inputs */
@@ -2197,6 +1824,33 @@ b {
     box-shadow: inset 0 0 0 1.5px var(--selected-ring);
   }
 
+  /* Ikonväljare i ark: grå grupp, rutnätet scrollar inuti med mjuk tona i kanten */
+  .dz-icon-picker {
+    border-radius: var(--radius-card-nested);
+    background-color: var(--fill-grouped);
+    padding: 8px;
+  }
+  .dz-icon-picker-scroll {
+    max-height: 226px; /* 4 hela rader + en halv som visar att det går att scrolla */
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    --fade-top: 0px;
+    --fade-bottom: 0px;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent 100%);
+  }
+  .dz-icon-picker-scroll[data-fade-top] {
+    --fade-top: 20px;
+  }
+  .dz-icon-picker-scroll[data-fade-bottom] {
+    --fade-bottom: 28px;
+  }
+  .dz-icon-picker-selected {
+    background-color: var(--accent-soft);
+    color: var(--accent-color);
+  }
+
   .ui-search-box {
     @apply relative flex items-center h-11 bg-[var(--surface-color)] shadow-[var(--card-shadow)] rounded-xl px-3 transition-shadow focus-within:shadow-[0_0_0_2px_var(--accent-soft)];
   }
@@ -2205,55 +1859,29 @@ b {
     @apply w-full bg-transparent border-0 p-0 pl-2 pr-6 text-subhead font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none;
   }
 
+  /* Röstinmatning: mjuk puls runt mikrofonen (stannar inom bladet, klipps inte) */
+  .ui-mic-pulse {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: var(--brand);
+    opacity: 0.35;
+    animation: ui-mic-pulse 1.4s ease-out infinite;
+  }
+  @keyframes ui-mic-pulse {
+    from { transform: scale(1); opacity: 0.35; }
+    to { transform: scale(1.35); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ui-mic-pulse { animation: none; opacity: 0.2; transform: scale(1.12); }
+  }
+
   .ui-box-input {
     @apply w-full p-3.5 rounded-card-nested bg-[var(--fill-grouped)] border border-transparent text-subhead font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/70 focus:outline-none focus:border-[var(--accent-color)] transition-colors;
   }
 
   .ui-inline-input {
     @apply flex-1 min-w-0 bg-transparent border-0 p-0 text-callout font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/80 text-right focus:outline-none transition-colors;
-  }
-
-  .ui-inline-amount-input {
-    @apply w-36 bg-transparent border-0 p-0 text-callout font-display font-semibold text-[var(--text-primary)] placeholder-[var(--text-muted)]/70 text-right tabular-nums focus:outline-none transition-colors;
-  }
-
-  .ui-payday-slider {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    height: 6px;
-    border-radius: 9999px;
-    background: var(--segment-track);
-    outline: none;
-    cursor: pointer;
-  }
-
-  .ui-payday-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 28px;
-    height: 28px;
-    border-radius: 9999px;
-    background: #FFFFFF;
-    border: 0;
-    box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 3px 8px rgba(0, 0, 0, 0.15), 0 3px 1px rgba(0, 0, 0, 0.06);
-    cursor: pointer;
-    transition: transform 0.12s ease;
-  }
-
-  .ui-payday-slider::-webkit-slider-thumb:active {
-    transform: scale(1.1);
-  }
-
-  .ui-payday-slider::-moz-range-thumb {
-    width: 28px;
-    height: 28px;
-    border-radius: 9999px;
-    background: #FFFFFF;
-    border: 0;
-    box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 3px 8px rgba(0, 0, 0, 0.15), 0 3px 1px rgba(0, 0, 0, 0.06);
-    cursor: pointer;
-    transition: transform 0.12s ease;
   }
 
   .ui-switch {
@@ -2284,6 +1912,13 @@ b {
     @apply h-10 sm:h-11 rounded-xl font-display text-callout tabular-nums transition-all cursor-pointer flex items-center justify-center bg-[var(--selected-bg)] text-[var(--selected-fg)] shadow-[inset_0_0_0_1.5px_var(--selected-ring)] font-semibold;
   }
 
+  /* Dagslisten på hem: når skärmkanterna och tonar ut där, så inga halva dagar syns */
+  .ui-day-strip {
+    @apply -mx-4 px-6;
+    -webkit-mask-image: linear-gradient(to right, transparent 0, black 40px, black calc(100% - 40px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, black 40px, black calc(100% - 40px), transparent 100%);
+  }
+
   /* 8. Empty States */
   .ui-empty-state {
     @apply py-14 px-6 flex flex-col items-center justify-center text-center select-none;
@@ -2297,6 +1932,20 @@ b {
     @apply mx-auto mb-3.5 text-[var(--text-muted)]/60 flex items-center justify-center;
   }
 
+  /* Ikon i tomma lägen: lugn lila ruta i stället för färgglada illustrationer */
+  .ui-empty-badge {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 14px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-soft);
+    color: var(--on-accent-container);
+    flex-shrink: 0;
+  }
+
   .ui-empty-title {
     @apply font-display font-semibold text-[17px] text-[var(--text-primary)] tracking-[-0.015em];
   }
@@ -2305,304 +1954,10 @@ b {
     @apply text-callout font-normal text-[var(--text-secondary)] mt-1 max-w-[280px] mx-auto leading-relaxed;
   }
 
-
   /* --- Komponentklasser (ett ställe per mönster; byt utseende här) --- */
   .ui-step-title {
     @apply font-display font-bold text-[28px] sm:text-3xl leading-[1.12] tracking-[-0.03em] text-[var(--text-primary)];
   }
-  /* Fältetikett ("Namn", "Belopp") – liten text i vanlig skiftläge, inte VERSALER */
-  .ui-field-label {
-    @apply text-footnote font-medium text-[var(--text-secondary)];
-  }
-  .ui-shortcut-tile {
-    @apply p-3.5 rounded-2xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-left flex items-center gap-2.5 transition-all active:scale-[0.97] cursor-pointer;
-  }
-  .ui-field-card {
-    @apply rounded-card-nested bg-[var(--fill-grouped)] p-4;
-  }
-  .ui-action-tile {
-    @apply p-2.5 min-h-[72px] rounded-card-nested bg-[var(--fill-grouped)] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-[0.96] cursor-pointer text-center;
-  }
-  .ui-action-tile-label {
-    @apply text-meta font-normal text-[var(--text-primary)] truncate max-w-full;
-  }
-  .ui-field-input-lg {
-    @apply w-full bg-transparent border-0 p-0 font-display font-semibold text-xl text-[var(--text-primary)] tracking-[-0.02em] placeholder-[var(--text-muted)]/60 focus:outline-none;
-  }
-  .ui-field-input {
-    @apply w-full bg-transparent border-0 p-0 text-base font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/70 focus:outline-none;
-  }
-  .ui-chip-sm {
-    @apply h-7 px-2.5 rounded-full bg-[var(--surface-color)] text-meta font-medium text-[var(--text-primary)] flex items-center gap-1.5 shadow-[var(--card-shadow)] active:scale-[0.96] transition-all cursor-pointer;
-  }
-  /* Bekräftelserutor och val-dialoger: svävande kort nere vid tummen i mobilen, mitt på i större fönster */
-  .ui-dialog-scrim {
-    @apply fixed inset-0 z-[260] flex items-end justify-center px-3 bg-[var(--scrim-color)] backdrop-blur-[2px] sm:items-center sm:p-5;
-    padding-bottom: max(env(safe-area-inset-bottom, 0px), 12px);
-  }
-  .ui-dialog-card {
-    @apply w-full max-w-[420px] rounded-modal bg-[var(--surface-elevated)] p-5 pt-6 shadow-[var(--shadow-modal)] sm:max-w-[360px];
-  }
-  .ui-dialog-btn-primary {
-    @apply w-full h-12 px-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] text-subhead font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer;
-  }
-  .ui-dialog-btn-danger {
-    @apply w-full h-12 px-4 rounded-full text-white text-subhead font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer;
-    /* Riktigt rött (inte rosa) – samma i ljust och mörkt, vit text klarar kontrastkravet */
-    background: var(--danger-btn-bg);
-  }
-  .ui-dialog-btn-secondary {
-    @apply w-full h-12 px-4 rounded-full bg-[var(--btn-secondary-fill)] text-subhead font-semibold text-[var(--text-primary)] hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer;
-  }
-  .ui-btn-primary-flow {
-    @apply w-full h-[52px] rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-subhead flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.97] transition-all cursor-pointer;
-  }
-  .ui-pill-btn {
-    @apply h-9 px-4 rounded-full bg-[var(--btn-secondary-fill)] text-callout font-medium text-[var(--text-primary)] inline-flex items-center gap-1.5 active:scale-[0.96] transition-all cursor-pointer;
-  }
-  .ui-text-btn {
-    @apply w-16 h-8 text-left text-subhead font-normal text-[var(--accent-color)] hover:opacity-80 cursor-pointer;
-  }
-  .ui-checkbox {
-    @apply w-[22px] h-[22px] rounded-full flex items-center justify-center border-[1.5px] shrink-0 transition-colors;
-  }
-  /* Vald / ej vald bockruta: lila fylld cirkel med vit bock, annars bara en ring */
-  .ui-checkbox-on {
-    @apply bg-[var(--cta-bg)] border-[var(--cta-bg)] text-[var(--cta-fg)];
-  }
-  .ui-checkbox-off {
-    @apply bg-transparent border-[var(--border-strong)];
-  }
-  .ui-input-icon {
-    @apply absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none;
-  }
-  .ui-option-card {
-    @apply w-full p-4 rounded-card-nested border flex items-center gap-3.5 text-left transition-all active:scale-[0.98] cursor-pointer;
-  }
-  .ui-legal-heading {
-    @apply font-display font-semibold text-callout sm:text-subhead text-[var(--text-primary)];
-  }
-  .ui-list-row-title {
-    @apply font-normal text-subhead text-[var(--text-primary)] truncate;
-  }
-  .ui-tile-title {
-    @apply font-display font-medium text-footnote text-[var(--text-primary)] block truncate;
-  }
-  .ui-option-title {
-    @apply font-display font-semibold text-subhead text-[var(--text-primary)] block truncate;
-  }
-  .ui-clear-btn {
-    @apply text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0;
-  }
-
-  /* 9. Bottenmeny – iOS-glas (genomskinlig med oskärpa) och plusknapp i samma höjd */
-  .ui-tabbar {
-    @apply flex-1 h-14 rounded-full px-1 flex items-center justify-around;
-    background: var(--nav-glass-bg);
-    -webkit-backdrop-filter: saturate(180%) blur(24px);
-    backdrop-filter: saturate(180%) blur(24px);
-    box-shadow: inset 0 0 0 1px var(--nav-glass-border), var(--shadow-nav);
-  }
-  .ui-tabbar-item {
-    @apply flex-1 h-12 rounded-full flex flex-col items-center justify-center gap-[3px] transition-colors duration-200 cursor-pointer text-[var(--nav-inactive-color)] font-medium;
-  }
-  .ui-tabbar-item-active {
-    @apply flex-1 h-12 rounded-full flex flex-col items-center justify-center gap-[3px] transition-colors duration-200 cursor-pointer text-[var(--nav-active-color)] font-semibold bg-[var(--nav-active-bg)];
-  }
-  .ui-fab {
-    @apply shrink-0 w-14 h-14 rounded-full flex items-center justify-center transition-transform duration-200 active:scale-[0.94] cursor-pointer;
-    color: var(--cta-fg);
-    background:
-      radial-gradient(120% 120% at 30% 0%, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 55%),
-      var(--brand-gradient);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14), var(--fab-shadow);
-  }
-  /* Mjuk övergång i nederkant så att listan tonar bort bakom menyn */
-  /* Täcker exakt menyns område (12 px luft + 56 px meny + hemindikatorn) och tonar 16 px ovanför,
-     så att ingen listtext syns mellan menyn och plusknappen eller runt kanterna. */
-  .ui-tabbar-fade {
-    @apply fixed left-0 right-0 bottom-0 pointer-events-none z-30;
-    height: calc(max(env(safe-area-inset-bottom, 0px), 8px) + 84px);
-    background: linear-gradient(to bottom, color-mix(in srgb, var(--bg-color) 0%, transparent) 0, var(--bg-color) 16px, var(--bg-color) 100%);
-  }
-}
-
-/* Tryckkänsla och rörelse: respektera "Reducera rörelse" */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-  }
-  :active {
-    scale: none !important;
-  }
-}
-
-
-/* ==========================================================================
-   DEJZ SIGNATURKORT – "Kvar att spendera"
-   Appens identitetsmoment: violett gradient med vit text. Variablerna
-   omdefinieras lokalt så att allt innehåll i kortet följer med automatiskt.
-   Blir rosa/röd när man är över budget.
-   ========================================================================== */
-.dejz-hero {
-  --hero-from: #7356FF;
-  --hero-mid: #5B3DF5;
-  --hero-to: #3F22C9;
-  --hero-glow: rgba(63, 34, 201, 0.5);
-  --text-primary: #FFFFFF;
-  --text-metric-label: #FFFFFF;
-  --text-secondary: rgba(255, 255, 255, 0.78);
-  --text-tertiary: rgba(255, 255, 255, 0.7);
-  --text-muted: rgba(255, 255, 255, 0.64);
-  --bg-color: rgba(255, 255, 255, 0.2);
-  --surface-color: var(--hero-mid);
-  --surface-raised: rgba(255, 255, 255, 0.2);
-  --border-subtle: rgba(255, 255, 255, 0.18);
-  --border-divider: rgba(255, 255, 255, 0.18);
-  position: relative;
-  isolation: isolate;
-  color: #FFFFFF;
-  border-color: transparent !important;
-  --separator: rgba(255, 255, 255, 0.2);
-  background:
-    radial-gradient(90% 120% at 100% 0%, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 60%),
-    radial-gradient(70% 90% at 0% 100%, rgba(20, 0, 90, 0.22) 0%, rgba(20, 0, 90, 0) 70%),
-    linear-gradient(155deg, var(--hero-from) 0%, var(--hero-mid) 45%, var(--hero-to) 100%) !important;
-  /* Skarp, diskret lyft i stället för lila glöd + ljus kant upptill */
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    0 1px 2px rgba(30, 10, 110, 0.18),
-    0 10px 24px -14px var(--hero-glow) !important;
-}
-/* "Batteriet": rundad, lugn bana med vit fyllning */
-.dejz-hero .dejz-hero-track {
-  background-color: rgba(255, 255, 255, 0.22);
-}
-.dark .dejz-hero {
-  --hero-from: #6E55FF;
-  --hero-mid: #5438E8;
-  --hero-to: #321AA8;
-  --hero-glow: rgba(84, 56, 232, 0.45);
-}
-.dejz-hero.dejz-hero--over {
-  --hero-from: #FB5B78;
-  --hero-mid: #E11D48;
-  --hero-to: #9F1239;
-  --hero-glow: rgba(225, 29, 72, 0.5);
-}
-/* Statusfärger som behöver ljusare toner mot den mörka gradienten */
-.dejz-hero .text-positive,
-.dejz-hero .dark\:text-positive { color: #B9F8D9 !important; }
-.dejz-hero .text-negative,
-.dejz-hero .dark\:text-negative { color: #FFFFFF !important; }
-.dejz-hero .text-caution,
-.dejz-hero .dark\:text-caution { color: #FFE7A3 !important; }
-.dejz-hero .bg-negative-solid { background-color: #FFFFFF !important; }
-.dejz-hero .border-negative-solid { border-color: #FFFFFF !important; }
-
-/* === Hem, Historik, Analys, Fasta (notiser, tomma lägen) === */
-/* Notis (toast): svävar 12 px ovanför bottenmenyn, samma bredd som menyraden. */
-.ui-toast-wrap {
-  position: fixed;
-  left: 16px;
-  right: 16px;
-  bottom: calc(max(env(safe-area-inset-bottom, 0px), 8px) + 88px);
-  max-width: 420px;
-  margin: 0 auto;
-}
-.ui-toast {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-height: 56px;
-  padding: 8px 12px 8px 16px;
-  border-radius: 18px;
-  background: var(--toast-bg);
-  color: var(--toast-fg);
-  box-shadow: 0 1px 2px rgba(22, 20, 31, 0.12), 0 12px 32px -8px rgba(22, 20, 31, 0.4);
-  animation: ui-toast-in 280ms cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
-}
-/* Mörkt läge: klart ljusare yta än alla kort och ark + tydlig skugga, annars försvinner notisen */
-.dark .ui-toast {
-  background: #45434F;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 2px 6px rgba(0, 0, 0, 0.5), 0 18px 44px -8px rgba(0, 0, 0, 0.85);
-}
-.dark .ui-toast-action { color: #C4BAFF; }
-.ui-toast-action {
-  flex-shrink: 0;
-  min-height: 40px;
-  padding: 0 12px;
-  border-radius: 999px;
-  font-size: var(--text-callout);
-  font-weight: 600;
-  color: var(--toast-action);
-  cursor: pointer;
-  transition: background-color 150ms, transform 150ms;
-}
-.ui-toast-action:hover { background: rgba(255, 255, 255, 0.1); }
-.ui-toast-action:active { transform: scale(0.96); }
-@keyframes ui-toast-in {
-  from { opacity: 0; transform: translateY(12px) scale(0.98); }
-  to { opacity: 1; transform: none; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .ui-toast { animation: none; }
-}
-/* Sekretessläge: dölj även hemkortets Inkomst/Fasta/Rörligt och radbelopp (läckte förut) */
-html.privacy-blur .ui-stat-value:not(.no-privacy-blur),
-html.privacy-blur .ui-row-amount:not(.no-privacy-blur),
-html.privacy-blur .ui-row-amount-income:not(.no-privacy-blur) {
-  filter: blur(8px) !important;
-  -webkit-filter: blur(8px) !important;
-  user-select: none;
-}
-
-/* === Inställningar, kvitton, paket (settings area) === */
-/* Gruppetikett ovanför ett listkort i Inställningar ("Ekonomi", "Personuppgifter") – samma överallt */
-.ui-settings-label {
-  display: block;
-  padding: 0 16px 6px;
-  font-size: var(--text-footnote);
-  font-weight: 500;
-  line-height: 1.3;
-  color: var(--text-secondary);
-}
-/* Ikon i tomma lägen: lugn lila ruta i stället för färgglada illustrationer */
-.ui-empty-badge {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 14px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--accent-soft);
-  color: var(--on-accent-container);
-  flex-shrink: 0;
-}
-/* Röstinmatning: mjuk puls runt mikrofonen (stannar inom bladet, klipps inte) */
-.ui-mic-pulse {
-  position: absolute;
-  inset: 0;
-  border-radius: 999px;
-  background: var(--brand);
-  opacity: 0.35;
-  animation: ui-mic-pulse 1.4s ease-out infinite;
-}
-@keyframes ui-mic-pulse {
-  from { transform: scale(1); opacity: 0.35; }
-  to { transform: scale(1.35); opacity: 0; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .ui-mic-pulse { animation: none; opacity: 0.2; transform: scale(1.12); }
-}
-
-/* === Startsida, inloggning, publika sidor och introduktion === */
-@layer components {
   /* Underrubrik under stegrubriken – samma i alla steg */
   .ui-onb-subtitle {
     @apply mt-2 text-subhead leading-snug text-[var(--text-secondary)];
@@ -2671,25 +2026,31 @@ html.privacy-blur .ui-row-amount-income:not(.no-privacy-blur) {
   .ui-auth-btn-surface {
     @apply w-full h-[52px] px-5 rounded-full bg-[var(--btn-secondary-fill)] text-subhead font-semibold text-[var(--text-primary)] hover:opacity-90 active:scale-[0.97] disabled:opacity-50 flex items-center justify-center gap-2 transition-all cursor-pointer;
   }
-}
-
-/* === review-fixes: svep, belopp, detaljvyer === */
-@layer components {
-  /* Dagslisten på hem: når skärmkanterna och tonar ut där, så inga halva dagar syns */
-  .ui-day-strip {
-    @apply -mx-4 px-6;
-    -webkit-mask-image: linear-gradient(to right, transparent 0, black 40px, black calc(100% - 40px), transparent 100%);
-    mask-image: linear-gradient(to right, transparent 0, black 40px, black calc(100% - 40px), transparent 100%);
+  /* Fältetikett ("Namn", "Belopp") – liten text i vanlig skiftläge, inte VERSALER */
+  .ui-field-label {
+    @apply text-footnote font-medium text-[var(--text-secondary)];
   }
-  /* Kvittovisning: bilden stor och direkt i arket – ingen ruta i rutan */
-  .ui-receipt-frame {
-    @apply overflow-hidden rounded-card-nested flex justify-center;
+  .ui-shortcut-tile {
+    @apply p-3.5 rounded-2xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-left flex items-center gap-2.5 transition-all active:scale-[0.97] cursor-pointer;
   }
-  .ui-receipt-image {
-    @apply block w-full h-auto max-h-[68dvh] object-contain rounded-card-nested;
+  .ui-field-card {
+    @apply rounded-card-nested bg-[var(--fill-grouped)] p-4;
   }
-  .ui-receipt-pdf {
-    @apply w-full h-[60dvh] border-0 rounded-card-nested bg-[var(--surface-color)];
+  .ui-action-tile {
+    @apply p-2.5 min-h-[72px] rounded-card-nested bg-[var(--fill-grouped)] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-[0.96] cursor-pointer text-center;
+  }
+  /* Rund ikon i snabbåtgärdsrutorna (Kvitto, Gör fast, Spara, Paket …) */
+  .ui-action-tile-icon {
+    @apply w-8 h-8 rounded-full bg-[var(--surface-color)] text-[var(--text-primary)] flex items-center justify-center group-hover:scale-105 transition-transform;
+  }
+  .ui-action-tile-label {
+    @apply text-meta font-normal text-[var(--text-primary)] truncate max-w-full;
+  }
+  .ui-field-input-lg {
+    @apply w-full bg-transparent border-0 p-0 font-display font-semibold text-xl text-[var(--text-primary)] tracking-[-0.02em] placeholder-[var(--text-muted)]/60 focus:outline-none;
+  }
+  .ui-field-input {
+    @apply w-full bg-transparent border-0 p-0 text-base font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/70 focus:outline-none;
   }
   /* Beloppsfält i formulär: neutral färg, mindre platshållare, tabellsiffror */
   .ui-amount-input {
@@ -2698,41 +2059,103 @@ html.privacy-blur .ui-row-amount-income:not(.no-privacy-blur) {
   .ui-amount-input::placeholder {
     @apply text-xl font-semibold text-[var(--text-muted)] opacity-60;
   }
-  /* Rund ikon i snabbåtgärdsrutorna (Kvitto, Gör fast, Spara, Paket …) */
-  .ui-action-tile-icon {
-    @apply w-8 h-8 rounded-full bg-[var(--surface-color)] text-[var(--text-primary)] flex items-center justify-center group-hover:scale-105 transition-transform;
+  .ui-chip-sm {
+    @apply h-7 px-2.5 rounded-full bg-[var(--surface-color)] text-meta font-medium text-[var(--text-primary)] flex items-center gap-1.5 shadow-[var(--card-shadow)] active:scale-[0.96] transition-all cursor-pointer;
   }
-  /* Namnet i detaljvyernas huvud: får två rader i stället för att klippas */
-  .ui-detail-title {
-    @apply font-sans font-normal text-[17px] leading-snug tracking-[-0.01em] text-[var(--text-secondary)] text-center line-clamp-2 break-words;
+  /* Bekräftelserutor och val-dialoger: svävande kort nere vid tummen i mobilen, mitt på i större fönster */
+  .ui-dialog-scrim {
+    @apply fixed inset-0 z-[260] flex items-end justify-center px-3 bg-[var(--scrim-color)] backdrop-blur-[2px] sm:items-center sm:p-5;
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 12px);
   }
-  /* Svepbar rad i listkort: når kortets kanter så att åtgärderna fyller hela raden */
-  .ui-swipe-row {
-    @apply relative overflow-hidden -mx-4;
-    --row-inset: 68px;
+  .ui-dialog-card {
+    @apply w-full max-w-[420px] rounded-modal bg-[var(--surface-elevated)] p-5 pt-6 shadow-[var(--shadow-modal)] sm:max-w-[360px];
   }
-  .ui-swipe-row-front {
-    @apply relative z-10 px-4 bg-[var(--surface-color)];
+  .ui-dialog-btn-primary {
+    @apply w-full h-12 px-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] text-subhead font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer;
   }
-  .ui-swipe-action {
-    @apply flex-1 flex flex-col items-center justify-center gap-1 text-footnote font-semibold active:opacity-70 transition-opacity cursor-pointer;
+  .ui-dialog-btn-danger {
+    @apply w-full h-12 px-4 rounded-full text-white text-subhead font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer;
+    /* Riktigt rött (inte rosa) – samma i ljust och mörkt, vit text klarar kontrastkravet */
+    background: var(--danger-btn-bg);
   }
-  .ui-swipe-action-heart {
-    @apply bg-[var(--danger-container)] text-negative;
+  .ui-dialog-btn-secondary {
+    @apply w-full h-12 px-4 rounded-full bg-[var(--btn-secondary-fill)] text-subhead font-semibold text-[var(--text-primary)] hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer;
   }
-  .ui-swipe-action-package {
-    @apply bg-[var(--warning-container)] text-caution;
+  .ui-btn-primary-flow {
+    @apply w-full h-[52px] rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-subhead flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.97] transition-all cursor-pointer;
   }
-  .ui-swipe-action-exclude {
-    @apply bg-[var(--fill-grouped)] text-[var(--text-secondary)];
+  .ui-pill-btn {
+    @apply h-9 px-4 rounded-full bg-[var(--btn-secondary-fill)] text-callout font-medium text-[var(--text-primary)] inline-flex items-center gap-1.5 active:scale-[0.96] transition-all cursor-pointer;
+  }
+  .ui-checkbox {
+    @apply w-[22px] h-[22px] rounded-full flex items-center justify-center border-[1.5px] shrink-0 transition-colors;
+  }
+  /* Vald / ej vald bockruta: lila fylld cirkel med vit bock, annars bara en ring */
+  .ui-checkbox-on {
+    @apply bg-[var(--cta-bg)] border-[var(--cta-bg)] text-[var(--cta-fg)];
+  }
+  .ui-checkbox-off {
+    @apply bg-transparent border-[var(--border-strong)];
+  }
+  .ui-input-icon {
+    @apply absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none;
+  }
+  .ui-option-card {
+    @apply w-full p-4 rounded-card-nested border flex items-center gap-3.5 text-left transition-all active:scale-[0.98] cursor-pointer;
+  }
+  .ui-list-row-title {
+    @apply font-normal text-subhead text-[var(--text-primary)] truncate;
+  }
+  .ui-tile-title {
+    @apply font-display font-medium text-footnote text-[var(--text-primary)] block truncate;
+  }
+  .ui-option-title {
+    @apply font-display font-semibold text-subhead text-[var(--text-primary)] block truncate;
+  }
+  .ui-clear-btn {
+    @apply text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0;
+  }
+
+  /* 9. Bottenmeny – iOS-glas (genomskinlig med oskärpa) och plusknapp i samma höjd */
+  .ui-tabbar {
+    @apply flex-1 h-14 rounded-full px-1 flex items-center justify-around;
+    background: var(--nav-glass-bg);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    backdrop-filter: saturate(180%) blur(24px);
+    box-shadow: inset 0 0 0 1px var(--nav-glass-border), var(--shadow-nav);
+  }
+  .ui-tabbar-item {
+    @apply flex-1 h-12 rounded-full flex flex-col items-center justify-center gap-[3px] transition-colors duration-200 cursor-pointer text-[var(--nav-inactive-color)] font-medium;
+  }
+  .ui-tabbar-item-active {
+    @apply flex-1 h-12 rounded-full flex flex-col items-center justify-center gap-[3px] transition-colors duration-200 cursor-pointer text-[var(--nav-active-color)] font-semibold bg-[var(--nav-active-bg)];
+  }
+  .ui-fab {
+    @apply shrink-0 w-14 h-14 rounded-full flex items-center justify-center transition-transform duration-200 active:scale-[0.94] cursor-pointer;
+    color: var(--cta-fg);
+    background:
+      radial-gradient(120% 120% at 30% 0%, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 55%),
+      var(--brand-gradient);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14), var(--fab-shadow);
+  }
+  /* Mjuk övergång i nederkant så att listan tonar bort bakom menyn */
+  /* Täcker exakt menyns område (12 px luft + 56 px meny + hemindikatorn) och tonar 16 px ovanför,
+     så att ingen listtext syns mellan menyn och plusknappen eller runt kanterna. */
+  .ui-tabbar-fade {
+    @apply fixed left-0 right-0 bottom-0 pointer-events-none z-30;
+    height: calc(max(env(safe-area-inset-bottom, 0px), 8px) + 84px);
+    background: linear-gradient(to bottom, color-mix(in srgb, var(--bg-color) 0%, transparent) 0, var(--bg-color) 16px, var(--bg-color) 100%);
   }
 }
 
-/* === Systemnivå (coordinator): avstängda knappar, fasta huvuden, dold meny på undersidor === */
+/* ==========================================================================
+   UTANFÖR LAGER – regler som ska vinna över Tailwind-klasser i komponenterna
+   Oskiktade regler slår alltid @layer components och utilities, oavsett ordning.
+   Flytta dem inte in i @layer components.
+   ========================================================================== */
 /* Avstängd huvudknapp: lila med 40 % täckning och vit text – samma i ljust och mörkt.
    Utanför lager så att den vinner över enstaka disabled:-klasser i komponenterna. */
 .ui-btn-primary:disabled,
-.ui-btn-primary-lg:disabled,
 .ui-btn-primary-flow:disabled,
 .ui-btn-sm-primary:disabled,
 .ui-dialog-btn-primary:disabled {
@@ -2752,111 +2175,129 @@ html.privacy-blur .ui-row-amount-income:not(.no-privacy-blur) {
 .ui-header-scrolled {
   box-shadow: 0 1px 0 var(--separator);
 }
-/* Undersidor (med tillbakaknapp) har ingen bottenmeny – mindre luft i nederkant */
-html[data-tabbar="hidden"] .ui-page {
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 2.5rem);
+
+/* Notis (toast): svävar 12 px ovanför bottenmenyn, samma bredd som menyraden.
+   Utanför lager så att notisens färger vinner över text-on-toast m.fl. */
+.ui-toast-wrap {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(max(env(safe-area-inset-bottom, 0px), 8px) + 88px);
+  max-width: 420px;
+  margin: 0 auto;
 }
+/* Undersidor utan bottenmeny: notisen ligger nära nederkanten */
 html[data-tabbar="hidden"] .ui-toast-wrap {
   bottom: calc(max(env(safe-area-inset-bottom, 0px), 8px) + 16px);
 }
-
-/* === Loggor, sparmål, ikonväljare (agent: visuella detaljer) === */
-:root {
-  /* Sparmål: alla bilder på samma ljuslila ruta, alla förlopp i varumärkets lila */
-  --goal-art-bg: #EEEBFF;
-  --goal-progress: var(--accent-color);
-  /* Bokstavsrutor (reservlogga): åtta toner, används som --cat i .ui-cat-tile */
-  --mono-1: #3E7BEA;
-  --mono-2: #5E63E0;
-  --mono-3: #8C5BE8;
-  --mono-4: #D2508F;
-  --mono-5: #E0604A;
-  --mono-6: #D4921C;
-  --mono-7: #2F9E62;
-  --mono-8: #14968E;
+.ui-toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 12px 8px 16px;
+  border-radius: 18px;
+  background: var(--toast-bg);
+  color: var(--toast-fg);
+  box-shadow: 0 1px 2px rgba(22, 20, 31, 0.12), 0 12px 32px -8px rgba(22, 20, 31, 0.4);
+  animation: ui-toast-in 280ms cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
 }
-.dark {
-  --goal-art-bg: #262240;
-  --mono-1: #5A90F5;
-  --mono-2: #7A7EF2;
-  --mono-3: #A27BF5;
-  --mono-4: #E56FA6;
-  --mono-5: #F07A64;
-  --mono-6: #E6A93A;
-  --mono-7: #46B87A;
-  --mono-8: #2DB3A9;
+/* Mörkt läge: klart ljusare yta än alla kort och ark + tydlig skugga, annars försvinner notisen */
+.dark .ui-toast {
+  background: #45434F;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 2px 6px rgba(0, 0, 0, 0.5), 0 18px 44px -8px rgba(0, 0, 0, 0.85);
 }
-/* Ikonväljare i ark: grå grupp, rutnätet scrollar inuti med mjuk tona i kanten */
-.dz-icon-picker {
-  border-radius: var(--radius-card-nested);
-  background-color: var(--fill-grouped);
-  padding: 8px;
+.ui-toast-action {
+  flex-shrink: 0;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: var(--text-callout);
+  font-weight: 600;
+  color: var(--toast-action);
+  cursor: pointer;
+  transition: background-color 150ms, transform 150ms;
 }
-.dz-icon-picker-scroll {
-  max-height: 226px; /* 4 hela rader + en halv som visar att det går att scrolla */
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-  --fade-top: 0px;
-  --fade-bottom: 0px;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent 100%);
+.dark .ui-toast-action { color: #C4BAFF; }
+.ui-toast-action:hover { background: rgba(255, 255, 255, 0.1); }
+.ui-toast-action:active { transform: scale(0.96); }
+@keyframes ui-toast-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: none; }
 }
-.dz-icon-picker-scroll[data-fade-top] {
-  --fade-top: 20px;
-}
-.dz-icon-picker-scroll[data-fade-bottom] {
-  --fade-bottom: 28px;
-}
-.dz-icon-picker-selected {
-  background-color: var(--accent-soft);
-  color: var(--accent-color);
+@media (prefers-reduced-motion: reduce) {
+  .ui-toast { animation: none; }
 }
 
-/* === Lugn design (Revolut-nivå): detaljvyer === */
-@layer components {
-  /* Huvudet i detaljvyer: logga, namn (grått), stort belopp, datum */
-  .ui-detail-hero {
-    @apply text-center pt-4 pb-6;
+/* Tryckkänsla och rörelse: respektera "Reducera rörelse" */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
-  .ui-detail-amount {
-    @apply mt-1 font-display font-bold text-[34px] leading-tight tracking-[-0.04em] tabular-nums text-[var(--text-primary)] flex items-baseline justify-center;
-  }
-  .ui-detail-amount-income {
-    @apply mt-1 font-display font-bold text-[34px] leading-tight tracking-[-0.04em] tabular-nums text-positive flex items-baseline justify-center;
-  }
-  .ui-detail-amount-suffix {
-    @apply ml-1.5 font-sans font-normal text-base tracking-normal text-[var(--text-secondary)];
-  }
-  .ui-detail-meta {
-    @apply mt-1.5 text-footnote font-normal text-[var(--text-tertiary)] tabular-nums;
-  }
-  /* Infokort: varje logisk grupp är ett eget kort, luft mellan korten, inga avdelare */
-  .ui-detail-card {
-    @apply rounded-card-nested bg-[var(--fill-grouped)] py-1 overflow-hidden;
-  }
-  /* Kort rad: grå etikett till vänster, värde till höger */
-  .ui-detail-row {
-    @apply w-full px-4 min-h-[48px] py-2.5 flex items-center justify-between gap-4 text-callout text-left;
-  }
-  .ui-detail-row-btn {
-    @apply w-full px-4 min-h-[48px] py-2.5 flex items-center justify-between gap-4 text-callout text-left active:bg-[var(--press-overlay)] transition-colors cursor-pointer;
-  }
-  .ui-detail-label {
-    @apply text-callout font-normal text-[var(--text-secondary)] shrink-0;
-  }
-  .ui-detail-value {
-    @apply min-w-0 text-callout font-normal text-[var(--text-primary)] text-right truncate flex items-center justify-end gap-1.5;
-  }
-  /* Tryckbart värde (kategori, betalsätt, konto …): accentfärg, som i Revolut */
-  .ui-detail-value-link {
-    @apply min-w-0 text-callout font-normal text-[var(--accent-color)] text-right truncate flex items-center justify-end gap-1.5;
-  }
-  /* Lång text (anteckning, banktext): etikett överst, värdet under */
-  .ui-detail-stack {
-    @apply w-full px-4 py-2.5 flex flex-col items-stretch gap-0.5 text-left;
-  }
-  .ui-detail-stack-value {
-    @apply w-full min-w-0 bg-transparent border-0 p-0 text-callout font-normal leading-snug text-[var(--text-primary)] placeholder-[var(--text-muted)] break-words focus:outline-none;
+  :active {
+    scale: none !important;
   }
 }
+
+/* ==========================================================================
+   DEJZ SIGNATURKORT – "Kvar att spendera"
+   Appens identitetsmoment: violett gradient med vit text. Variablerna
+   omdefinieras lokalt så att allt innehåll i kortet följer med automatiskt.
+   Blir rosa/röd när man är över budget.
+   ========================================================================== */
+.dejz-hero {
+  --hero-from: #7356FF;
+  --hero-mid: #5B3DF5;
+  --hero-to: #3F22C9;
+  --hero-glow: rgba(63, 34, 201, 0.5);
+  --text-primary: #FFFFFF;
+  --text-metric-label: #FFFFFF;
+  --text-secondary: rgba(255, 255, 255, 0.78);
+  --text-tertiary: rgba(255, 255, 255, 0.7);
+  --text-muted: rgba(255, 255, 255, 0.64);
+  --bg-color: rgba(255, 255, 255, 0.2);
+  --surface-color: var(--hero-mid);
+  --surface-raised: rgba(255, 255, 255, 0.2);
+  --border-subtle: rgba(255, 255, 255, 0.18);
+  --border-divider: rgba(255, 255, 255, 0.18);
+  position: relative;
+  isolation: isolate;
+  color: #FFFFFF;
+  border-color: transparent !important;
+  --separator: rgba(255, 255, 255, 0.2);
+  background:
+    radial-gradient(90% 120% at 100% 0%, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 60%),
+    radial-gradient(70% 90% at 0% 100%, rgba(20, 0, 90, 0.22) 0%, rgba(20, 0, 90, 0) 70%),
+    linear-gradient(155deg, var(--hero-from) 0%, var(--hero-mid) 45%, var(--hero-to) 100%) !important;
+  /* Skarp, diskret lyft i stället för lila glöd + ljus kant upptill */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 1px 2px rgba(30, 10, 110, 0.18),
+    0 10px 24px -14px var(--hero-glow) !important;
+}
+/* "Batteriet": rundad, lugn bana med vit fyllning */
+.dejz-hero .dejz-hero-track {
+  background-color: rgba(255, 255, 255, 0.22);
+}
+.dark .dejz-hero {
+  --hero-from: #6E55FF;
+  --hero-mid: #5438E8;
+  --hero-to: #321AA8;
+  --hero-glow: rgba(84, 56, 232, 0.45);
+}
+.dejz-hero.dejz-hero--over {
+  --hero-from: #FB5B78;
+  --hero-mid: #E11D48;
+  --hero-to: #9F1239;
+  --hero-glow: rgba(225, 29, 72, 0.5);
+}
+/* Statusfärger som behöver ljusare toner mot den mörka gradienten */
+.dejz-hero .text-positive { color: #B9F8D9 !important; }
+.dejz-hero .text-negative { color: #FFFFFF !important; }
+.dejz-hero .text-caution { color: #FFE7A3 !important; }
+.dejz-hero .bg-negative-solid { background-color: #FFFFFF !important; }
+.dejz-hero .border-negative-solid { border-color: #FFFFFF !important; }
