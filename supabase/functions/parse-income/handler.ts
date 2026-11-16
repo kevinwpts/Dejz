@@ -2,6 +2,7 @@
 // (tests/supabase/parse-income.test.ts). Deno.env kommer in som parametrar.
 
 import { redactSecrets, type Env } from '../_shared/deps.ts';
+import { unauthorizedResponse, type GetUserId } from '../_shared/auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,12 +15,15 @@ interface RequestPayload {
   defaultPayday?: number;
 }
 
-export function createHandler({ env }: { env: Env }) {
+export function createHandler({ env, getUserId }: { env: Env; getUserId: GetUserId }) {
   return async (req: Request) => {
     // Handle CORS preflight
     if (req.method === 'OPTIONS') {
       return new Response('ok', { headers: corsHeaders });
     }
+
+    // Bara inloggade användare (annars kan vem som helst använda vår Gemini-nyckel)
+    if (!(await getUserId(req))) return unauthorizedResponse(corsHeaders);
 
     try {
       const { prompt, incomeCategories = ['Lön', 'CSN', 'Barnbidrag', 'Pension', 'Sidoinkomst', 'Övrigt'], defaultPayday = 25 }: RequestPayload = await req.json();

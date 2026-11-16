@@ -1,5 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { ApiRequest, ApiResponse, readJsonBody } from "../_http";
+import { requireUser } from "../_auth";
 
 let aiClient: GoogleGenAI | null = null;
 function getGenAI(): GoogleGenAI | null {
@@ -38,6 +39,10 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
+
+  // Bara inloggade användare (annars kan vem som helst använda vår Gemini-nyckel)
+  const auth = await requireUser(req);
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
 
   const { items, expenseCategories, incomeCategories } = readJsonBody<CleanMerchantsBody>(req);
   if (!Array.isArray(items) || items.length === 0) {

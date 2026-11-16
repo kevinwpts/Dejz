@@ -1,10 +1,11 @@
 import { GoogleGenAI, Type } from '@google/genai';
 import { ApiRequest, ApiResponse, readJsonBody } from '../_http';
+import { requireUser } from '../_auth';
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') {
     res.status(200).end?.();
     return;
@@ -12,6 +13,10 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
+
+  // Bara inloggade användare (annars kan vem som helst använda vår Gemini-nyckel)
+  const auth = await requireUser(req);
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
 
   try {
     const { name, type, categories } = readJsonBody<{ name: string; type: string; categories: unknown }>(req);

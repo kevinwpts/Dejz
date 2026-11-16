@@ -15,6 +15,10 @@ vi.mock('@google/genai', () => ({
   Type: { ARRAY: 'ARRAY', OBJECT: 'OBJECT', STRING: 'STRING' },
 }));
 
+// Inloggningen testas för sig (tests/api/auth.test.ts). Här: inloggad som standard.
+const { requireUser } = vi.hoisted(() => ({ requireUser: vi.fn() }));
+vi.mock('../../api/_auth', () => ({ requireUser }));
+
 const { default: cleanMerchants } = await import('../../api/ai/clean-merchants');
 const { default: enrichMerchant } = await import('../../api/ai/enrich-merchant');
 
@@ -34,6 +38,7 @@ const item = (key: string, rawText: string, type: 'income' | 'expense' = 'expens
 });
 
 beforeEach(() => {
+  requireUser.mockReset().mockResolvedValue({ ok: true, userId: 'user-1' });
   generateContent.mockReset();
   vi.stubEnv('GEMINI_API_KEY', '');
   vi.stubEnv('VITE_GEMINI_API_KEY', '');
@@ -42,6 +47,19 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllEnvs();
   vi.restoreAllMocks();
+});
+
+describe.each([
+  ['clean-merchants', cleanMerchants, { items: [{ key: 'a', rawText: 'ZETTLE*KAF', amount: -1, time: '2026-11-01', type: 'expense' }] }],
+  ['enrich-merchant', enrichMerchant, { name: 'Holy Greens' }],
+])('%s: inloggning', (_name, handler, body) => {
+  it('401 utan inloggning, och Gemini anropas aldrig', async () => {
+    vi.stubEnv('GEMINI_API_KEY', 'test-key');
+    requireUser.mockResolvedValue({ ok: false, status: 401, error: 'Logga in för att använda den här funktionen' });
+    const out = await call(handler, { method: 'POST', body });
+    expect(out.statusCode).toBe(401);
+    expect(generateContent).not.toHaveBeenCalled();
+  });
 });
 
 describe('clean-merchants: indata', () => {
@@ -195,7 +213,7 @@ describe('enrich-merchant', () => {
     expect(out.headers).toEqual({
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     });
   });
 

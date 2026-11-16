@@ -10,6 +10,7 @@ import { findMatchingFixedExpense, findMatchingIncome } from '../../utils/recurr
 
 import { sanitizeTransactionItem } from '../transactions/sanitizeTransaction';
 import { apiUrl } from '../../utils/platform';
+import { aiRequestHeaders } from '../../utils/aiAuth';
 import { isDemoMode } from '../../utils/demoUtils';
 
 /** Skickar en omgång kryptiska bankrader till AI-tvätten. Ger `null` om servern svarar med fel. */
@@ -17,9 +18,11 @@ async function fetchMerchantCleaning(
   body: { items: unknown[]; expenseCategories: string[]; incomeCategories: string[] },
   signal: AbortSignal
 ) {
+  const headers = await aiRequestHeaders();
+  if (!headers) return null; // inte inloggad: ingen AI-tvätt
   const res = await fetch(apiUrl('/api/ai/clean-merchants'), {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify(body),
     signal,
   });
