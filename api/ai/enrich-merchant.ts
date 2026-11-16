@@ -1,6 +1,6 @@
 import { GoogleGenAI, Type } from '@google/genai';
-import { ApiRequest, ApiResponse, readJsonBody } from '../_http';
-import { requireUser } from '../_auth';
+import { ApiRequest, ApiResponse, readJsonBody } from '../_http.js';
+import { requireUser } from '../_auth.js';
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');

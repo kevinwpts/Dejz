@@ -17,7 +17,7 @@ vi.mock('@google/genai', () => ({
 
 // Inloggningen testas för sig (tests/api/auth.test.ts). Här: inloggad som standard.
 const { requireUser } = vi.hoisted(() => ({ requireUser: vi.fn() }));
-vi.mock('../../api/_auth', () => ({ requireUser }));
+vi.mock('../../api/_auth.js', () => ({ requireUser }));
 
 const { default: cleanMerchants } = await import('../../api/ai/clean-merchants');
 const { default: enrichMerchant } = await import('../../api/ai/enrich-merchant');

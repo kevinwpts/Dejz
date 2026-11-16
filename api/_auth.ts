@@ -3,7 +3,7 @@
  * Används av AI-funktionerna så att bara inloggade användare kan driva upp Gemini-kostnaden.
  * Appens publika nyckel (anon) räknas inte som inloggning – Supabase svarar då med fel.
  */
-import type { ApiRequest } from './_http';
+import type { ApiRequest } from './_http.js';
 
 export type AuthResult =
   | { ok: true; userId: string }

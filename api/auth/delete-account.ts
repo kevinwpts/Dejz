@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { ApiRequest, ApiResponse, errorMessage, readJsonBody } from '../_http';
+import { ApiRequest, ApiResponse, errorMessage, readJsonBody } from '../_http.js';
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== 'POST') {
