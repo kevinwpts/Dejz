@@ -179,7 +179,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <CaretLeft size={20} />
               </button>
-              <span className="absolute left-14 right-14 text-center font-display font-semibold text-[17px] tracking-[-0.02em] text-[var(--text-primary)] truncate pointer-events-none">
+              <span className="absolute left-14 right-14 text-center font-display font-semibold text-[16px] tracking-[-0.02em] text-[var(--text-primary)] truncate pointer-events-none">
                 {pageTitle}
               </span>
               <div className="w-10 shrink-0" aria-hidden="true" />

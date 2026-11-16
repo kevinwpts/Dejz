@@ -31,7 +31,7 @@ export const HomeSinceLastSheet: React.FC<HomeSinceLastSheetProps> = ({
         <div className="space-y-4">
           {/* Summan först, stort – sedan vad den består av */}
           <div className="px-1">
-            <div className="font-display font-bold text-[34px] leading-none tracking-[-0.035em] text-[var(--text-primary)] tabular-nums">
+            <div className="font-display font-bold text-[30px] leading-none tracking-[-0.035em] text-[var(--text-primary)] tabular-nums">
               −{formatKr(sinceLastVisitTxs.reduce((s, t) => s + (Number(t.amount) || 0), 0))}
             </div>
             <p className="mt-1.5 text-callout text-[var(--text-secondary)]">

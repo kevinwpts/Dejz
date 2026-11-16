@@ -58,7 +58,7 @@ export const HomeAccountsCard: React.FC<HomeAccountsCardProps> = ({
             {isInitialLoading && accounts.length === 0 ? (
               <div className="h-7 w-32 rounded-lg bg-[var(--surface-raised)] animate-pulse mt-1" />
             ) : (
-              <div className="font-display text-[20px] sm:text-[20px] font-semibold tracking-[-0.015em] leading-tight text-[var(--text-primary)] tabular-nums mt-0.5">
+              <div className="font-display text-[18px] font-semibold tracking-[-0.015em] leading-tight text-[var(--text-primary)] tabular-nums mt-0.5">
                 {formatKr(totalBalance)}
               </div>
             )}

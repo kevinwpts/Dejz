@@ -92,7 +92,7 @@ export const AnalysisDonutChart: React.FC<AnalysisDonutChartProps> = ({
                 <CategoryIcon category={activeSlice.category} size={14} />
                 {activeSlice.category}
               </span>
-              <span className="font-display font-semibold text-[24px] tracking-[-0.03em] whitespace-nowrap text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
+              <span className="font-display font-semibold text-[22px] tracking-[-0.03em] whitespace-nowrap text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
                 {formatKr(activeSlice.amount)}
               </span>
               {/* Ersätter den svävande "Visa alla"-knappen: tryck i mitten för att visa alla igen */}
@@ -105,7 +105,7 @@ export const AnalysisDonutChart: React.FC<AnalysisDonutChartProps> = ({
               <span className="text-footnote font-normal text-[var(--text-secondary)]">
                 Utgifter i perioden
               </span>
-              <span className="font-display font-[600] text-[24px] sm:text-[26px] tracking-[-0.03em] whitespace-nowrap text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
+              <span className="font-display font-[600] text-[22px] sm:text-[24px] tracking-[-0.03em] whitespace-nowrap text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
                 {formatKr(totalSpent)}
               </span>
             </>

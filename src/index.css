@@ -85,13 +85,14 @@
   --color-toast-action: var(--toast-action);
 
   /* Textskala (utan egen radhöjd, så att layouten inte flyttar sig) */
-  /* Golv: sekundärtext minst 12 px, radundertexter 13 px. 11 px bara för menyetiketter och märken. */
-  --text-micro: 11px;
-  --text-caption: 12px;
-  --text-meta: 12px;
-  --text-footnote: 13px;
-  --text-callout: 14px;
-  --text-subhead: 15px;
+  /* Kompakt skala (nära Avanza, ca 10 % mindre än iOS-standard). Golv: sekundärtext minst 11 px,
+     radundertexter 12 px. 10 px bara för menyetiketter och märken. Inmatning zoomar inte (maximum-scale=1). */
+  --text-micro: 10px;
+  --text-caption: 11px;
+  --text-meta: 11px;
+  --text-footnote: 12px;
+  --text-callout: 13px;
+  --text-subhead: 14px;
 
   --color-success: var(--success-color);
   --color-success-container: var(--success-container);
@@ -1465,7 +1466,7 @@ b {
 
   /* Flikrubrik i övre raden bredvid profilbilden (Historik, Analys, Fasta) – sparar en hel rad */
   .ui-header-title {
-    @apply font-display text-[20px] font-semibold leading-tight tracking-[-0.02em] text-[var(--text-primary)] truncate min-w-0;
+    @apply font-display text-[18px] font-semibold leading-tight tracking-[-0.02em] text-[var(--text-primary)] truncate min-w-0;
   }
 
   .ui-section {
@@ -1477,7 +1478,7 @@ b {
   }
 
   .ui-section-title {
-    @apply font-display font-semibold text-[19px] leading-tight tracking-[-0.02em] text-[var(--text-primary)] flex items-center gap-1.5;
+    @apply font-display font-semibold text-[16px] leading-tight tracking-[-0.02em] text-[var(--text-primary)] flex items-center gap-1.5;
   }
 
   .ui-section-meta {
@@ -1695,10 +1696,10 @@ b {
     @apply font-sans font-normal text-[17px] leading-snug tracking-[-0.01em] text-[var(--text-secondary)] text-center line-clamp-2 break-words;
   }
   .ui-detail-amount {
-    @apply mt-1 font-display font-bold text-[34px] leading-tight tracking-[-0.04em] tabular-nums text-[var(--text-primary)] flex items-baseline justify-center;
+    @apply mt-1 font-display font-bold text-[30px] leading-tight tracking-[-0.04em] tabular-nums text-[var(--text-primary)] flex items-baseline justify-center;
   }
   .ui-detail-amount-income {
-    @apply mt-1 font-display font-bold text-[34px] leading-tight tracking-[-0.04em] tabular-nums text-positive flex items-baseline justify-center;
+    @apply mt-1 font-display font-bold text-[30px] leading-tight tracking-[-0.04em] tabular-nums text-positive flex items-baseline justify-center;
   }
   .ui-detail-amount-suffix {
     @apply ml-1.5 font-sans font-normal text-base tracking-normal text-[var(--text-secondary)];

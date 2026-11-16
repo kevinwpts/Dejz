@@ -118,14 +118,14 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
                     setAccountNameDraft(activeModalAccount.name);
                     setIsEditingAccountName(true);
                   }}
-                  className="mt-3 inline-flex items-center gap-1.5 text-[17px] font-semibold tracking-[-0.01em] text-[var(--text-primary)] hover:opacity-80 transition-opacity cursor-pointer"
+                  className="mt-3 inline-flex items-center gap-1.5 text-[16px] font-semibold tracking-[-0.01em] text-[var(--text-primary)] hover:opacity-80 transition-opacity cursor-pointer"
                   title="Byt namn på kontot"
                 >
                   <span>{activeModalAccount.name}</span>
                 </button>
               )}
 
-              <div className="font-display text-[34px] font-bold tracking-[-0.035em] text-[var(--text-primary)] tabular-nums mt-1 leading-tight">
+              <div className="font-display text-[30px] font-bold tracking-[-0.035em] text-[var(--text-primary)] tabular-nums mt-1 leading-tight">
                 {formatKr(activeModalAccount.balance)}
               </div>
             </div>

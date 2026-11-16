@@ -112,13 +112,13 @@ export const HomeHeroCard: React.FC<HomeHeroCardProps> = ({
                 {isInitialLoading && accounts.length === 0 ? (
                   // Samma höjd som beloppet + stapeln, så att kortet inte hoppar när siffrorna laddats
                   <div aria-hidden="true">
-                    <div className="h-[46px] w-44 rounded-xl bg-[var(--surface-raised)] animate-pulse mt-2" />
+                    <div className="h-[40px] w-44 rounded-xl bg-[var(--surface-raised)] animate-pulse mt-2" />
                     <div className="dejz-hero-track mt-5 h-1.5 rounded-full" />
                   </div>
                 ) : (
                   <div className="min-w-0">
                     <div
-                      className={`font-display text-[46px] sm:text-[50px] font-bold tracking-[-0.045em] leading-none tabular-nums mt-2 ${
+                      className={`font-display text-[40px] sm:text-[44px] font-bold tracking-[-0.045em] leading-none tabular-nums mt-2 ${
                         kvarAttSpendera >= 0
                           ? 'text-[var(--text-primary)]'
                           : 'text-negative'
